@@ -1,98 +1,117 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>眼部疾病诊疗系统</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <meta name="description" content="一个用于诊断眼部疾病的系统">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <meta name="description" content="一个用于诊断眼部疾病的系统" />
+  </head>
+  <body>
     <div class="container">
-
-
-        <h1>眼部疾病诊疗系统</h1>
-        
-        <div class="upload-section">
-            <div class="upload-modes">
-                <button class="mode-btn active" data-mode="single">单次上传</button>
-                <button class="mode-btn" data-mode="batch">批量上传</button>
-            </div>
-
+      <h1>眼部疾病诊疗系统</h1>
+      <div class="main-section">
+        <div class="top-section">
+          <div class="upload-section">
+            <h2 class="upload-title">上传窗口</d>
             <div class="single-upload-container">
-                <div class="upload-group">
-                    <label class="upload-box" for="leftEye">
-                        <div class="upload-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <p>左眼图片</p>
-                        <input type="file" id="leftEye" accept="image/*">
-                    </label>
-                    <label class="upload-box" for="rightEye">
-                        <div class="upload-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <p>右眼图片</p>
-                        <input type="file" id="rightEye" accept="image/*">
-                    </label>
-                </div>
+              <div class="upload-group">
+                <label class="upload-box" for="leftEye">
+                  <div class="upload-icon">
+                    <i class="fas fa-plus"></i>
+                  </div>
+                  <p>左眼图片</p>
+                  <input type="file" id="leftEye" accept="image/*" />
+                </label>
+                <label class="upload-box" for="rightEye">
+                  <div class="upload-icon">
+                    <i class="fas fa-plus"></i>
+                  </div>
+                  <p>右眼图片</p>
+                  <input type="file" id="rightEye" accept="image/*" />
+                </label>
+              </div>
             </div>
 
-            <div class="batch-upload-container" style="display: none;">
-                <div class="upload-group">
-                    <label class="upload-box" for="leftEyeFolder">
-                        <div class="upload-icon">
-                            <i class="fas fa-folder-plus"></i>
-                        </div>
-                        <p>选择左眼图片文件夹</p>
-                        <input type="file" id="leftEyeFolder" webkitdirectory directory multiple>
-                    </label>
-                    <label class="upload-box" for="rightEyeFolder">
-                        <div class="upload-icon">
-                            <i class="fas fa-folder-plus"></i>
-                        </div>
-                        <p>选择右眼图片文件夹</p>
-                        <input type="file" id="rightEyeFolder" webkitdirectory directory multiple>
-                    </label>
-                </div>
+            <div class="batch-upload-container" style="display: none">
+              <div class="upload-group">
+                <label class="upload-box" for="leftEyeFolder">
+                  <div class="upload-icon">
+                    <i class="fas fa-folder-plus"></i>
+                  </div>
+                  <p>选择左眼图片文件夹</p>
+                  <input
+                    type="file"
+                    id="leftEyeFolder"
+                    webkitdirectory
+                    directory
+                    multiple
+                  />
+                </label>
+                <label class="upload-box" for="rightEyeFolder">
+                  <div class="upload-icon">
+                    <i class="fas fa-folder-plus"></i>
+                  </div>
+                  <p>选择右眼图片文件夹</p>
+                  <input
+                    type="file"
+                    id="rightEyeFolder"
+                    webkitdirectory
+                    directory
+                    multiple
+                  />
+                </label>
+              </div>
             </div>
-
+            <div class="upload-control">
+            <div class="upload-modes">
+              <button class="mode-btn active" data-mode="single">
+                单次上传
+              </button>
+              <button class="mode-btn" data-mode="batch">
+                批量上传
+              </button>
+            </div>
             <button id="submitBtn" disabled>开始诊断</button>
         </div>
+          </div>
 
-
-        <div class="preview-section">
+          <div class="preview-section">
             <h2>上传预览</h2>
             <div class="preview-container">
-                <!-- 左眼预览 -->
-                <div class="eye-preview-column">
-                    <div class="eye-count">
-                        左眼图片：<span>0</span>张
-                    </div>
-                    <div class="eye-preview-area" id="leftEyePreview"></div>
-                </div>
-                
-                <!-- 右眼预览 -->
-                <div class="eye-preview-column">
-                    <div class="eye-count">
-                        右眼图片：<span>0</span>张
-                    </div>
-                    <div class="eye-preview-area" id="rightEyePreview"></div>
-                </div>
+              <!-- 左眼预览 -->
+              <div class="eye-preview-column">
+                <div class="eye-count">左眼图片：<span>0</span>张</div>
+                <div class="eye-preview-area" id="leftEyePreview"></div>
+              </div>
+
+              <!-- 右眼预览 -->
+              <div class="eye-preview-column">
+                <div class="eye-count">右眼图片：<span>0</span>张</div>
+                <div class="eye-preview-area" id="rightEyePreview"></div>
+              </div>
             </div>
+          </div>
         </div>
 
         <div class="result-section">
-            <h2>诊断结果</h2>
-            <div id="resultContainer"></div>
+          <h2>诊断结果</h2>
+          <div id="resultContainer"></div>
         </div>
 
-        <div id="loading" style="display: none; text-align: center; margin-top: 20px;">
-            <p>正在处理，请等待...</p>
+        <div
+          id="loading"
+          style="display: none; text-align: center; margin-top: 20px"
+        >
+          <p>正在处理，请等待...</p>
         </div>
+      </div>
     </div>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

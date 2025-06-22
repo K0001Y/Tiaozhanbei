@@ -252,7 +252,7 @@ class EyeDiagnosisSystem {
         const resultContainer = document.getElementById('resultContainer');
         resultContainer.innerHTML = '';
         // 先设置结果容器整体样式
-        resultContainer.style.backgroundColor = 'rgba(0, 255, 208, 0.05)';
+        resultContainer.style.backgroundColor = 'rgba(0, 170, 255, 0.05)';
         resultContainer.style.padding = '2rem';
         resultContainer.style.borderRadius = '15px';
         resultContainer.style.boxShadow = '0 8px 24px rgba(0, 255, 208, 0.1)';
@@ -267,9 +267,9 @@ class EyeDiagnosisSystem {
             // 直接给当前创建的结果元素设置样式
             resultDiv.style.marginBottom = '1rem';
             resultDiv.style.padding = '1rem';
-            resultDiv.style.backgroundColor = 'rgba(0, 255, 208, 0.1)';
+            resultDiv.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
             resultDiv.style.borderRadius = '8px';
-            resultDiv.style.border = '1px solid rgba(0, 255, 208, 0.3)';
+            resultDiv.style.border = '1px solid rgba(0, 195, 255, 0.1)';
             resultContainer.appendChild(resultDiv);
         });
     }

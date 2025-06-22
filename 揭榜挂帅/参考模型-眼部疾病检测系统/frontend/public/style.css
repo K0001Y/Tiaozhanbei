@@ -1,17 +1,18 @@
 :root {
     --primary-bg: #0d1117;
     --card-bg: #1a2433;
-    --accent-color: #00ffd0;
+    --accent-color: #1fd0e7;
     --text-primary: #ffffff;
     --text-secondary: #8b949e;
     --card-hover: #243142;
-    --card-shadow: 0 8px 24px rgba(0, 255, 208, 0.1);
+    --card-shadow: 0 8px 24px rgba(19, 71, 148, 0.1);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: none;
 }
 
 body {
@@ -19,21 +20,44 @@ body {
     background-color: var(--primary-bg);
     color: var(--text-primary);
     min-height: 100vh;
+    width: 100vw;
     margin: 0;
-    padding: 2rem;
+    padding: 0;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+.main-section {
+    display: flex;
+    width: 100vw;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
     color: var(--accent-color);
     font-size: 2.5rem;
     text-shadow: 0 0 15px rgba(0, 255, 208, 0.3);
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+}
+
+h2 {
+    color: var(--accent-color);
+    margin-bottom: 1.5rem;
+    width: 100%;
+    /* text-align: center; */
+}
+
+.top-section {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
 }
 
 .upload-section {
@@ -41,26 +65,34 @@ h1 {
     padding: 2.5rem;
     border-radius: 15px;
     box-shadow: var(--card-shadow);
-    margin-bottom: 2rem;
-    border: 1px solid rgba(0, 255, 208, 0.1);
+    margin-right: 2rem;
+    border: 1px solid rgba(34, 160, 195, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 460px;
 }
 
 .upload-modes {
-    width: 100%;
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-bottom: 3rem;
+    margin-right: 50px;
+}
+
+.upload-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    width: calc(500px + 3rem);
 }
 
 .mode-btn {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background-color: rgba(0, 255, 208, 0.1);
+    background-color: rgba(37, 113, 146, 0.68);
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -78,13 +110,14 @@ h1 {
     justify-content: center;
     gap: 3rem;
     margin-bottom: 2rem;
+    margin-top: 2rem;
 }
 
 /* 上传区域样式统一 */
 .upload-box {
     width: 250px;
     height: 250px;
-    border: 2px dashed rgba(0, 255, 208, 0.3);
+    border: 2px dashed rgba(0, 162, 255, 0.3);
     border-radius: 15px;
     display: flex;
     flex-direction: column;
@@ -92,13 +125,13 @@ h1 {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background-color: rgba(0, 255, 208, 0.05);
+    background-color: rgba(0, 170, 255, 0.05);
 }
 
 .upload-box:hover {
     border-color: var(--accent-color);
-    background-color: rgba(0, 255, 208, 0.1);
-    box-shadow: 0 0 20px rgba(0, 255, 208, 0.2);
+    background-color: rgba(0, 217, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);
 }
 
 .upload-icon {
@@ -130,8 +163,7 @@ input[type="file"] {
 }
 
 #submitBtn {
-    width: 200px;
-    margin: 0 auto;
+    width: 240px;
     background-color: var(--accent-color);
     color: var(--primary-bg);
     padding: 14px 32px;
@@ -161,15 +193,9 @@ input[type="file"] {
     background-color: var(--card-bg);
     padding: 2rem;
     border-radius: 15px;
-    margin-top: 2rem;
     box-shadow: var(--card-shadow);
-    border: 1px solid rgba(0, 255, 208, 0.1);
-}
-
-.preview-section h2 {
-    color: var(--accent-color);
-    margin-bottom: 1.5rem;
-    text-align: center;
+    border: 1px solid rgba(0, 162, 255, 0.3);
+    width: 900px;
 }
 
 /* 预览区域样式 */
@@ -180,17 +206,19 @@ input[type="file"] {
 }
 
 .eye-preview-column {
-    background-color: rgba(0, 255, 208, 0.05);
+    background-color: rgba(0, 170, 255, 0.05);
     border-radius: 12px;
     padding: 1.5rem;
-    border: 1px solid rgba(0, 255, 208, 0.1);
+    border: 1px solid rgba(0, 162, 255, 0.3);
+    height: 340px;
+    width: 400px;
 }
 
 .eye-count {
     color: var(--text-secondary);
     font-size: 1rem;
     padding: 0.75rem 1rem;
-    background-color: rgba(0, 255, 208, 0.05);
+    background-color: rgba(0, 195, 255, 0.05);
     border-radius: 8px;
     margin-bottom: 1rem;
     display: flex;
@@ -206,7 +234,7 @@ input[type="file"] {
 
 .eye-preview-area {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 1rem;
 }
 
@@ -215,7 +243,7 @@ input[type="file"] {
     aspect-ratio: 1;
     border-radius: 8px;
     overflow: hidden;
-    background-color: rgba(0, 255, 208, 0.05);
+    background-color: rgba(0, 170, 255, 0.05);
 }
 
 .preview-item img {
@@ -258,7 +286,7 @@ input[type="file"] {
 }
 
 .remaining-count {
-    background-color: rgba(0, 255, 208, 0.1);
+    background-color: rgba(0, 195, 255, 0.1);
     border: 2px dashed var(--accent-color);
     display: flex;
     align-items: center;
@@ -271,7 +299,7 @@ input[type="file"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 255, 208, 0.1);
+    background-color: rgba(0, 195, 255, 0.1);
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--accent-color);
@@ -309,3 +337,14 @@ input[type="file"] {
         gap: 1rem;
     }
 } 
+
+.result-section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-top: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0, 255, 208, 0.1);
+    width: 1560px;
+    min-height: 200px;
+}
