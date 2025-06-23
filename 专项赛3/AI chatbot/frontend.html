@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能聊天机器人</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .api-config {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .api-config h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .message.error {
+            align-self: center;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            align-self: center;
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            max-height: 120px;
+            min-height: 44px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .file-upload-area {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 4px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .status-item.online {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #047857;
+        }
+
+        .status-item.offline {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .log-container {
+            background: #1f2937;
+            color: #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .file-list {
+            margin-top: 10px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin: 5px 0;
+            border: 1px solid #e5e7eb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                height: 100vh;
+            }
+            
+            .sidebar, .status-panel {
+                max-height: 200px;
+            }
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧功能面板 -->
+        <div class="sidebar">
+            <!-- API 配置区域 -->
+            <div class="api-config">
+                <h4>🔗 API 连接设置</h4>
+                <input type="text" class="input-field" id="apiBaseUrl" placeholder="API 地址" value="http://localhost:8000">
+                <button class="btn btn-primary" onclick="updateApiConfig()">更新连接</button>
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    当前: <span id="currentApiUrl">http://localhost:8000</span>
+                </div>
+            </div>
+
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('upload')">上传</div>
+                <div class="tab" onclick="switchTab('config')">配置</div>
+            </div>
+
+            <!-- 文件上传标签页 -->
+            <div id="upload-tab" class="tab-content active">
+                <div class="section">
+                    <h3 class="section-title">文件对话</h3>
+                    <div class="file-upload-area" id="chatFileUpload">
+                        <p>📁 拖拽文件到这里或点击选择</p>
+                        <small>支持: txt, md, pdf, docx, doc</small>
+                        <input type="file" id="chatFileInput" style="display: none;" accept=".txt,.md,.pdf,.docx,.doc">
+                    </div>
+                    <input type="text" class="input-field" id="chatFileMessage" placeholder="对文件的提问..." value="请分析这个文件的内容">
+                    <button class="btn btn-primary" onclick="uploadChatFile()">📤 上传并对话</button>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">RAG向量库</h3>
+                    <div class="file-upload-area" id="ragFileUpload">
+                        <p>📚 拖拽文档到这里或点击选择</p>
+                        <small>支持多文件上传</small>
+                        <input type="file" id="ragFileInput" style="display: none;" multiple accept=".txt,.md,.pdf,.docx,.doc">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin: 10px 0;">
+                        <input type="number" class="input-field" id="chunkSize" placeholder="块大小" value="1000" style="flex: 1;">
+                        <input type="number" class="input-field" id="chunkOverlap" placeholder="重叠" value="200" style="flex: 1;">
+                    </div>
+                    <button class="btn btn-primary" onclick="uploadRAGFiles()">📚 上传到向量库</button>
+                    
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="saveVectorStore()">💾 保存向量库</button>
+                        <button class="btn btn-secondary" onclick="loadVectorStore()">📂 加载向量库</button>
+                        <button class="btn btn-secondary" onclick="reloadVectorStore()">🔄 重新加载</button>
+                    </div>
+                </div>
+
+                <div class="file-list" id="fileList"></div>
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- 配置标签页 -->
+            <div id="config-tab" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">模型参数</h3>
+                    <label>Temperature (0-2):</label>
+                    <input type="range" class="input-field" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <span id="temperatureValue">0.7</span>
+                    
+                    <label>Max Tokens:</label>
+                    <input type="number" class="input-field" id="maxTokens" value="1024">
+                    
+                    <label>Top P (0-1):</label>
+                    <input type="range" class="input-field" id="topP" min="0" max="1" step="0.05" value="0.95">
+                    <span id="topPValue">0.95</span>
+                    
+                    <label>Presence Penalty (-2 to 2):</label>
+                    <input type="range" class="input-field" id="presencePenalty" min="-2" max="2" step="0.1" value="0.1">
+                    <span id="presencePenaltyValue">0.1</span>
+                    
+                    <button class="btn btn-primary" onclick="updatePipelineConfig()">🔧 更新配置</button>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">记忆设置</h3>
+                    <select class="input-field" id="memoryType">
+                        <option value="buffer">缓冲记忆</option>
+                        <option value="summary">摘要记忆</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="setMemoryType()">🧠 设置记忆</button>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">系统操作</h3>
+                    <button class="btn btn-danger" onclick="clearHistory()">🗑️ 清除历史</button>
+                    <button class="btn btn-secondary" onclick="reinitializeSystem()">🔄 重新初始化</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间聊天区域 -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1 class="chat-title">智能聊天机器人</h1>
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">连接中...</span>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    👋 你好！我是智能聊天机器人。你可以：
+                    <br>• 💬 直接与我对话
+                    <br>• 📁 上传文件进行分析
+                    <br>• 📚 上传文档到知识库
+                    <br>• ⚙️ 调整我的参数设置
+                    <br>• 🔗 修改 API 连接地址
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="输入您的消息..."
+                            rows="1"
+                        ></textarea>
+                    </div>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧状态面板 -->
+        <div class="status-panel">
+            <h3 class="section-title">系统状态</h3>
+            
+            <div class="status-grid" id="statusGrid">
+                <div class="status-item" id="statusLLM">
+                    <div>LLM</div>
+                    <div>检查中...</div>
+                </div>
+                <div class="status-item" id="statusMemory">
+                    <div>记忆</div>
+                    <div>检查中...</div>
+                </div>
+                <div class="status-item" id="statusRAG">
+                    <div>RAG</div>
+                    <div>检查中...</div>
+                </div>
+                <div class="status-item" id="statusVector">
+                    <div>向量库</div>
+                    <div>检查中...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h4>详细状态</h4>
+                <div class="log-container" id="detailedStatus">
+                    加载中...
+                </div>
+            </div>
+
+            <div class="section">
+                <h4>操作日志</h4>
+                <div class="log-container" id="operationLog">
+                    系统启动中...
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="refreshStatus()" style="width: 100%; margin-top: 15px;">
+                🔄 刷新状态
+            </button>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>处理中...</p>
+    </div>
+
+    <script>
+        let isConnected = false;
+        let currentFiles = [];
+        let API_BASE_URL = 'http://localhost:8000'; // 默认 API 地址
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            addMessage('🔗 前端已加载，正在尝试连接后端...', 'info');
+            checkSystemStatus();
+            
+            // 定期刷新状态
+            setInterval(checkSystemStatus, 30000);
+        });
+
+        function updateApiConfig() {
+            const newUrl = document.getElementById('apiBaseUrl').value.trim();
+            if (!newUrl) {
+                alert('请输入有效的 API 地址');
+                return;
+            }
+            
+            // 移除末尾的斜杠
+            API_BASE_URL = newUrl.replace(/\/$/, '');
+            document.getElementById('currentApiUrl').textContent = API_BASE_URL;
+            
+            addMessage(`🔗 API 地址已更新为: ${API_BASE_URL}`, 'info');
+            logOperation(`🔗 API 地址更新: ${API_BASE_URL}`);
+            
+            // 立即测试连接
+            checkSystemStatus();
+        }
+
+        function setupEventListeners() {
+            // 聊天输入事件
+            const chatInput = document.getElementById('chatInput');
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // 自动调整文本框高度
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+
+            // 文件上传事件
+            setupFileUpload('chatFileUpload', 'chatFileInput');
+            setupFileUpload('ragFileUpload', 'ragFileInput');
+
+            // 滑块事件
+            setupRangeInputs();
+        }
+
+        function setupFileUpload(areaId, inputId) {
+            const area = document.getElementById(areaId);
+            const input = document.getElementById(inputId);
+
+            area.addEventListener('click', () => input.click());
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                input.files = e.dataTransfer.files;
+                updateFileList(inputId);
+            });
+
+            input.addEventListener('change', () => updateFileList(inputId));
+        }
+
+        function setupRangeInputs() {
+            const ranges = ['temperature', 'topP', 'presencePenalty'];
+            ranges.forEach(id => {
+                const range = document.getElementById(id);
+                const display = document.getElementById(id + 'Value');
+                range.addEventListener('input', () => {
+                    display.textContent = range.value;
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            // 切换标签
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        function updateFileList(inputId) {
+            const input = document.getElementById(inputId);
+            const fileList = document.getElementById('fileList');
+            
+            if (input.files.length > 0) {
+                const files = Array.from(input.files);
+                fileList.innerHTML = files.map(file => `
+                    <div class="file-item">
+                        <span>📄 ${file.name}</span>
+                        <span>${(file.size / 1024).toFixed(1)} KB</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            input.value = '';
+            input.style.height = 'auto';
+            
+            addMessage(message, 'user');
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage(data.response, 'bot');
+                    logOperation(`💬 对话成功 (RAG: ${data.metadata?.rag_enabled || false})`);
+                } else {
+                    addMessage(`错误: ${data.detail}`, 'error');
+                    logOperation(`❌ 对话失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`网络错误: ${error.message}`, 'error');
+                logOperation(`🔌 网络错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function uploadChatFile() {
+            const fileInput = document.getElementById('chatFileInput');
+            const messageInput = document.getElementById('chatFileMessage');
+            
+            if (!fileInput.files.length) {
+                alert('请选择文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('message', messageInput.value);
+
+            showLoading(true);
+            addMessage(`📁 上传文件: ${fileInput.files[0].name}`, 'user');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/file`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage(data.response, 'bot');
+                    logOperation(`📁 文件对话成功: ${data.metadata?.filename}`);
+                } else {
+                    addMessage(`错误: ${data.detail}`, 'error');
+                    logOperation(`❌ 文件对话失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`上传失败: ${error.message}`, 'error');
+                logOperation(`📁 文件上传失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+                fileInput.value = '';
+                updateFileList('chatFileInput');
+            }
+        }
+
+        async function uploadRAGFiles() {
+            const fileInput = document.getElementById('ragFileInput');
+            const chunkSize = document.getElementById('chunkSize').value;
+            const chunkOverlap = document.getElementById('chunkOverlap').value;
+            
+            if (!fileInput.files.length) {
+                alert('请选择文件');
+                return;
+            }
+
+            const formData = new FormData();
+            Array.from(fileInput.files).forEach(file => {
+                formData.append('files', file);
+            });
+            formData.append('chunk_size', chunkSize);
+            formData.append('chunk_overlap', chunkOverlap);
+
+            showProgress(0);
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/rag/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showProgress(100);
+                    addMessage(`📚 RAG上传成功: ${data.message}`, 'bot');
+                    logOperation(`📚 RAG文档上传成功: ${data.chunks_generated} 个块`);
+                } else {
+                    addMessage(`RAG上传失败: ${data.detail}`, 'error');
+                    logOperation(`❌ RAG上传失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`RAG上传错误: ${error.message}`, 'error');
+                logOperation(`📚 RAG上传错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+                setTimeout(() => showProgress(0), 2000);
+                fileInput.value = '';
+                updateFileList('ragFileInput');
+                checkSystemStatus();
+            }
+        }
+
+        async function updatePipelineConfig() {
+            const config = {
+                temperature: parseFloat(document.getElementById('temperature').value),
+                max_tokens: parseInt(document.getElementById('maxTokens').value),
+                top_p: parseFloat(document.getElementById('topP').value),
+                presence_penalty: parseFloat(document.getElementById('presencePenalty').value)
+            };
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/config/pipeline`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(config)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('⚙️ 配置更新成功', 'bot');
+                    logOperation('⚙️ Pipeline配置已更新');
+                } else {
+                    addMessage(`配置更新失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 配置更新失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`配置更新错误: ${error.message}`, 'error');
+                logOperation(`⚙️ 配置更新错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function setMemoryType() {
+            const memoryType = document.getElementById('memoryType').value;
+            
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/config/memory`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ memory_type: memoryType })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage(`🧠 记忆类型设置为: ${memoryType}`, 'bot');
+                    logOperation(`🧠 记忆类型更新: ${memoryType}`);
+                } else {
+                    addMessage(`记忆设置失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 记忆设置失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`记忆设置错误: ${error.message}`, 'error');
+                logOperation(`🧠 记忆设置错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm('确定要清除对话历史吗？')) return;
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/clear`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('chatMessages').innerHTML = `
+                        <div class="message bot">
+                            🗑️ 对话历史已清除，让我们重新开始吧！
+                        </div>
+                    `;
+                    logOperation('🗑️ 对话历史已清除');
+                } else {
+                    addMessage(`清除失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 清除历史失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`清除错误: ${error.message}`, 'error');
+                logOperation(`🗑️ 清除历史错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function saveVectorStore() {
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/rag/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'path=RAG'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('💾 向量库保存成功', 'bot');
+                    logOperation('💾 向量库已保存');
+                } else {
+                    addMessage(`保存失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 向量库保存失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`保存错误: ${error.message}`, 'error');
+                logOperation(`💾 向量库保存错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadVectorStore() {
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/rag/load`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'path=RAG'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('📂 向量库加载成功', 'bot');
+                    logOperation('📂 向量库已加载');
+                } else {
+                    addMessage(`加载失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 向量库加载失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`加载错误: ${error.message}`, 'error');
+                logOperation(`📂 向量库加载错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+                checkSystemStatus();
+            }
+        }
+
+        async function reloadVectorStore() {
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/rag/reload`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('🔄 向量库重新加载成功', 'bot');
+                    logOperation('🔄 向量库已重新加载');
+                } else {
+                    addMessage(`重新加载失败: ${data.detail}`, 'error');
+                    logOperation(`❌ 向量库重新加载失败: ${data.detail}`);
+                }
+            } catch (error) {
+                addMessage(`重新加载错误: ${error.message}`, 'error');
+                logOperation(`🔄 向量库重新加载错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+                checkSystemStatus();
+            }
+        }
+
+        async function reinitializeSystem() {
+            if (!confirm('确定要重新初始化系统吗？这可能需要一些时间。')) return;
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/system/reinitialize`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('🔄 系统重新初始化成功', 'bot');
+                    logOperation('🔄 系统已重新初始化');
+                } else {
+                    addMessage(`重新初始化失败: ${data.error}`, 'error');
+                    logOperation(`❌ 系统重新初始化失败: ${data.error}`);
+                }
+            } catch (error) {
+                addMessage(`重新初始化错误: ${error.message}`, 'error');
+                logOperation(`🔄 系统重新初始化错误: ${error.message}`);
+            } finally {
+                showLoading(false);
+                checkSystemStatus();
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/status`);
+                const data = await response.json();
+                
+                updateStatusIndicator(data.chatbot_ready);
+                updateStatusGrid(data.chatbot_status || {});
+                updateDetailedStatus(data.detailed_status || '状态未知');
+                
+                isConnected = data.chatbot_ready;
+                
+                if (isConnected) {
+                    logOperation('✅ 后端连接成功');
+                } else {
+                    logOperation('⚠️ 后端已连接但机器人未就绪');
+                }
+            } catch (error) {
+                updateStatusIndicator(false);
+                logOperation(`🔌 后端连接失败: ${error.message}`);
+                updateDetailedStatus(`连接错误: ${error.message}`);
+            }
+        }
+
+        function updateStatusIndicator(connected) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (connected) {
+                dot.classList.add('online');
+                text.textContent = '已连接';
+            } else {
+                dot.classList.remove('online');
+                text.textContent = '未连接';
+            }
+        }
+
+        function updateStatusGrid(status) {
+            const items = {
+                'statusLLM': status.llm_ready,
+                'statusMemory': status.memory_ready,
+                'statusRAG': status.rag_ready,
+                'statusVector': status.vector_store_loaded
+            };
+
+            Object.entries(items).forEach(([id, isReady]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.className = `status-item ${isReady ? 'online' : 'offline'}`;
+                    element.children[1].textContent = isReady ? '✓ 正常' : '✗ 异常';
+                }
+            });
+        }
+
+        function updateDetailedStatus(status) {
+            document.getElementById('detailedStatus').textContent = status;
+        }
+
+        function addMessage(content, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = content;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function logOperation(message) {
+            const logContainer = document.getElementById('operationLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // 限制日志条数
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('sendBtn').disabled = show;
+        }
+
+        function showProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (percent > 0) {
+                progressBar.style.display = 'block';
+                progressFill.style.width = percent + '%';
+            } else {
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function refreshStatus() {
+            checkSystemStatus();
+            logOperation('🔄 状态已刷新');
+        }
+    </script>
+</body>
+</html>
