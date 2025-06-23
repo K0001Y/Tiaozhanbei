@@ -85,16 +85,7 @@ curl "http://localhost:8000/config?session_id=test"
 
 ### 主要API端点
 
-- `POST /chat` - 发送聊天消息
-- `POST /documents/upload` - 上传文档文件
-- `POST /documents/load` - 从路径加载文档
-- `GET /config` - 获取配置信息
-- `POST /config` - 更新配置
-- `POST /vector-store/save` - 保存向量存储
-- `POST /vector-store/load` - 加载向量存储
-- `GET /sessions` - 获取会话信息
-- `DELETE /sessions/{session_id}` - 删除会话
-- `GET /stats` - 获取性能统计
+见文末
 
 ## ⚙️ 命令行参数
 
