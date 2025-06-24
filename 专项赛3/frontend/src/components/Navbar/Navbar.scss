@@ -1,0 +1,51 @@
+$title-color: #C1E8FF;
+$bg-color: #052659;
+$section-color: #7DA0CA;
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px;
+  z-index: 1000;
+  background: $bg-color;
+
+  .navbar-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 40px;
+
+    .navbar-title {
+      font-family: Source Sans Pro, sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: $title-color;
+      text-shadow: #a0bee3 2px 2px 3px;
+    }
+
+    .navbar-subtitle {
+      margin-left: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: $title-color;
+    }
+
+    .navbar-section {
+      margin-left: 20px;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 550;
+      color: $section-color;
+    }
+  }
+  
+  .navbar-user {
+    margin-right: 30px;
+    font-size: 16px;
+  }
+}
