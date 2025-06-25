@@ -9,18 +9,17 @@ DEFAULT_API_KEY = "sk-ded931914889432ca04c7fc7ac922c3b"
 
 # 模型配置
 DEFAULT_MODEL_CONFIGS = {
-    "llm_kwargs": {
         "max_tokens": 1024,
         "temperature": 0.7,
         "top_p": 0.95,
         "presence_penalty": 0.1,
-    }
+    
 }
 
 # RAG配置
 DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
-DEFAULT_EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+DEFAULT_EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 DEFAULT_EMBEDDING_PATH = "model"
 DEFAULT_VECTOR_STORE_PATH = "RAG"
 
@@ -131,9 +130,6 @@ A[四诊输入] --> B[证型判断]
 所有知识输出必须标注三维来源：
 [典籍]《金匮要略·痰饮篇》§3.2 | [医案]国医大师邓铁涛案1987-021 | [指南]2020版消渴病诊疗规范
 
-# 执行确认
-每次响应首行显示系统状态：
-[中医辅助诊疗系统v2.1] 辨证引擎就绪 | 安全协议激活 | 轻量化模式运行
 
 ---
 
@@ -143,7 +139,13 @@ A[四诊输入] --> B[证型判断]
 当前对话历史：
 {history}
 
-"""
 
+        
+病症: 
+{input}
+
+请给出具体的诊断结果（得了什么病）以及推荐的治疗方式。
+
+"""
 
 

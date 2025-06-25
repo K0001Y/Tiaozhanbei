@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能聊天机器人</title>
+    <title>中医AI聊天机器人 - 测试界面</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
@@ -22,110 +22,76 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
             display: grid;
-            grid-template-columns: 300px 1fr 350px;
+            grid-template-columns: 1fr 350px;
             gap: 20px;
-            height: 100vh;
+            height: calc(100vh - 200px);
+        }
+
+        .chat-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .sidebar {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-        }
-
-        .chat-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            gap: 20px;
         }
 
-        .status-panel {
-            background: rgba(255, 255, 255, 0.95);
+        .status-panel, .upload-panel, .control-panel {
+            background: white;
             border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
         }
 
-        .chat-header {
-            padding: 20px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .api-config {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .api-config h4 {
-            margin-bottom: 10px;
-            color: #495057;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.online {
-            background: #10b981;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .panel-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 20px;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            padding: 20px;
+            background: #f8fafc;
         }
 
         .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            word-wrap: break-word;
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.3s ease;
         }
 
-        @keyframes slideIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -137,204 +103,169 @@
         }
 
         .message.user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border-bottom-right-radius: 5px;
         }
 
-        .message.bot {
-            align-self: flex-start;
-            background: #f3f4f6;
-            color: #374151;
+        .message.assistant .message-content {
+            background: #e2e8f0;
+            color: #2d3748;
+            border-bottom-left-radius: 5px;
         }
 
-        .message.error {
-            align-self: center;
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-        }
-
-        .message.info {
-            align-self: center;
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-
-        .chat-input-container {
+        .chat-input-area {
             padding: 20px;
-            border-top: 1px solid #e5e7eb;
-            background: rgba(249, 250, 251, 0.8);
+            background: white;
+            border-top: 1px solid #e2e8f0;
         }
 
         .input-group {
             display: flex;
             gap: 10px;
-            align-items: end;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            position: relative;
         }
 
         .chat-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
             border-radius: 25px;
-            resize: none;
-            font-family: inherit;
-            font-size: 14px;
-            max-height: 120px;
-            min-height: 44px;
-            transition: all 0.3s ease;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
         }
 
         .chat-input:focus {
-            outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .send-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .send-btn, .btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            min-width: 80px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
         }
 
-        .send-btn:hover:not(:disabled) {
+        .send-btn:hover, .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .send-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
         }
 
-        .file-upload-area {
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .file-upload {
             margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
             padding: 15px;
-            border: 2px dashed #d1d5db;
+            border: 2px dashed #cbd5e0;
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: #f7fafc;
         }
 
-        .file-upload-area:hover {
+        .file-label:hover {
             border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
+            background: #edf2f7;
         }
 
-        .file-upload-area.dragover {
+        .file-label.dragover {
             border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 8px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            margin: 4px;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            background: #e6fffa;
         }
 
         .status-item {
-            padding: 10px;
-            background: #f9fafb;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .status-item.online {
-            background: #ecfdf5;
-            border-color: #10b981;
-            color: #047857;
+        .status-item:last-child {
+            border-bottom: none;
         }
 
-        .status-item.offline {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #dc2626;
+        .status-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .status-value {
+            font-weight: bold;
+        }
+
+        .status-value.success {
+            color: #38a169;
+        }
+
+        .status-value.error {
+            color: #e53e3e;
+        }
+
+        .status-value.warning {
+            color: #d69e2e;
         }
 
         .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -342,824 +273,731 @@
             100% { transform: rotate(360deg); }
         }
 
-        .log-container {
-            background: #1f2937;
-            color: #e5e7eb;
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            background: #38a169;
+        }
+
+        .notification.error {
+            background: #e53e3e;
+        }
+
+        .notification.info {
+            background: #3182ce;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            padding: 15px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+        }
+
+        .medical-records {
             max-height: 200px;
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            margin-top: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            background: #f8fafc;
         }
 
-        .file-list {
-            margin-top: 10px;
-        }
-
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .record-item {
             padding: 8px;
-            background: #f9fafb;
-            border-radius: 6px;
-            margin: 5px 0;
-            border: 1px solid #e5e7eb;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 5px;
+            font-size: 12px;
+            border-left: 3px solid #667eea;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        @media (max-width: 1200px) {
-            .container {
+        @media (max-width: 768px) {
+            .main-content {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr auto;
-                height: 100vh;
+                height: auto;
             }
             
-            .sidebar, .status-panel {
-                max-height: 200px;
+            .chat-section {
+                height: 60vh;
+            }
+            
+            .header h1 {
+                font-size: 2em;
             }
         }
 
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #e5e7eb;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab.active {
-            border-bottom-color: #667eea;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .tab-content {
+        .typing-indicator {
             display: none;
+            padding: 10px 20px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            margin: 10px 0;
+            max-width: 100px;
         }
 
-        .tab-content.active {
-            display: block;
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 左侧功能面板 -->
-        <div class="sidebar">
-            <!-- API 配置区域 -->
-            <div class="api-config">
-                <h4>🔗 API 连接设置</h4>
-                <input type="text" class="input-field" id="apiBaseUrl" placeholder="API 地址" value="http://localhost:8000">
-                <button class="btn btn-primary" onclick="updateApiConfig()">更新连接</button>
-                <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                    当前: <span id="currentApiUrl">http://localhost:8000</span>
+        <div class="header">
+            <h1>🏥 中医AI聊天机器人</h1>
+            <p>专业的中医诊疗AI助手 - API测试界面</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 聊天区域 -->
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">
+                        <div class="message-content">
+                            您好！我是中医AI助手，请描述您的症状或上传病历文件，我将为您提供专业的中医诊疗建议。
+                        </div>
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" class="chat-input" id="messageInput" 
+                               placeholder="请描述您的症状..." 
+                               onkeypress="handleKeyPress(event)">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <span id="sendBtnText">发送</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-container">
-                <div class="tab active" onclick="switchTab('upload')">上传</div>
-                <div class="tab" onclick="switchTab('config')">配置</div>
-            </div>
-
-            <!-- 文件上传标签页 -->
-            <div id="upload-tab" class="tab-content active">
-                <div class="section">
-                    <h3 class="section-title">文件对话</h3>
-                    <div class="file-upload-area" id="chatFileUpload">
-                        <p>📁 拖拽文件到这里或点击选择</p>
-                        <small>支持: txt, md, pdf, docx, doc</small>
-                        <input type="file" id="chatFileInput" style="display: none;" accept=".txt,.md,.pdf,.docx,.doc">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <!-- 系统状态面板 -->
+                <div class="status-panel">
+                    <div class="panel-title">📊 系统状态</div>
+                    <div id="systemStatus">
+                        <div class="status-item">
+                            <span class="status-label">系统状态</span>
+                            <span class="status-value" id="systemHealth">检查中...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">ChatBot</span>
+                            <span class="status-value" id="chatbotStatus">未知</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">RAG系统</span>
+                            <span class="status-value" id="ragStatus">未知</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">向量库</span>
+                            <span class="status-value" id="vectorStatus">未知</span>
+                        </div>
                     </div>
-                    <input type="text" class="input-field" id="chatFileMessage" placeholder="对文件的提问..." value="请分析这个文件的内容">
-                    <button class="btn btn-primary" onclick="uploadChatFile()">📤 上传并对话</button>
+                    <button class="btn btn-small" onclick="refreshStatus()" style="margin-top: 15px; width: 100%;">
+                        🔄 刷新状态
+                    </button>
                 </div>
 
-                <div class="section">
-                    <h3 class="section-title">RAG向量库</h3>
-                    <div class="file-upload-area" id="ragFileUpload">
-                        <p>📚 拖拽文档到这里或点击选择</p>
-                        <small>支持多文件上传</small>
-                        <input type="file" id="ragFileInput" style="display: none;" multiple accept=".txt,.md,.pdf,.docx,.doc">
+                <!-- 病历上传面板 -->
+                <div class="upload-panel">
+                    <div class="panel-title">🏥 病历上传</div>
+                    <div class="file-upload">
+                        <input type="file" class="file-input" id="medicalFile" 
+                               accept=".txt,.pdf,.docx,.doc,.md" 
+                               onchange="handleMedicalFileSelect(event)">
+                        <label for="medicalFile" class="file-label" id="medicalFileLabel">
+                            📄 点击或拖拽上传病历文件<br>
+                            <small>支持: txt, pdf, docx, doc, md</small>
+                        </label>
                     </div>
-                    <div style="display: flex; gap: 10px; margin: 10px 0;">
-                        <input type="number" class="input-field" id="chunkSize" placeholder="块大小" value="1000" style="flex: 1;">
-                        <input type="number" class="input-field" id="chunkOverlap" placeholder="重叠" value="200" style="flex: 1;">
+                    <div class="form-group">
+                        <label class="form-label">患者姓名</label>
+                        <input type="text" class="form-input" id="patientName" placeholder="请输入患者姓名">
                     </div>
-                    <button class="btn btn-primary" onclick="uploadRAGFiles()">📚 上传到向量库</button>
+                    <div class="form-group">
+                        <label class="form-label">病历描述</label>
+                        <input type="text" class="form-input" id="medicalDescription" placeholder="简要描述病历内容">
+                    </div>
+                    <button class="btn btn-success btn-small" onclick="uploadMedicalRecord()" style="width: 100%;">
+                        📤 上传病历
+                    </button>
                     
                     <div style="margin-top: 15px;">
-                        <button class="btn btn-secondary" onclick="saveVectorStore()">💾 保存向量库</button>
-                        <button class="btn btn-secondary" onclick="loadVectorStore()">📂 加载向量库</button>
-                        <button class="btn btn-secondary" onclick="reloadVectorStore()">🔄 重新加载</button>
+                        <div class="form-label">已上传病历</div>
+                        <div class="medical-records" id="medicalRecords">
+                            <div style="text-align: center; color: #666;">暂无病历记录</div>
+                        </div>
+                        <button class="btn btn-small" onclick="loadMedicalRecords()" style="margin-top: 10px; width: 100%;">
+                            📋 刷新病历列表
+                        </button>
                     </div>
                 </div>
 
-                <div class="file-list" id="fileList"></div>
-                <div class="progress-bar" id="progressBar" style="display: none;">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
-
-            <!-- 配置标签页 -->
-            <div id="config-tab" class="tab-content">
-                <div class="section">
-                    <h3 class="section-title">模型参数</h3>
-                    <label>Temperature (0-2):</label>
-                    <input type="range" class="input-field" id="temperature" min="0" max="2" step="0.1" value="0.7">
-                    <span id="temperatureValue">0.7</span>
-                    
-                    <label>Max Tokens:</label>
-                    <input type="number" class="input-field" id="maxTokens" value="1024">
-                    
-                    <label>Top P (0-1):</label>
-                    <input type="range" class="input-field" id="topP" min="0" max="1" step="0.05" value="0.95">
-                    <span id="topPValue">0.95</span>
-                    
-                    <label>Presence Penalty (-2 to 2):</label>
-                    <input type="range" class="input-field" id="presencePenalty" min="-2" max="2" step="0.1" value="0.1">
-                    <span id="presencePenaltyValue">0.1</span>
-                    
-                    <button class="btn btn-primary" onclick="updatePipelineConfig()">🔧 更新配置</button>
-                </div>
-
-                <div class="section">
-                    <h3 class="section-title">记忆设置</h3>
-                    <select class="input-field" id="memoryType">
-                        <option value="buffer">缓冲记忆</option>
-                        <option value="summary">摘要记忆</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="setMemoryType()">🧠 设置记忆</button>
-                </div>
-
-                <div class="section">
-                    <h3 class="section-title">系统操作</h3>
-                    <button class="btn btn-danger" onclick="clearHistory()">🗑️ 清除历史</button>
-                    <button class="btn btn-secondary" onclick="reinitializeSystem()">🔄 重新初始化</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 中间聊天区域 -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1 class="chat-title">智能聊天机器人</h1>
-                <div class="status-indicator">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">连接中...</span>
-                </div>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot">
-                    👋 你好！我是智能聊天机器人。你可以：
-                    <br>• 💬 直接与我对话
-                    <br>• 📁 上传文件进行分析
-                    <br>• 📚 上传文档到知识库
-                    <br>• ⚙️ 调整我的参数设置
-                    <br>• 🔗 修改 API 连接地址
-                </div>
-            </div>
-
-            <div class="chat-input-container">
-                <div class="input-group">
-                    <div class="input-wrapper">
-                        <textarea 
-                            class="chat-input" 
-                            id="chatInput" 
-                            placeholder="输入您的消息..."
-                            rows="1"
-                        ></textarea>
+                <!-- RAG文档上传面板 -->
+                <div class="upload-panel">
+                    <div class="panel-title">📚 知识库管理</div>
+                    <div class="file-upload">
+                        <input type="file" class="file-input" id="ragFiles" 
+                               accept=".txt,.pdf,.docx,.doc,.md" 
+                               multiple
+                               onchange="handleRagFileSelect(event)">
+                        <label for="ragFiles" class="file-label" id="ragFileLabel">
+                            📚 上传知识库文档<br>
+                            <small>可选择多个文件</small>
+                        </label>
                     </div>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+                    <div class="form-group">
+                        <label class="form-label">分块大小</label>
+                        <input type="number" class="form-input" id="chunkSize" value="1000" min="100" max="2000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">重叠大小</label>
+                        <input type="number" class="form-input" id="chunkOverlap" value="200" min="0" max="500">
+                    </div>
+                    <button class="btn btn-success btn-small" onclick="uploadRAGDocuments()" style="width: 100%;">
+                        📤 上传到知识库
+                    </button>
+                </div>
+
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <div class="panel-title">🎛️ 控制面板</div>
+                    <div class="form-group">
+                        <label class="form-label">内存类型</label>
+                        <select class="form-input" id="memoryType">
+                            <option value="buffer">Buffer Memory</option>
+                            <option value="summary">Summary Memory</option>
+                            <option value="window">Window Memory</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-small" onclick="updateMemoryType()" style="width: 100%; margin-bottom: 10px;">
+                        💾 更新内存配置
+                    </button>
+                    <button class="btn btn-danger btn-small" onclick="clearChatHistory()" style="width: 100%; margin-bottom: 10px;">
+                        🗑️ 清除对话历史
+                    </button>
+                    <button class="btn btn-small" onclick="reinitializeSystem()" style="width: 100%;">
+                        🔄 重新初始化系统
+                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- 右侧状态面板 -->
-        <div class="status-panel">
-            <h3 class="section-title">系统状态</h3>
-            
-            <div class="status-grid" id="statusGrid">
-                <div class="status-item" id="statusLLM">
-                    <div>LLM</div>
-                    <div>检查中...</div>
-                </div>
-                <div class="status-item" id="statusMemory">
-                    <div>记忆</div>
-                    <div>检查中...</div>
-                </div>
-                <div class="status-item" id="statusRAG">
-                    <div>RAG</div>
-                    <div>检查中...</div>
-                </div>
-                <div class="status-item" id="statusVector">
-                    <div>向量库</div>
-                    <div>检查中...</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h4>详细状态</h4>
-                <div class="log-container" id="detailedStatus">
-                    加载中...
-                </div>
-            </div>
-
-            <div class="section">
-                <h4>操作日志</h4>
-                <div class="log-container" id="operationLog">
-                    系统启动中...
-                </div>
-            </div>
-
-            <button class="btn btn-secondary" onclick="refreshStatus()" style="width: 100%; margin-top: 15px;">
-                🔄 刷新状态
-            </button>
-        </div>
-    </div>
-
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <p>处理中...</p>
     </div>
 
     <script>
-        let isConnected = false;
-        let currentFiles = [];
-        let API_BASE_URL = 'http://localhost:8000'; // 默认 API 地址
+        // API基础URL
+        const API_BASE = 'http://localhost:8000';
+        
+        // 全局状态
+        let isLoading = false;
+        let selectedMedicalFile = null;
+        let selectedRAGFiles = [];
 
-        // 初始化
+        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            addMessage('🔗 前端已加载，正在尝试连接后端...', 'info');
-            checkSystemStatus();
+            refreshStatus();
+            loadMedicalRecords();
+            setupFileDropHandlers();
             
-            // 定期刷新状态
-            setInterval(checkSystemStatus, 30000);
+            // 每30秒自动刷新状态
+            setInterval(refreshStatus, 30000);
         });
 
-        function updateApiConfig() {
-            const newUrl = document.getElementById('apiBaseUrl').value.trim();
-            if (!newUrl) {
-                alert('请输入有效的 API 地址');
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 处理键盘事件
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 添加消息到聊天区域
+        function addMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            // 滚动到底部
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 显示/隐藏打字指示器
+        function showTypingIndicator(show = true) {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = show ? 'block' : 'none';
+            
+            if (show) {
+                const messagesContainer = document.getElementById('chatMessages');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            if (isLoading) return;
+            
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                showNotification('请输入消息', 'warning');
                 return;
             }
             
-            // 移除末尾的斜杠
-            API_BASE_URL = newUrl.replace(/\/$/, '');
-            document.getElementById('currentApiUrl').textContent = API_BASE_URL;
-            
-            addMessage(`🔗 API 地址已更新为: ${API_BASE_URL}`, 'info');
-            logOperation(`🔗 API 地址更新: ${API_BASE_URL}`);
-            
-            // 立即测试连接
-            checkSystemStatus();
-        }
-
-        function setupEventListeners() {
-            // 聊天输入事件
-            const chatInput = document.getElementById('chatInput');
-            chatInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-
-            // 自动调整文本框高度
-            chatInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = this.scrollHeight + 'px';
-            });
-
-            // 文件上传事件
-            setupFileUpload('chatFileUpload', 'chatFileInput');
-            setupFileUpload('ragFileUpload', 'ragFileInput');
-
-            // 滑块事件
-            setupRangeInputs();
-        }
-
-        function setupFileUpload(areaId, inputId) {
-            const area = document.getElementById(areaId);
-            const input = document.getElementById(inputId);
-
-            area.addEventListener('click', () => input.click());
-            area.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                area.classList.add('dragover');
-            });
-            area.addEventListener('dragleave', () => {
-                area.classList.remove('dragover');
-            });
-            area.addEventListener('drop', (e) => {
-                e.preventDefault();
-                area.classList.remove('dragover');
-                input.files = e.dataTransfer.files;
-                updateFileList(inputId);
-            });
-
-            input.addEventListener('change', () => updateFileList(inputId));
-        }
-
-        function setupRangeInputs() {
-            const ranges = ['temperature', 'topP', 'presencePenalty'];
-            ranges.forEach(id => {
-                const range = document.getElementById(id);
-                const display = document.getElementById(id + 'Value');
-                range.addEventListener('input', () => {
-                    display.textContent = range.value;
-                });
-            });
-        }
-
-        function switchTab(tabName) {
-            // 切换标签
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
-        }
-
-        function updateFileList(inputId) {
-            const input = document.getElementById(inputId);
-            const fileList = document.getElementById('fileList');
-            
-            if (input.files.length > 0) {
-                const files = Array.from(input.files);
-                fileList.innerHTML = files.map(file => `
-                    <div class="file-item">
-                        <span>📄 ${file.name}</span>
-                        <span>${(file.size / 1024).toFixed(1)} KB</span>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-
+            // 添加用户消息
+            addMessage(message, true);
             input.value = '';
-            input.style.height = 'auto';
             
-            addMessage(message, 'user');
-            showLoading(true);
-
+            // 设置加载状态
+            isLoading = true;
+            const sendBtn = document.getElementById('sendBtnText');
+            sendBtn.innerHTML = '<div class="loading"></div>';
+            showTypingIndicator(true);
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/chat`, {
+                const response = await fetch(`${API_BASE}/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ message: message })
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    addMessage(data.response, 'bot');
-                    logOperation(`💬 对话成功 (RAG: ${data.metadata?.rag_enabled || false})`);
+                if (response.ok && data.status === 'success') {
+                    addMessage(data.response);
+                    showNotification('回复生成成功', 'success');
                 } else {
-                    addMessage(`错误: ${data.detail}`, 'error');
-                    logOperation(`❌ 对话失败: ${data.detail}`);
+                    addMessage(`抱歉，生成回复时发生错误：${data.error || data.detail || '未知错误'}`);
+                    showNotification('回复生成失败', 'error');
                 }
             } catch (error) {
-                addMessage(`网络错误: ${error.message}`, 'error');
-                logOperation(`🔌 网络错误: ${error.message}`);
+                console.error('发送消息失败:', error);
+                addMessage('网络错误，请检查服务器连接');
+                showNotification('网络连接失败', 'error');
             } finally {
-                showLoading(false);
+                isLoading = false;
+                sendBtn.textContent = '发送';
+                showTypingIndicator(false);
             }
         }
 
-        async function uploadChatFile() {
-            const fileInput = document.getElementById('chatFileInput');
-            const messageInput = document.getElementById('chatFileMessage');
+        // 刷新系统状态
+        async function refreshStatus() {
+            try {
+                // 获取系统健康状态
+                const healthResponse = await fetch(`${API_BASE}/system/health`);
+                const healthData = await healthResponse.json();
+                
+                // 获取详细状态
+                const statusResponse = await fetch(`${API_BASE}/status`);
+                const statusData = await statusResponse.json();
+                
+                // 获取RAG状态
+                const ragResponse = await fetch(`${API_BASE}/rag/status`);
+                const ragData = await ragResponse.json();
+                
+                // 更新UI
+                updateStatusUI(healthData, statusData, ragData);
+                
+            } catch (error) {
+                console.error('刷新状态失败:', error);
+                updateStatusUI(null, null, null);
+            }
+        }
+
+        // 更新状态UI
+        function updateStatusUI(health, status, rag) {
+            const systemHealth = document.getElementById('systemHealth');
+            const chatbotStatus = document.getElementById('chatbotStatus');
+            const ragStatus = document.getElementById('ragStatus');
+            const vectorStatus = document.getElementById('vectorStatus');
             
-            if (!fileInput.files.length) {
-                alert('请选择文件');
+            if (health) {
+                systemHealth.textContent = health.status === 'healthy' ? '正常' : '异常';
+                systemHealth.className = `status-value ${health.status === 'healthy' ? 'success' : 'error'}`;
+                
+                if (health.components) {
+                    chatbotStatus.textContent = health.components.chatbot ? '正常' : '异常';
+                    chatbotStatus.className = `status-value ${health.components.chatbot ? 'success' : 'error'}`;
+                }
+            } else {
+                systemHealth.textContent = '连接失败';
+                systemHealth.className = 'status-value error';
+                chatbotStatus.textContent = '未知';
+                chatbotStatus.className = 'status-value error';
+            }
+            
+            if (rag) {
+                ragStatus.textContent = rag.rag_ready ? '正常' : '异常';
+                ragStatus.className = `status-value ${rag.rag_ready ? 'success' : 'error'}`;
+                
+                vectorStatus.textContent = rag.vector_store_loaded ? '已加载' : '未加载';
+                vectorStatus.className = `status-value ${rag.vector_store_loaded ? 'success' : 'warning'}`;
+            } else {
+                ragStatus.textContent = '未知';
+                ragStatus.className = 'status-value error';
+                vectorStatus.textContent = '未知';
+                vectorStatus.className = 'status-value error';
+            }
+        }
+
+        // 设置文件拖拽处理
+        function setupFileDropHandlers() {
+            const medicalLabel = document.getElementById('medicalFileLabel');
+            const ragLabel = document.getElementById('ragFileLabel');
+            
+            // 病历文件拖拽
+            medicalLabel.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            medicalLabel.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            medicalLabel.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleMedicalFileSelect({ target: { files: files } });
+                }
+            });
+            
+            // RAG文件拖拽
+            ragLabel.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            ragLabel.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            ragLabel.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleRagFileSelect({ target: { files: files } });
+                }
+            });
+        }
+
+        // 处理病历文件选择
+        function handleMedicalFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedMedicalFile = file;
+                const label = document.getElementById('medicalFileLabel');
+                label.innerHTML = `📄 已选择: ${file.name}<br><small>大小: ${(file.size / 1024).toFixed(1)} KB</small>`;
+            }
+        }
+
+        // 处理RAG文件选择
+        function handleRagFileSelect(event) {
+            const files = Array.from(event.target.files);
+            if (files.length > 0) {
+                selectedRAGFiles = files;
+                const label = document.getElementById('ragFileLabel');
+                label.innerHTML = `📚 已选择 ${files.length} 个文件<br><small>${files.map(f => f.name).join(', ')}</small>`;
+            }
+        }
+
+        // 上传病历文件
+        async function uploadMedicalRecord() {
+            if (!selectedMedicalFile) {
+                showNotification('请先选择病历文件', 'warning');
                 return;
             }
-
+            
+            const patientName = document.getElementById('patientName').value.trim();
+            const description = document.getElementById('medicalDescription').value.trim();
+            
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('message', messageInput.value);
-
-            showLoading(true);
-            addMessage(`📁 上传文件: ${fileInput.files[0].name}`, 'user');
-
+            formData.append('file', selectedMedicalFile);
+            formData.append('patient_name', patientName);
+            formData.append('description', description);
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/chat/file`, {
+                showNotification('正在上传病历文件...', 'info');
+                
+                const response = await fetch(`${API_BASE}/medical/upload`, {
                     method: 'POST',
                     body: formData
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    addMessage(data.response, 'bot');
-                    logOperation(`📁 文件对话成功: ${data.metadata?.filename}`);
+                if (response.ok && data.status === 'success') {
+                    showNotification('病历文件上传成功', 'success');
+                    
+                    // 清除选择
+                    selectedMedicalFile = null;
+                    document.getElementById('medicalFile').value = '';
+                    document.getElementById('patientName').value = '';
+                    document.getElementById('medicalDescription').value = '';
+                    document.getElementById('medicalFileLabel').innerHTML = '📄 点击或拖拽上传病历文件<br><small>支持: txt, pdf, docx, doc, md</small>';
+                    
+                    // 刷新病历列表
+                    loadMedicalRecords();
                 } else {
-                    addMessage(`错误: ${data.detail}`, 'error');
-                    logOperation(`❌ 文件对话失败: ${data.detail}`);
+                    showNotification(`病历上传失败: ${data.error || data.message}`, 'error');
                 }
             } catch (error) {
-                addMessage(`上传失败: ${error.message}`, 'error');
-                logOperation(`📁 文件上传失败: ${error.message}`);
-            } finally {
-                showLoading(false);
-                fileInput.value = '';
-                updateFileList('chatFileInput');
+                console.error('上传病历失败:', error);
+                showNotification('网络错误，上传失败', 'error');
             }
         }
 
-        async function uploadRAGFiles() {
-            const fileInput = document.getElementById('ragFileInput');
-            const chunkSize = document.getElementById('chunkSize').value;
-            const chunkOverlap = document.getElementById('chunkOverlap').value;
-            
-            if (!fileInput.files.length) {
-                alert('请选择文件');
+        // 加载病历记录列表
+        async function loadMedicalRecords() {
+            try {
+                const response = await fetch(`${API_BASE}/medical/list`);
+                const data = await response.json();
+                
+                const container = document.getElementById('medicalRecords');
+                
+                if (response.ok && data.records && data.records.length > 0) {
+                    container.innerHTML = data.records.map(record => `
+                        <div class="record-item">
+                            <strong>${record.patient_name || '未知患者'}</strong><br>
+                            文件: ${record.original_filename}<br>
+                            时间: ${record.upload_time}<br>
+                            ${record.description ? `描述: ${record.description}` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: #666;">暂无病历记录</div>';
+                }
+            } catch (error) {
+                console.error('加载病历列表失败:', error);
+                document.getElementById('medicalRecords').innerHTML = '<div style="text-align: center; color: #e53e3e;">加载失败</div>';
+            }
+        }
+
+        // 上传RAG文档
+        async function uploadRAGDocuments() {
+            if (selectedRAGFiles.length === 0) {
+                showNotification('请先选择要上传的文档', 'warning');
                 return;
             }
-
+            
+            const chunkSize = parseInt(document.getElementById('chunkSize').value) || 1000;
+            const chunkOverlap = parseInt(document.getElementById('chunkOverlap').value) || 200;
+            
             const formData = new FormData();
-            Array.from(fileInput.files).forEach(file => {
+            selectedRAGFiles.forEach(file => {
                 formData.append('files', file);
             });
-            formData.append('chunk_size', chunkSize);
-            formData.append('chunk_overlap', chunkOverlap);
-
-            showProgress(0);
-            showLoading(true);
-
+            formData.append('chunk_size', chunkSize.toString());
+            formData.append('chunk_overlap', chunkOverlap.toString());
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/rag/upload`, {
+                showNotification('正在上传文档到知识库...', 'info');
+                
+                const response = await fetch(`${API_BASE}/rag/upload`, {
                     method: 'POST',
                     body: formData
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    showProgress(100);
-                    addMessage(`📚 RAG上传成功: ${data.message}`, 'bot');
-                    logOperation(`📚 RAG文档上传成功: ${data.chunks_generated} 个块`);
+                if (response.ok && data.status === 'success') {
+                    showNotification(`知识库更新成功，处理了 ${data.documents_added} 个文档`, 'success');
+                    
+                    // 清除选择
+                    selectedRAGFiles = [];
+                    document.getElementById('ragFiles').value = '';
+                    document.getElementById('ragFileLabel').innerHTML = '📚 上传知识库文档<br><small>可选择多个文件</small>';
+                    
+                    // 刷新状态
+                    refreshStatus();
                 } else {
-                    addMessage(`RAG上传失败: ${data.detail}`, 'error');
-                    logOperation(`❌ RAG上传失败: ${data.detail}`);
+                    showNotification(`知识库上传失败: ${data.error || data.message}`, 'error');
                 }
             } catch (error) {
-                addMessage(`RAG上传错误: ${error.message}`, 'error');
-                logOperation(`📚 RAG上传错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-                setTimeout(() => showProgress(0), 2000);
-                fileInput.value = '';
-                updateFileList('ragFileInput');
-                checkSystemStatus();
+                console.error('上传RAG文档失败:', error);
+                showNotification('网络错误，上传失败', 'error');
             }
         }
 
-        async function updatePipelineConfig() {
-            const config = {
-                temperature: parseFloat(document.getElementById('temperature').value),
-                max_tokens: parseInt(document.getElementById('maxTokens').value),
-                top_p: parseFloat(document.getElementById('topP').value),
-                presence_penalty: parseFloat(document.getElementById('presencePenalty').value)
-            };
-
-            showLoading(true);
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/config/pipeline`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(config)
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addMessage('⚙️ 配置更新成功', 'bot');
-                    logOperation('⚙️ Pipeline配置已更新');
-                } else {
-                    addMessage(`配置更新失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 配置更新失败: ${data.detail}`);
-                }
-            } catch (error) {
-                addMessage(`配置更新错误: ${error.message}`, 'error');
-                logOperation(`⚙️ 配置更新错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function setMemoryType() {
+        // 更新内存类型
+        async function updateMemoryType() {
             const memoryType = document.getElementById('memoryType').value;
             
-            showLoading(true);
-
             try {
-                const response = await fetch(`${API_BASE_URL}/config/memory`, {
+                const response = await fetch(`${API_BASE}/config/memory`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ memory_type: memoryType })
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    addMessage(`🧠 记忆类型设置为: ${memoryType}`, 'bot');
-                    logOperation(`🧠 记忆类型更新: ${memoryType}`);
+                if (response.ok && data.status === 'success') {
+                    showNotification(`内存类型已更新为: ${memoryType}`, 'success');
                 } else {
-                    addMessage(`记忆设置失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 记忆设置失败: ${data.detail}`);
+                    showNotification(`内存配置更新失败: ${data.error || data.detail}`, 'error');
                 }
             } catch (error) {
-                addMessage(`记忆设置错误: ${error.message}`, 'error');
-                logOperation(`🧠 记忆设置错误: ${error.message}`);
-            } finally {
-                showLoading(false);
+                console.error('更新内存配置失败:', error);
+                showNotification('网络错误，配置更新失败', 'error');
             }
         }
 
-        async function clearHistory() {
-            if (!confirm('确定要清除对话历史吗？')) return;
-
-            showLoading(true);
-
+        // 清除对话历史
+        async function clearChatHistory() {
+            if (!confirm('确定要清除所有对话历史吗？')) {
+                return;
+            }
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/chat/clear`, {
+                const response = await fetch(`${API_BASE}/chat/clear`, {
                     method: 'POST'
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    document.getElementById('chatMessages').innerHTML = `
-                        <div class="message bot">
-                            🗑️ 对话历史已清除，让我们重新开始吧！
+                if (response.ok && data.status === 'success') {
+                    showNotification('对话历史已清除', 'success');
+                    
+                    // 清除UI中的消息
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = `
+                        <div class="message assistant">
+                            <div class="message-content">
+                                对话历史已清除。您好！我是中医AI助手，请描述您的症状或上传病历文件。
+                            </div>
                         </div>
                     `;
-                    logOperation('🗑️ 对话历史已清除');
                 } else {
-                    addMessage(`清除失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 清除历史失败: ${data.detail}`);
+                    showNotification(`清除历史失败: ${data.error || data.detail}`, 'error');
                 }
             } catch (error) {
-                addMessage(`清除错误: ${error.message}`, 'error');
-                logOperation(`🗑️ 清除历史错误: ${error.message}`);
-            } finally {
-                showLoading(false);
+                console.error('清除历史失败:', error);
+                showNotification('网络错误，操作失败', 'error');
             }
         }
 
-        async function saveVectorStore() {
-            showLoading(true);
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/rag/save`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'path=RAG'
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addMessage('💾 向量库保存成功', 'bot');
-                    logOperation('💾 向量库已保存');
-                } else {
-                    addMessage(`保存失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 向量库保存失败: ${data.detail}`);
-                }
-            } catch (error) {
-                addMessage(`保存错误: ${error.message}`, 'error');
-                logOperation(`💾 向量库保存错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function loadVectorStore() {
-            showLoading(true);
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/rag/load`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'path=RAG'
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addMessage('📂 向量库加载成功', 'bot');
-                    logOperation('📂 向量库已加载');
-                } else {
-                    addMessage(`加载失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 向量库加载失败: ${data.detail}`);
-                }
-            } catch (error) {
-                addMessage(`加载错误: ${error.message}`, 'error');
-                logOperation(`📂 向量库加载错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-                checkSystemStatus();
-            }
-        }
-
-        async function reloadVectorStore() {
-            showLoading(true);
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/rag/reload`, {
-                    method: 'POST'
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addMessage('🔄 向量库重新加载成功', 'bot');
-                    logOperation('🔄 向量库已重新加载');
-                } else {
-                    addMessage(`重新加载失败: ${data.detail}`, 'error');
-                    logOperation(`❌ 向量库重新加载失败: ${data.detail}`);
-                }
-            } catch (error) {
-                addMessage(`重新加载错误: ${error.message}`, 'error');
-                logOperation(`🔄 向量库重新加载错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-                checkSystemStatus();
-            }
-        }
-
+        // 重新初始化系统
         async function reinitializeSystem() {
-            if (!confirm('确定要重新初始化系统吗？这可能需要一些时间。')) return;
-
-            showLoading(true);
-
+            if (!confirm('确定要重新初始化系统吗？这可能需要一些时间。')) {
+                return;
+            }
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/system/reinitialize`, {
+                showNotification('正在重新初始化系统...', 'info');
+                
+                const response = await fetch(`${API_BASE}/system/reinitialize`, {
                     method: 'POST'
                 });
-
+                
                 const data = await response.json();
                 
-                if (response.ok) {
-                    addMessage('🔄 系统重新初始化成功', 'bot');
-                    logOperation('🔄 系统已重新初始化');
+                if (response.ok && data.status === 'success') {
+                    showNotification('系统重新初始化成功', 'success');
+                    refreshStatus();
                 } else {
-                    addMessage(`重新初始化失败: ${data.error}`, 'error');
-                    logOperation(`❌ 系统重新初始化失败: ${data.error}`);
+                    showNotification(`系统初始化失败: ${data.error || data.message}`, 'error');
                 }
             } catch (error) {
-                addMessage(`重新初始化错误: ${error.message}`, 'error');
-                logOperation(`🔄 系统重新初始化错误: ${error.message}`);
-            } finally {
-                showLoading(false);
-                checkSystemStatus();
+                console.error('系统初始化失败:', error);
+                showNotification('网络错误，初始化失败', 'error');
             }
-        }
-
-        async function checkSystemStatus() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/status`);
-                const data = await response.json();
-                
-                updateStatusIndicator(data.chatbot_ready);
-                updateStatusGrid(data.chatbot_status || {});
-                updateDetailedStatus(data.detailed_status || '状态未知');
-                
-                isConnected = data.chatbot_ready;
-                
-                if (isConnected) {
-                    logOperation('✅ 后端连接成功');
-                } else {
-                    logOperation('⚠️ 后端已连接但机器人未就绪');
-                }
-            } catch (error) {
-                updateStatusIndicator(false);
-                logOperation(`🔌 后端连接失败: ${error.message}`);
-                updateDetailedStatus(`连接错误: ${error.message}`);
-            }
-        }
-
-        function updateStatusIndicator(connected) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            
-            if (connected) {
-                dot.classList.add('online');
-                text.textContent = '已连接';
-            } else {
-                dot.classList.remove('online');
-                text.textContent = '未连接';
-            }
-        }
-
-        function updateStatusGrid(status) {
-            const items = {
-                'statusLLM': status.llm_ready,
-                'statusMemory': status.memory_ready,
-                'statusRAG': status.rag_ready,
-                'statusVector': status.vector_store_loaded
-            };
-
-            Object.entries(items).forEach(([id, isReady]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.className = `status-item ${isReady ? 'online' : 'offline'}`;
-                    element.children[1].textContent = isReady ? '✓ 正常' : '✗ 异常';
-                }
-            });
-        }
-
-        function updateDetailedStatus(status) {
-            document.getElementById('detailedStatus').textContent = status;
-        }
-
-        function addMessage(content, type) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = content;
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function logOperation(message) {
-            const logContainer = document.getElementById('operationLog');
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
-
-            // 限制日志条数
-            if (logContainer.children.length > 50) {
-                logContainer.removeChild(logContainer.firstChild);
-            }
-        }
-
-        function showLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
-            document.getElementById('sendBtn').disabled = show;
-        }
-
-        function showProgress(percent) {
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            
-            if (percent > 0) {
-                progressBar.style.display = 'block';
-                progressFill.style.width = percent + '%';
-            } else {
-                progressBar.style.display = 'none';
-            }
-        }
-
-        function refreshStatus() {
-            checkSystemStatus();
-            logOperation('🔄 状态已刷新');
         }
     </script>
 </body>

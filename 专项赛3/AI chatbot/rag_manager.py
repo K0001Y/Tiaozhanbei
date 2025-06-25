@@ -1,308 +1,583 @@
 """
 RAG(检索增强生成)功能管理器
-负责文档加载、向量存储、检索器等RAG相关功能
+负责向量存储、检索器等RAG相关功能
 """
-
 import os
 import json
-from typing import List, Optional
+import logging
+from datetime import datetime
+from typing import List, Optional, Dict, Any
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, DirectoryLoader
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.prompts import ChatPromptTemplate
-
+from transformers import AutoModel, AutoTokenizer
+from langchain.schema import Document
+from utils import FileHandler, DocumentLoader
 from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_VECTOR_STORE_PATH,
-    SUPPORTED_ENCODINGS
+    SUPPORTED_ENCODINGS,
+    DEFAULT_PROMPT_TEMPLATE
 )
 
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class RAGManager:
     """RAG功能管理器类"""
     
     def __init__(self, embedding_model_path: str = "model"):
-        self.embedding_model_path = embedding_model_path
-        self.vector_store = None
-        self.retriever = None
-        self.qa_chain = None
-        self.documents = []
-        self.embedding_model_info = None
-        
-        # 确保embedding模型目录存在
-        os.makedirs(self.embedding_model_path, exist_ok=True)
-        print(f"RAG管理器初始化完成，嵌入模型保存路径: {self.embedding_model_path}")
-    
-    def load_documents(self, file_paths, chunk_size=DEFAULT_CHUNK_SIZE, chunk_overlap=DEFAULT_CHUNK_OVERLAP):
         """
-        加载并处理文档
-        :param file_paths: 文件路径列表或单个文件路径
-        :param chunk_size: 分块大小
-        :param chunk_overlap: 分块重叠大小
-        :return: 文本块数量
+        初始化RAG管理器
+        :param embedding_model_path: 嵌入模型路径
         """
-        if not isinstance(file_paths, list):
-            file_paths = [file_paths]
-        
-        documents = []
-        for file_path in file_paths:
-            try:
-                print(f"开始加载文档: {file_path}")
-                loaded_docs = self._load_single_document(file_path)
-                if loaded_docs:
-                    documents.extend(loaded_docs)
-                    print(f"成功加载文档: {file_path}, 文档数: {len(loaded_docs)}")
-            except Exception as e:
-                print(f"加载文档失败 {file_path}: {str(e)}")
-        
-        # 分割文档
-        if documents:
-            try:
-                print(f"开始分割文档，共 {len(documents)} 个文档")
-                text_splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=chunk_size,
-                    chunk_overlap=chunk_overlap,
-                    length_function=len
-                )
-                self.documents = text_splitter.split_documents(documents)
-                print(f"文档分割完成，共有 {len(self.documents)} 个文本块")
-                
-                # 创建向量存储
-                if self._create_vector_store():
-                    return len(self.documents)
-                else:
-                    print("向量存储创建失败")
-                    return 0
-            except Exception as e:
-                print(f"分割文档过程失败: {str(e)}")
-                return 0
-        else:
-            print("没有成功加载任何文档")
-            return 0
-    
-    def _load_single_document(self, file_path: str):
-        """加载单个文档"""
-        if file_path.endswith('.txt'):
-            return self._load_text_file(file_path)
-        elif file_path.endswith('.pdf'):
-            print(f"检测到pdf文件，使用PyPDFLoader...")
-            loader = PyPDFLoader(file_path)
-            return loader.load()
-        elif os.path.isdir(file_path):
-            return self._load_directory(file_path)
-        else:
-            print(f"不支持的文件类型: {file_path}")
-            return []
-    
-    def _load_text_file(self, file_path: str):
-        """加载文本文件，自动检测编码"""
-        print(f"检测到txt文件，尝试自动检测编码...")
-        
-        # 尝试自动检测编码
-        detected_encoding = None
-        for encoding in SUPPORTED_ENCODINGS:
-            try:
-                with open(file_path, 'r', encoding=encoding) as f:
-                    f.read(1024)  # 读取一小部分验证编码
-                detected_encoding = encoding
-                break
-            except UnicodeDecodeError:
-                continue
-        
-        if detected_encoding:
-            print(f"检测到文件编码: {detected_encoding}")
-            loader = TextLoader(file_path, encoding=detected_encoding)
-            return loader.load()
-        else:
-            print("无法检测到正确的编码，使用latin-1编码")
-            loader = TextLoader(file_path, encoding="latin-1")
-            return loader.load()
-    
-    def _load_directory(self, dir_path: str):
-        """加载目录中的所有文档"""
-        print(f"检测到目录，使用DirectoryLoader...")
-        
-        for encoding in ["utf-8", "gbk", "gb18030"]:
-            try:
-                loader = DirectoryLoader(
-                    dir_path,
-                    glob="**/*.txt",
-                    loader_cls=TextLoader,
-                    loader_kwargs={"encoding": encoding}
-                )
-                docs = loader.load()
-                print(f"成功使用{encoding}编码加载目录")
-                return docs
-            except Exception as e:
-                print(f"使用{encoding}加载失败: {str(e)}")
-                continue
-        
-        return []
-    
-    def _create_vector_store(self):
-        """从文档创建向量存储"""
-        if not self.documents:
-            print("无法创建向量存储：缺少文档")
-            return False
-        
         try:
-            print("开始创建向量存储...")
-            embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_EMBEDDING_MODEL)
+            self.embedding_model_path = embedding_model_path
+            self.embedding_model = None
+            self.vector_store = None
+            self.retriever = None
+            self.document_loader = DocumentLoader()
+            self.file_handler = FileHandler()
             
-            # 保存嵌入模型信息
-            self._save_embedding_info()
+            # 确保必要的目录存在
+            os.makedirs("model", exist_ok=True)
+            os.makedirs("RAG", exist_ok=True)
             
-            # 确保RAG目录存在
-            os.makedirs(DEFAULT_VECTOR_STORE_PATH, exist_ok=True)
-            
-            print("开始将文档转换为向量...")
-            self.vector_store = FAISS.from_documents(self.documents, embeddings)
-            
-            print("创建检索器...")
-            self.retriever = self.vector_store.as_retriever(search_kwargs={"k": 4})
-            
-            print("向量存储创建成功")
-            # 自动保存向量存储
-            self.save_vector_store()
-            return True
+            logger.info("RAG管理器初始化成功")
             
         except Exception as e:
-            print(f"创建向量存储失败: {str(e)}")
-            return False
-    
-    def _save_embedding_info(self):
-        """保存嵌入模型信息"""
+            logger.error(f"RAG管理器初始化失败: {str(e)}")
+            raise Exception(f"RAG管理器初始化失败: {str(e)}")
+        
+    def load_embedding_model(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
+        """
+        加载嵌入模型
+        :param model_name: 嵌入模型名称
+        :return: 嵌入模型对象
+        """
         try:
-            self.embedding_model_info = {
-                "model_name": DEFAULT_EMBEDDING_MODEL,
-                "saved_path": self.embedding_model_path
+            logger.info(f"正在加载嵌入模型: {model_name}")
+        
+        # 构造本地模型存储路径
+            local_model_path = os.path.join(self.embedding_model_path, model_name.replace("/", "_"))
+        
+        # 定义必需的文件
+            required_files = [
+                'config.json',
+                'pytorch_model.bin',  # 或者 model.safetensors
+                'tokenizer_config.json',
+                'vocab.txt'  # 或者其他 tokenizer 文件
+            ]
+        
+        # 检查本地模型文件是否完整
+            all_files_exist = all(os.path.exists(os.path.join(local_model_path, f)) for f in required_files)
+        
+            if all_files_exist:
+                logger.info(f"从本地加载嵌入模型: {local_model_path}")
+                model_path = local_model_path
+            else:
+                logger.info(f"从 HuggingFace 下载嵌入模型并保存到本地: {model_name}")
+            # 下载并保存模型和 tokenizer 到本地路径
+                model = AutoModel.from_pretrained(model_name)
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                os.makedirs(local_model_path, exist_ok=True)
+                model.save_pretrained(local_model_path)
+                tokenizer.save_pretrained(local_model_path)
+                model_path = local_model_path
+        
+        # 创建嵌入模型
+            self.embedding_model = HuggingFaceEmbeddings(
+                model_name=model_path,
+                model_kwargs={'device': 'cpu'},  # 可根据需要改为 'cuda'
+                encode_kwargs={'normalize_embeddings': True}
+            )
+        
+        # 保存模型信息到本地
+            model_info = {
+                'model_name': model_name,
+                'local_path': local_model_path,
+                'model_kwargs': {'device': 'cpu'},
+                'encode_kwargs': {'normalize_embeddings': True}
+            }
+            self._save_embedding_model_info(model_info)
+        
+            logger.info("嵌入模型加载成功")
+            return self.embedding_model
+        
+        except Exception as e:
+            logger.error(f"加载嵌入模型失败: {str(e)}")
+            raise Exception(f"加载嵌入模型失败: {str(e)}")
+
+    def _save_embedding_model_info(self, model_info: dict):
+        """
+        保存嵌入模型信息到文件
+        :param model_info: 嵌入模型信息字典
+        """
+        try:
+            logger.info("正在保存嵌入模型信息")
+            
+            model_info_path = os.path.join(self.embedding_model_path, "model_info.json")
+            
+            # 如果文件已存在，读取现有信息
+            existing_info = {}
+            if os.path.exists(model_info_path):
+                with open(model_info_path, 'r', encoding='utf-8') as f:
+                    existing_info = json.load(f)
+            
+            # 更新模型信息
+            existing_info[model_info['model_name']] = model_info
+            
+            # 保存到文件
+            with open(model_info_path, 'w', encoding='utf-8') as f:
+                json.dump(existing_info, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"嵌入模型信息已保存到: {model_info_path}")
+            
+        except Exception as e:
+            logger.error(f"保存嵌入模型信息失败: {str(e)}")
+            raise Exception(f"保存嵌入模型信息失败: {str(e)}")
+    def _create_empty_vector_store(self):
+        """
+        创建空的向量存储
+        :return: 空向量存储对象
+        """
+        try:
+            logger.info("正在创建空向量存储")
+            
+            if not self.embedding_model:
+                logger.info("嵌入模型未加载，正在加载默认模型")
+                self.load_embedding_model()
+            
+            # 创建一个临时文档用于初始化FAISS
+            temp_doc = Document(
+                page_content="临时初始化文档",
+                metadata={"temp": True}
+            )
+            
+            # 创建向量存储
+            self.vector_store = FAISS.from_documents(
+                documents=[temp_doc],
+                embedding=self.embedding_model
+            )
+            
+            # 删除临时文档
+            # FAISS不支持直接删除，但我们可以在后续添加真实文档时覆盖
+            
+            # 保存空向量存储到本地
+            vector_store_path = os.path.join("RAG", "vector_store")
+            self._save_vector_store(self.vector_store, vector_store_path)
+            
+            # 保存元数据
+            metadata = {
+                "documents_count": 0,
+                "chunks_count": 0,
+                "chunk_size": DEFAULT_CHUNK_SIZE,
+                "chunk_overlap": DEFAULT_CHUNK_OVERLAP,
+                "vector_store_path": vector_store_path,
+                "created_time": datetime.now().isoformat(),
+                "is_empty": True
             }
             
-            if not os.path.exists(self.embedding_model_path):
-                os.makedirs(self.embedding_model_path, exist_ok=True)
+            metadata_path = os.path.join("RAG", "metadata.json")
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, ensure_ascii=False, indent=2)
             
-            with open(os.path.join(self.embedding_model_path, "embedding_info.json"), "w") as f:
-                json.dump(self.embedding_model_info, f)
-            
-            print(f"嵌入模型信息已保存")
-        except Exception as e:
-            print(f"保存嵌入模型信息时出错: {str(e)}")
-    
-    def create_qa_chain(self, llm):
-        """创建问答链"""
-        if self.retriever is None:
-            print("无法创建QA链：缺少检索器")
-            return False
-        
-        try:
-            print("开始创建QA链...")
-            template = """使用以下检索到的上下文信息来回答最后的问题。如果你不知道答案，就说你不知道，不要试图编造答案。
-            你是一个文本处理器，我会上传给你文本，你需要:
-            1. 始终保持礼貌和专业的态度
-            2. 给出清晰、准确的回答
-            3. 在不确定的情况下诚实承认
-            4. 避免有害或不当的内容
-            5. 使用用户的语言进行回复
-            6. 提取出文本关键词并对文本关键词做出解释
-            7. 使用清晰明了的语言总结文本内容
-            8. 对文本进行分块划分
-            9. 仔细阅读文本内容，当我向你提问时，你可以迅速找到问题在文本中的具体位置
-            10. 在我让你总结我上传的文章时，按照**关键词**：" "；
-                    **关键词解释**：" "；
-                    **文章摘要**：" "；
-                    **文章大纲**：" "；
-                    的格式回答
-            11. 当我让你总结文章时，优先总结我最近上传的文章，而不是向量库中的文章
-            12. 只有当我说"总结"的时候才按照我给出的格式回复，我没有说"总结"则按正常格式回复
-         
-            上下文信息:
-            {context}
-        
-            问题: {question}
-            """
-            
-            qa_prompt = ChatPromptTemplate.from_template(template)
-            
-            self.qa_chain = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                retriever=self.retriever,
-                chain_type_kwargs={"prompt": qa_prompt},
-                return_source_documents=True
-            )
-            print("QA链创建成功")
-            return True
+            logger.info("空向量存储创建成功")
+            return self.vector_store
             
         except Exception as e:
-            print(f"创建QA链失败: {str(e)}")
-            return False
-    
-    def save_vector_store(self, path=DEFAULT_VECTOR_STORE_PATH):
-        """保存向量数据库到本地"""
-        if self.vector_store is None:
-            return "向量存储为空，无法保存"
-        
+            logger.error(f"创建空向量存储失败: {str(e)}")
+            raise Exception(f"创建空向量存储失败: {str(e)}")
+
+    def add_documents_to_store(self, documents: List[str], chunk_size=DEFAULT_CHUNK_SIZE, chunk_overlap=DEFAULT_CHUNK_OVERLAP):
+        """
+        向现有向量存储添加文档
+        :param documents: 文档路径列表
+        :param chunk_size: 分块大小
+        :param chunk_overlap: 分块重叠大小
+        :return: 更新后的向量存储对象
+        """
         try:
-            os.makedirs(path, exist_ok=True)
-            self.vector_store.save_local(path)
+            logger.info(f"正在向向量存储添加 {len(documents)} 个文档")
             
-            # 保存嵌入模型信息到向量存储目录
-            if hasattr(self, 'embedding_model_info') and self.embedding_model_info:
-                embedding_info_path = os.path.join(path, "embedding_info.json")
-                with open(embedding_info_path, "w") as f:
-                    json.dump(self.embedding_model_info, f)
-                return f"向量存储已保存到 {path}，嵌入模型信息已保存"
+            if not self.vector_store:
+                logger.info("向量存储不存在，先创建空向量存储")
+                self._create_empty_vector_store()
             
-            return f"向量存储已保存到 {path}"
-        except Exception as e:
-            return f"保存向量存储失败: {str(e)}"
-    
-    def load_vector_store(self, path=DEFAULT_VECTOR_STORE_PATH, custom_embedding_model=None):
-        """从本地加载向量数据库"""
-        try:
-            # 检查嵌入模型信息
-            embedding_info_path = os.path.join(path, "embedding_info.json")
-            embedding_model_name = None
+            if not self.embedding_model:
+                logger.info("嵌入模型未加载，正在加载默认模型")
+                self.load_embedding_model()
             
-            if os.path.exists(embedding_info_path) and not custom_embedding_model:
+            # 加载新文档
+            loaded_documents = []
+            for doc_path in documents:
                 try:
-                    with open(embedding_info_path, "r") as f:
-                        embedding_info = json.load(f)
-                    embedding_model_name = embedding_info.get("model_name")
-                    print(f"从保存的信息中加载嵌入模型: {embedding_model_name}")
+                    # 验证文件路径
+                    validation = self.document_loader.validate_file_path(doc_path)
+                    if not validation['valid']:
+                        logger.warning(f"文件验证失败 {doc_path}: {validation['reason']}")
+                        continue
+                    
+                    # 加载单个文档
+                    docs = self.document_loader.load_single_document(doc_path)
+                    if docs:
+                        # 转换为LangChain Document格式
+                        for doc in docs:
+                            if isinstance(doc, dict):
+                                doc_obj = Document(
+                                    page_content=doc.get('page_content', ''),
+                                    metadata=doc.get('metadata', {})
+                                )
+                                loaded_documents.append(doc_obj)
+                            else:
+                                loaded_documents.append(doc)
                 except Exception as e:
-                    print(f"读取嵌入模型信息失败: {str(e)}")
+                    logger.warning(f"加载文档失败 {doc_path}: {str(e)}")
+                    continue
             
-            # 确定使用的嵌入模型
-            if custom_embedding_model:
-                embeddings = HuggingFaceEmbeddings(model_name=custom_embedding_model)
-            elif embedding_model_name:
-                embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
-            else:
-                embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_EMBEDDING_MODEL)
+            if not loaded_documents:
+                logger.warning("没有成功加载任何新文档")
+                return self.vector_store
+            
+            # 分块处理文档
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                length_function=len,
+                separators=["\n\n", "\n", " ", ""]
+            )
+            
+            split_documents = []
+            for doc in loaded_documents:
+                try:
+                    splits = text_splitter.split_documents([doc])
+                    split_documents.extend(splits)
+                except Exception as e:
+                    logger.warning(f"文档分块失败: {str(e)}")
+                    continue
+            
+            if not split_documents:
+                logger.warning("文档分块后没有有效内容")
+                return self.vector_store
+            
+            # 将新文档添加到现有向量存储
+            self.vector_store.add_documents(split_documents)
+            
+            # 保存更新后的向量存储
+            vector_store_path = os.path.join("RAG", "vector_store")
+            self._save_vector_store(self.vector_store, vector_store_path)
+            
+            # 更新元数据
+            metadata_path = os.path.join("RAG", "metadata.json")
+            existing_metadata = {}
+            if os.path.exists(metadata_path):
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    existing_metadata = json.load(f)
+            
+            # 更新计数
+            original_docs = existing_metadata.get('documents_count', 0)
+            original_chunks = existing_metadata.get('chunks_count', 0)
+            
+            updated_metadata = {
+                "documents_count": original_docs + len(loaded_documents),
+                "chunks_count": original_chunks + len(split_documents),
+                "chunk_size": chunk_size,
+                "chunk_overlap": chunk_overlap,
+                "vector_store_path": vector_store_path,
+                "last_updated": datetime.now().isoformat(),
+                "is_empty": False
+            }
+            
+            # 保留原有的创建时间
+            if 'created_time' in existing_metadata:
+                updated_metadata['created_time'] = existing_metadata['created_time']
+            
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(updated_metadata, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"成功添加 {len(split_documents)} 个文档块到向量存储")
+            return self.vector_store
+            
+        except Exception as e:
+            logger.error(f"添加文档到向量存储失败: {str(e)}")
+            raise Exception(f"添加文档到向量存储失败: {str(e)}")
+
+    
+    def _load_vector_store(self, vector_store_path: str):
+        """
+        从指定路径加载向量存储
+        :param vector_store_path: 向量存储路径
+        :return: 向量存储对象
+        """
+        try:
+            logger.info(f"正在从路径加载向量存储: {vector_store_path}")
+            
+            # 指定相对路径：RAG/
+            if not os.path.isabs(vector_store_path):
+                vector_store_path = os.path.join("RAG", vector_store_path)
+            
+            if not os.path.exists(vector_store_path + ".faiss"):
+                raise FileNotFoundError(f"向量存储文件不存在: {vector_store_path}")
+            
+            if not self.embedding_model:
+                logger.info("嵌入模型未加载，正在加载默认模型")
+                self.load_embedding_model()
             
             # 加载向量存储
             self.vector_store = FAISS.load_local(
-                path, 
-                embeddings,
+                vector_store_path,
+                self.embedding_model,
                 allow_dangerous_deserialization=True
             )
-            self.retriever = self.vector_store.as_retriever(search_kwargs={"k": 4})
             
-            return f"向量存储已从 {path} 加载成功"
+            logger.info("向量存储加载成功")
+            return self.vector_store
+            
         except Exception as e:
-            return f"加载向量存储失败: {str(e)}"
+            logger.error(f"加载向量存储失败: {str(e)}")
+            raise Exception(f"加载向量存储失败: {str(e)}")
+
+    def _save_vector_store(self, vector_store: FAISS, vector_store_path: str):
+        """
+        保存向量存储到指定路径
+        :param vector_store: 向量存储对象
+        :param vector_store_path: 向量存储路径
+        """
+        try:
+            logger.info(f"正在保存向量存储到: {vector_store_path}")
+            
+            if not vector_store:
+                raise ValueError("向量存储对象不能为空")
+            
+            # 保存向量存储到指定相对路径RAG/
+            if not os.path.isabs(vector_store_path):
+                vector_store_path = os.path.join("RAG", vector_store_path)
+            
+            # 确保目录存在
+            os.makedirs(os.path.dirname(vector_store_path), exist_ok=True)
+            
+            # 保存向量存储
+            vector_store.save_local(vector_store_path)
+            
+            logger.info(f"向量存储已保存到: {vector_store_path}")
+            
+        except Exception as e:
+            logger.error(f"保存向量存储失败: {str(e)}")
+            raise Exception(f"保存向量存储失败: {str(e)}")
     
-    def get_relevant_documents(self, query: str, k: int = 4):
-        """获取相关文档"""
-        if self.retriever is None:
-            return []
-        return self.retriever.get_relevant_documents(query)
-    
-    def is_ready(self):
-        """检查RAG系统是否准备就绪"""
-        return self.qa_chain is not None
+    def _create_retriever(self, vector_store: FAISS):
+        """
+        创建检索器
+        :param vector_store: 向量存储对象
+        :return: 检索器对象
+        """
+        try:
+            logger.info("正在创建检索器")
+            
+            if not vector_store:
+                raise ValueError("向量存储对象不能为空")
+            
+            # 创建检索器
+            self.retriever = vector_store.as_retriever(
+                search_type="similarity",
+                search_kwargs={"k": 4}
+            )
+            
+            logger.info("检索器创建成功")
+            return self.retriever
+            
+        except Exception as e:
+            logger.error(f"创建检索器失败: {str(e)}")
+            raise Exception(f"创建检索器失败: {str(e)}")
+        
+    def _start_rag_manager(self, vector_store_path: str = DEFAULT_VECTOR_STORE_PATH):
+        """
+        启动RAG管理器
+        :param vector_store_path: 向量存储路径
+        :return: RAG管理器对象
+        """
+        try:
+            logger.info("正在启动RAG管理器")
+            
+            # 检查本地是否存在嵌入模型
+            model_info_path = os.path.join(self.embedding_model_path, "model_info.json")
+            
+            if os.path.exists(model_info_path):
+                logger.info("发现本地嵌入模型信息，正在加载")
+                try:
+                    with open(model_info_path, 'r', encoding='utf-8') as f:
+                        model_info = json.load(f)
+                    
+                    # 加载第一个可用的模型
+                    if model_info:
+                        first_model = list(model_info.keys())[0]
+                        self.load_embedding_model(first_model)
+                    else:
+                        self.load_embedding_model()
+                except Exception as e:
+                    logger.warning(f"加载本地模型信息失败，使用默认模型: {str(e)}")
+                    self.load_embedding_model()
+            else:
+                logger.info("未发现本地嵌入模型，下载默认模型")
+                self.load_embedding_model()
+            
+            # 检查本地向量存储并加载
+            full_vector_path = os.path.join("RAG", vector_store_path) if not os.path.isabs(vector_store_path) else vector_store_path
+            
+            if os.path.exists(full_vector_path + ".faiss"):
+                logger.info("发现本地向量存储，正在加载")
+                self._load_vector_store(vector_store_path)
+            else:
+                logger.warning("未发现本地向量存储，已创建空的存储")
+                # 这里可以选择创建空的向量存储或者抛出异常
+                self._create_empty_vector_store
+                # raise Exception("未发现向量存储，请先创建向量存储")
+            
+            # 创建检索器
+            if self.vector_store:
+                self._create_retriever(self.vector_store)
+            
+            logger.info("RAG管理器启动成功")
+            return self
+            
+        except Exception as e:
+            logger.error(f"启动RAG管理器失败: {str(e)}")
+            raise Exception(f"启动RAG管理器失败: {str(e)}")
+
+    def _retrieve(self, query: str, k: int = 4) -> List[dict]:
+        """
+        执行检索操作
+        :param query: 查询字符串
+        :param k: 返回结果数量
+        :return: 检索结果列表
+        """
+        try:
+            logger.info(f"正在执行检索操作，查询: {query}")
+            
+            if not query or not query.strip():
+                raise ValueError("查询字符串不能为空")
+            
+            if not self.retriever:
+                raise Exception("检索器未初始化，请先启动RAG管理器")
+            
+            # 执行检索操作
+            retrieved_docs = self.retriever.get_relevant_documents(query)
+            
+            # 限制返回结果数量
+            retrieved_docs = retrieved_docs[:k]
+            
+            # 格式化返回结果
+            results = []
+            for i, doc in enumerate(retrieved_docs):
+                try:
+                    result = {
+                        "id": i,
+                        "content": doc.page_content,
+                        "metadata": doc.metadata,
+                        "score": getattr(doc, 'score', None)  # 如果有相似度分数
+                    }
+                    results.append(result)
+                except Exception as e:
+                    logger.warning(f"格式化检索结果失败: {str(e)}")
+                    continue
+            
+            logger.info(f"检索完成，返回 {len(results)} 个结果")
+            return results
+            
+        except Exception as e:
+            logger.error(f"检索操作失败: {str(e)}")
+            raise Exception(f"检索操作失败: {str(e)}")
+
+    def get_vector_store_info(self) -> Dict[str, Any]:
+        """
+        获取向量存储信息
+        :return: 向量存储信息字典
+        """
+        try:
+            if not self.vector_store:
+                return {"status": "未加载", "count": 0}
+            
+            # 获取向量存储中的文档数量
+            index_to_docstore_id = self.vector_store.index_to_docstore_id
+            count = len(index_to_docstore_id) if index_to_docstore_id else 0
+            
+            # 读取元数据
+            metadata_path = os.path.join("RAG", "metadata.json")
+            metadata = {}
+            if os.path.exists(metadata_path):
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+            
+            info = {
+                "status": "已加载",
+                "count": count,
+                "metadata": metadata
+            }
+            
+            return info
+            
+        except Exception as e:
+            logger.error(f"获取向量存储信息失败: {str(e)}")
+            return {"status": "错误", "error": str(e)}
+
+    def batch_load_documents(self, file_paths: List[str]) -> List[Document]:
+        """
+        批量加载多个文档
+        :param file_paths: 文件路径列表
+        :return: 文档对象列表
+        """
+        try:
+            logger.info(f"正在批量加载 {len(file_paths)} 个文档")
+            
+            # 使用DocumentLoader的批量加载功能
+            all_docs = self.document_loader.load_multiple_documents(file_paths)
+            
+            # 转换为统一的Document格式
+            documents = []
+            for doc in all_docs:
+                if isinstance(doc, dict):
+                    doc_obj = Document(
+                        page_content=doc.get('page_content', ''),
+                        metadata=doc.get('metadata', {})
+                    )
+                    documents.append(doc_obj)
+                else:
+                    documents.append(doc)
+            
+            logger.info(f"批量加载完成，共获得 {len(documents)} 个文档")
+            return documents
+            
+        except Exception as e:
+            logger.error(f"批量加载文档失败: {str(e)}")
+            raise Exception(f"批量加载文档失败: {str(e)}")
+
+    def clear_vector_store(self):
+        """
+        清空向量存储
+        """
+        try:
+            logger.info("正在清空向量存储")
+            
+            # 创建新的空向量存储
+            self._create_empty_vector_store()
+            
+            logger.info("向量存储已清空")
+            
+        except Exception as e:
+            logger.error(f"清空向量存储失败: {str(e)}")
+            raise Exception(f"清空向量存储失败: {str(e)}")
+
+    def get_supported_formats(self) -> List[str]:
+        """
+        获取支持的文档格式
+        :return: 支持的格式列表
+        """
+        try:
+            return self.document_loader.get_supported_formats()
+        except Exception as e:
+            logger.error(f"获取支持格式失败: {str(e)}")
+            return ['.txt']  # 默认支持txt格式

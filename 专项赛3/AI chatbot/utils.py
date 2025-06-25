@@ -1,6 +1,6 @@
 """
-工具类模块 - 数据库管理器和辅助函数
-包含数据库操作、文件处理、日志配置等工具函数
+工具类模块 - 数据库管理器、文件处理和文档加载器
+包含数据库操作、文件处理、文档加载、日志配置等工具函数
 """
 
 import asyncio
@@ -16,6 +16,20 @@ from urllib.parse import urlparse
 
 import aiohttp
 import requests
+
+# 文档加载相关导入
+try:
+    from langchain.document_loaders import TextLoader, DirectoryLoader, PyPDFLoader
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
+    logging.warning("LangChain未安装，文档加载功能将受限")
+
+# 支持的编码格式
+SUPPORTED_ENCODINGS = [
+    'utf-8', 'utf-8-sig', 'gbk', 'gb2312', 'gb18030', 
+    'big5', 'ascii', 'latin-1', 'cp1252'
+]
 
 
 class DatabaseManager:
@@ -415,265 +429,338 @@ class FileHandler:
             return []
 
 
-class ConfigManager:
-    """配置管理器"""
+class DocumentLoader:
+    """文档加载器 - 支持多种文档格式和智能编码检测"""
     
-    def __init__(self, config_file: Union[str, Path] = "config.json"):
-        self.config_file = Path(config_file)
-        self._config = {}
-        self.load_config()
+    def __init__(self, use_langchain: bool = True):
+        """
+        初始化文档加载器
+        
+        Args:
+            use_langchain: 是否使用LangChain加载器（需要安装langchain）
+        """
+        self.use_langchain = use_langchain and LANGCHAIN_AVAILABLE
+        self.logger = logging.getLogger("DocumentLoader")
+        
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
+        
+        if use_langchain and not LANGCHAIN_AVAILABLE:
+            self.logger.warning("LangChain未安装，将使用基础文档加载功能")
     
-    def load_config(self) -> Dict[str, Any]:
-        """加载配置文件"""
+    def load_single_document(self, file_path: str) -> List[Any]:
+        """
+        加载单个文档
+        
+        Args:
+            file_path: 文件路径
+            
+        Returns:
+            List: 文档列表（LangChain Document对象或字典）
+        """
         try:
-            if self.config_file.exists():
-                with open(self.config_file, 'r', encoding='utf-8') as file:
-                    self._config = json.load(file)
+            if file_path.endswith('.txt'):
+                return self._load_text_file(file_path)
+            elif file_path.endswith('.pdf'):
+                return self._load_pdf_file(file_path)
+            elif os.path.isdir(file_path):
+                return self._load_directory(file_path)
             else:
-                self._config = {}
-            return self._config
+                self.logger.warning(f"不支持的文件类型: {file_path}")
+                return []
         except Exception as e:
-            logging.error(f"加载配置失败: {str(e)}")
-            self._config = {}
-            return self._config
+            self.logger.error(f"加载文档失败 {file_path}: {str(e)}")
+            return []
     
-    def save_config(self) -> bool:
-        """保存配置文件"""
-        try:
-            self.config_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.config_file, 'w', encoding='utf-8') as file:
-                json.dump(self._config, file, indent=2, ensure_ascii=False)
-            return True
-        except Exception as e:
-            logging.error(f"保存配置失败: {str(e)}")
-            return False
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        """获取配置值"""
-        keys = key.split('.')
-        value = self._config
-        
-        try:
-            for k in keys:
-                value = value[k]
-            return value
-        except (KeyError, TypeError):
-            return default
-    
-    def set(self, key: str, value: Any) -> None:
-        """设置配置值"""
-        keys = key.split('.')
-        config = self._config
-        
-        for k in keys[:-1]:
-            if k not in config:
-                config[k] = {}
-            config = config[k]
-        
-        config[keys[-1]] = value
-    
-    def delete(self, key: str) -> bool:
-        """删除配置项"""
-        keys = key.split('.')
-        config = self._config
-        
-        try:
-            for k in keys[:-1]:
-                config = config[k]
-            del config[keys[-1]]
-            return True
-        except KeyError:
-            return False
-
-
-class LogManager:
-    """日志管理器"""
-    
-    @staticmethod
-    def setup_logger(name: str, 
-                    level: int = logging.INFO,
-                    log_file: Optional[str] = None,
-                    format_string: Optional[str] = None) -> logging.Logger:
+    def _load_text_file(self, file_path: str) -> List[Any]:
         """
-        设置日志记录器
+        加载文本文件，自动检测编码
         
         Args:
-            name: 记录器名称
-            level: 日志级别
-            log_file: 日志文件路径（可选）
-            format_string: 格式字符串（可选）
+            file_path: 文件路径
             
         Returns:
-            logging.Logger: 配置好的日志记录器
+            List: 文档列表
         """
-        logger = logging.getLogger(name)
+        self.logger.info(f"检测到txt文件，尝试自动检测编码...")
         
-        # 清除现有处理器
-        logger.handlers.clear()
-        
-        # 设置日志级别
-        logger.setLevel(level)
-        
-        # 设置格式
-        if format_string is None:
-            format_string = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        
-        formatter = logging.Formatter(format_string)
-        
-        # 控制台处理器
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-        
-        # 文件处理器（如果指定）
-        if log_file:
+        # 尝试自动检测编码
+        detected_encoding = None
+        for encoding in SUPPORTED_ENCODINGS:
             try:
-                Path(log_file).parent.mkdir(parents=True, exist_ok=True)
-                file_handler = logging.FileHandler(log_file, encoding='utf-8')
-                file_handler.setFormatter(formatter)
-                logger.addHandler(file_handler)
-            except Exception as e:
-                logger.warning(f"无法创建文件处理器: {str(e)}")
+                with open(file_path, 'r', encoding=encoding) as f:
+                    f.read(1024)  # 读取一小部分验证编码
+                detected_encoding = encoding
+                break
+            except UnicodeDecodeError:
+                continue
         
-        return logger
-
-
-class ErrorHandler:
-    """错误处理工具"""
+        if detected_encoding:
+            self.logger.info(f"检测到文件编码: {detected_encoding}")
+            
+            if self.use_langchain:
+                try:
+                    loader = TextLoader(file_path, encoding=detected_encoding)
+                    return loader.load()
+                except Exception as e:
+                    self.logger.warning(f"LangChain加载失败，使用基础加载: {str(e)}")
+            
+            # 基础加载方式
+            return self._load_text_basic(file_path, detected_encoding)
+        else:
+            self.logger.warning("无法检测到正确的编码，使用latin-1编码")
+            
+            if self.use_langchain:
+                try:
+                    loader = TextLoader(file_path, encoding="latin-1")
+                    return loader.load()
+                except Exception as e:
+                    self.logger.warning(f"LangChain加载失败，使用基础加载: {str(e)}")
+            
+            return self._load_text_basic(file_path, "latin-1")
     
-    @staticmethod
-    def format_error(error: Exception, include_traceback: bool = True) -> str:
+    def _load_text_basic(self, file_path: str, encoding: str) -> List[Dict[str, Any]]:
         """
-        格式化错误信息
+        基础文本加载方式（不依赖LangChain）
         
         Args:
-            error: 异常对象
-            include_traceback: 是否包含堆栈跟踪
+            file_path: 文件路径
+            encoding: 编码格式
             
         Returns:
-            str: 格式化的错误信息
+            List[Dict]: 文档字典列表
         """
-        error_info = {
-            'type': type(error).__name__,
-            'message': str(error),
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        if include_traceback:
-            error_info['traceback'] = traceback.format_exc()
-        
-        return json.dumps(error_info, indent=2, ensure_ascii=False)
+        try:
+            with open(file_path, 'r', encoding=encoding) as f:
+                content = f.read()
+            
+            return [{
+                'page_content': content,
+                'metadata': {
+                    'source': file_path,
+                    'encoding': encoding,
+                    'file_size': len(content),
+                    'load_time': datetime.now().isoformat()
+                }
+            }]
+        except Exception as e:
+            self.logger.error(f"基础文本加载失败: {str(e)}")
+            return []
     
-    @staticmethod
-    def log_error(logger: logging.Logger, 
-                  error: Exception, 
-                  context: Optional[str] = None) -> None:
+    def _load_pdf_file(self, file_path: str) -> List[Any]:
         """
-        记录错误日志
+        加载PDF文件
         
         Args:
-            logger: 日志记录器
-            error: 异常对象
-            context: 上下文信息（可选）
+            file_path: PDF文件路径
+            
+        Returns:
+            List: 文档列表
         """
-        error_msg = f"{type(error).__name__}: {str(error)}"
+        self.logger.info(f"检测到PDF文件，尝试加载...")
         
-        if context:
-            error_msg = f"{context} - {error_msg}"
+        if self.use_langchain:
+            try:
+                loader = PyPDFLoader(file_path)
+                return loader.load()
+            except Exception as e:
+                self.logger.error(f"PDF加载失败: {str(e)}")
+                return []
+        else:
+            self.logger.warning("PDF加载需要LangChain支持")
+            return []
+    
+    def _load_directory(self, dir_path: str) -> List[Any]:
+        """
+        加载目录中的所有文档
         
-        logger.error(error_msg, exc_info=True)
+        Args:
+            dir_path: 目录路径
+            
+        Returns:
+            List: 文档列表
+        """
+        self.logger.info(f"检测到目录，使用批量加载...")
+        
+        if self.use_langchain:
+            # 尝试使用LangChain的DirectoryLoader
+            for encoding in ["utf-8", "gbk", "gb18030"]:
+                try:
+                    loader = DirectoryLoader(
+                        dir_path,
+                        glob="**/*.txt",
+                        loader_cls=TextLoader,
+                        loader_kwargs={"encoding": encoding}
+                    )
+                    docs = loader.load()
+                    self.logger.info(f"成功使用{encoding}编码加载目录")
+                    return docs
+                except Exception as e:
+                    self.logger.warning(f"使用{encoding}加载失败: {str(e)}")
+                    continue
+            
+            return []
+        else:
+            # 基础目录加载
+            return self._load_directory_basic(dir_path)
+    
+    def _load_directory_basic(self, dir_path: str) -> List[Dict[str, Any]]:
+        """
+        基础目录加载方式（不依赖LangChain）
+        
+        Args:
+            dir_path: 目录路径
+            
+        Returns:
+            List[Dict]: 文档字典列表
+        """
+        documents = []
+        
+        try:
+            # 获取目录下所有txt文件
+            txt_files = FileHandler.list_files(dir_path, "*.txt", recursive=True)
+            
+            for file_path in txt_files:
+                docs = self._load_text_file(file_path)
+                documents.extend(docs)
+            
+            self.logger.info(f"基础方式加载目录完成，共{len(documents)}个文档")
+            return documents
+            
+        except Exception as e:
+            self.logger.error(f"基础目录加载失败: {str(e)}")
+            return []
+    
+    def load_multiple_documents(self, file_paths: List[str]) -> List[Any]:
+        """
+        批量加载多个文档
+        
+        Args:
+            file_paths: 文件路径列表
+            
+        Returns:
+            List: 所有文档列表
+        """
+        all_documents = []
+        
+        for file_path in file_paths:
+            docs = self.load_single_document(file_path)
+            all_documents.extend(docs)
+        
+        self.logger.info(f"批量加载完成，共处理{len(file_paths)}个路径，获得{len(all_documents)}个文档")
+        return all_documents
+    
+    def get_supported_formats(self) -> List[str]:
+        """
+        获取支持的文件格式
+        
+        Returns:
+            List[str]: 支持的文件格式列表
+        """
+        base_formats = ['.txt']
+        
+        if self.use_langchain:
+            base_formats.extend(['.pdf'])
+        
+        return base_formats
+    
+    def validate_file_path(self, file_path: str) -> Dict[str, Any]:
+        """
+        验证文件路径
+        
+        Args:
+            file_path: 文件路径
+            
+        Returns:
+            Dict: 验证结果
+        """
+        file_info = FileHandler.get_file_info(file_path)
+        supported_formats = self.get_supported_formats()
+        
+        if not file_info['exists']:
+            return {
+                'valid': False,
+                'reason': '文件或目录不存在',
+                'file_info': file_info
+            }
+        
+        if file_info['is_file']:
+            extension = file_info['extension'].lower()
+            if extension not in supported_formats:
+                return {
+                    'valid': False,
+                    'reason': f'不支持的文件格式: {extension}',
+                    'supported_formats': supported_formats,
+                    'file_info': file_info
+                }
+        
+        return {
+            'valid': True,
+            'file_info': file_info,
+            'supported_formats': supported_formats
+        }
 
 
-def validate_url(url: str) -> bool:
+def setup_logging(level: str = "INFO", 
+                 log_file: Optional[str] = None,
+                 format_string: Optional[str] = None) -> None:
     """
-    验证URL格式
+    设置全局日志配置
     
     Args:
-        url: 待验证的URL
-        
-    Returns:
-        bool: URL是否有效
+        level: 日志级别
+        log_file: 日志文件路径（可选）
+        format_string: 日志格式字符串（可选）
     """
-    try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc])
-    except Exception:
-        return False
+    if format_string is None:
+        format_string = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    logging.basicConfig(
+        level=getattr(logging, level.upper()),
+        format=format_string,
+        handlers=[
+            logging.StreamHandler(),
+            *([logging.FileHandler(log_file)] if log_file else [])
+        ]
+    )
 
 
-def format_file_size(size_bytes: int) -> str:
+def create_utils_instance(config: Dict[str, Any]) -> Dict[str, Any]:
     """
-    格式化文件大小
+    创建工具类实例的工厂函数
     
     Args:
-        size_bytes: 字节大小
+        config: 配置字典
         
     Returns:
-        str: 格式化后的文件大小
+        Dict: 包含各种工具实例的字典
     """
-    if size_bytes == 0:
-        return "0 B"
+    instances = {}
     
-    size_names = ["B", "KB", "MB", "GB", "TB"]
-    i = 0
-    while size_bytes >= 1024 and i < len(size_names) - 1:
-        size_bytes /= 1024.0
-        i += 1
+    # 创建数据库管理器
+    if 'database' in config:
+        db_config = config['database']
+        instances['db_manager'] = DatabaseManager(
+            db_url=db_config.get('url'),
+            db_token=db_config.get('token'),
+            use_async=db_config.get('use_async', False),
+            timeout=db_config.get('timeout', 30),
+            max_retries=db_config.get('max_retries', 3)
+        )
     
-    return f"{size_bytes:.1f} {size_names[i]}"
+    # 创建文档加载器
+    if 'document_loader' in config:
+        doc_config = config['document_loader']
+        instances['doc_loader'] = DocumentLoader(
+            use_langchain=doc_config.get('use_langchain', True)
+        )
+    
+    # 文件处理器（静态类，直接引用）
+    instances['file_handler'] = FileHandler
+    
+    return instances
 
-
-def sanitize_filename(filename: str) -> str:
-    """
-    清理文件名，移除非法字符
-    
-    Args:
-        filename: 原始文件名
-        
-    Returns:
-        str: 清理后的文件名
-    """
-    # 移除或替换非法字符
-    illegal_chars = '<>:"/\\|?*'
-    for char in illegal_chars:
-        filename = filename.replace(char, '_')
-    
-    # 移除前后空格和点
-    filename = filename.strip(' .')
-    
-    # 确保不为空
-    if not filename:
-        filename = "unnamed"
-    
-    return filename
-
-
-def get_timestamp(format_string: str = "%Y%m%d_%H%M%S") -> str:
-    """
-    获取格式化的时间戳
-    
-    Args:
-        format_string: 时间格式字符串
-        
-    Returns:
-        str: 格式化的时间戳
-    """
-    return datetime.now().strftime(format_string)
-
-
-def ensure_directory(directory: Union[str, Path]) -> bool:
-    """
-    确保目录存在，不存在则创建
-    
-    Args:
-        directory: 目录路径
-        
-    Returns:
-        bool: 操作是否成功
-    """
-    try:
-        Path(directory).mkdir(parents=True, exist_ok=True)
-        return True
-    except Exception as e:
-        logging.error(f"创建目录失败: {str(e)}")
-        return False

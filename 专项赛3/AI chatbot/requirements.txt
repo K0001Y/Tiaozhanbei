@@ -1,0 +1,30 @@
+# LangChain核心库
+langchain>=0.1.0
+langchain-openai>=0.1.0
+langchain-huggingface>=0.0.3
+langchain-community>=0.0.29
+
+# Web框架
+fastapi>=0.104.0
+pydantic>=2.0.0
+
+# HTTP请求库
+requests>=2.31.0
+aiohttp>=3.8.0
+
+# 向量数据库和文档处理
+faiss-cpu>=1.7.4
+# 如果你有GPU，可以用 faiss-gpu 替换 faiss-cpu
+
+# 文档加载器依赖
+pypdf>=3.0.0
+
+# 嵌入模型依赖
+sentence-transformers>=2.2.0
+transformers>=4.21.0
+torch>=2.0.0
+# 如果你有GPU，建议安装对应CUDA版本的torch
+
+# 其他可能需要的依赖
+python-multipart>=0.0.6  # FastAPI文件上传支持
+uvicorn>=0.23.0  # ASGI服务器
