@@ -1,0 +1,10 @@
+{
+  "documents_count": 10,
+  "chunks_count": 1179,
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "vector_store_path": "RAG\\vector_store",
+  "last_updated": "2025-06-26T14:47:21.419129",
+  "is_empty": false,
+  "created_time": "2025-06-26T14:43:03.244166"
+}

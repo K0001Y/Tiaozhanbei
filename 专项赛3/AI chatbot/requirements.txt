@@ -1,31 +1,44 @@
+# 核心机器学习和AI库
+torch>=2.0.0                    # PyTorch深度学习框架，支持GPU加速
+transformers>=4.30.0            # Hugging Face预训练模型库
+langchain>=0.1.0                # LangChain核心库，用于构建LLM应用
+langchain-community>=0.0.20     # LangChain社区组件，包含文档加载器等
+langchain-openai>=0.0.8         # LangChain OpenAI集成
+langchain-core>=0.1.0           # LangChain核心组件
 
-# LangChain核心库
-langchain>=0.1.0
-langchain-openai>=0.1.0
-langchain-huggingface>=0.0.3
-langchain-community>=0.0.29
+# 向量数据库和嵌入
+faiss-cpu>=1.7.4                # Facebook AI相似性搜索库（CPU版本）
+# 如需GPU支持，请替换为：
+# faiss-gpu>=1.7.4              # Facebook AI相似性搜索库（GPU版本）
 
-# Web框架
-fastapi>=0.104.0
-pydantic>=2.0.0
+# Web框架和API
+fastapi>=0.100.0                # 现代化的Python Web框架
+pydantic>=2.0.0                 # 数据验证和设置管理
+uvicorn>=0.22.0                 # ASGI服务器，用于运行FastAPI
 
-# HTTP请求库
-requests>=2.31.0
-aiohttp>=3.8.0
+# HTTP和网络请求
+aiohttp>=3.8.0                  # 异步HTTP客户端/服务器
+requests>=2.31.0                # 简单易用的HTTP库
 
-# 向量数据库和文档处理
-faiss-cpu>=1.7.4
-# 如果你有GPU，可以用 faiss-gpu 替换 faiss-cpu
+# 文件处理和工具
+pypdf>=3.8.0                    # PDF文档读取和处理
+python-multipart>=0.0.6        # 文件上传支持
 
-# 文档加载器依赖
-pypdf>=3.0.0
+# 开发和日志
+python-dotenv>=1.0.0            # 环境变量管理
 
-# 嵌入模型依赖
-sentence-transformers>=2.2.0
-transformers>=4.21.0
-torch>=2.0.0
-# 如果你有GPU，建议安装对应CUDA版本的torch
+# 可选：文本处理增强
+nltk>=3.8.0                     # 自然语言处理工具包
+spacy>=3.6.0                    # 工业级自然语言处理库
 
-# 其他可能需要的依赖
-python-multipart>=0.0.6  # FastAPI文件上传支持
-uvicorn>=0.23.0  # ASGI服务器
+# 可选：高级文档处理
+docx2txt>=0.8                   # Word文档转文本
+python-docx>=0.8.11             # Word文档读写
+openpyxl>=3.1.0                 # Excel文件处理
+pandas>=2.0.0                   # 数据分析和处理
+
+# 可选：改进的分词
+tiktoken>=0.4.0                 # OpenAI的分词器
+
+# 可选：异步支持增强
+asyncio-mqtt>=0.11.0            # 异步MQTT客户端

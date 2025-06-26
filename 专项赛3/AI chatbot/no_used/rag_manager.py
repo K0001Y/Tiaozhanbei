@@ -257,5 +257,3 @@ class RAGManager:
             return []
         return self.retriever.get_relevant_documents(query)
     
-    def is_ready(self):
-        """检查R

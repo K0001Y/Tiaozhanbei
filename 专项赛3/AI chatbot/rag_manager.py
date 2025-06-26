@@ -5,6 +5,7 @@ RAG(检索增强生成)功能管理器
 import os
 import json
 import logging
+import torch
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -42,16 +43,36 @@ class RAGManager:
             self.retriever = None
             self.document_loader = DocumentLoader()
             self.file_handler = FileHandler()
+            self.device = self._get_device()
             
             # 确保必要的目录存在
             os.makedirs("model", exist_ok=True)
             os.makedirs("RAG", exist_ok=True)
             
-            logger.info("RAG管理器初始化成功")
+            logger.info(f"RAG管理器初始化成功，使用设备: {self.device}")
             
         except Exception as e:
             logger.error(f"RAG管理器初始化失败: {str(e)}")
             raise Exception(f"RAG管理器初始化失败: {str(e)}")
+
+    def _get_device(self):
+        """
+        检测并返回可用的设备
+        :return: 设备类型 ('cuda' 或 'cpu')
+        """
+        try:
+            if torch.cuda.is_available():
+                device = 'cuda'
+                gpu_count = torch.cuda.device_count()
+                gpu_name = torch.cuda.get_device_name(0)
+                logger.info(f"检测到GPU设备: {gpu_name}, 共 {gpu_count} 个GPU")
+            else:
+                device = 'cpu'
+                logger.info("未检测到GPU设备，使用CPU")
+            return device
+        except Exception as e:
+            logger.warning(f"设备检测失败，默认使用CPU: {str(e)}")
+            return 'cpu'
         
     def load_embedding_model(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
         """
@@ -92,7 +113,7 @@ class RAGManager:
         # 创建嵌入模型
             self.embedding_model = HuggingFaceEmbeddings(
                 model_name=model_path,
-                model_kwargs={'device': 'cpu'},  # 可根据需要改为 'cuda'
+                model_kwargs={'device': self.device},
                 encode_kwargs={'normalize_embeddings': True}
             )
         
@@ -100,12 +121,12 @@ class RAGManager:
             model_info = {
                 'model_name': model_name,
                 'local_path': local_model_path,
-                'model_kwargs': {'device': 'cpu'},
+                'model_kwargs': {'device': self.device},
                 'encode_kwargs': {'normalize_embeddings': True}
             }
             self._save_embedding_model_info(model_info)
         
-            logger.info("嵌入模型加载成功")
+            logger.info(f"嵌入模型加载成功，使用设备: {self.device}")
             return self.embedding_model
         
         except Exception as e:
@@ -179,7 +200,8 @@ class RAGManager:
                 "chunk_overlap": DEFAULT_CHUNK_OVERLAP,
                 "vector_store_path": vector_store_path,
                 "created_time": datetime.now().isoformat(),
-                "is_empty": True
+                "is_empty": True,
+                "device": self.device
             }
             
             metadata_path = os.path.join("RAG", "metadata.json")
@@ -289,7 +311,8 @@ class RAGManager:
                 "chunk_overlap": chunk_overlap,
                 "vector_store_path": vector_store_path,
                 "last_updated": datetime.now().isoformat(),
-                "is_empty": False
+                "is_empty": False,
+                "device": self.device
             }
             
             # 保留原有的创建时间
@@ -499,7 +522,7 @@ class RAGManager:
         """
         try:
             if not self.vector_store:
-                return {"status": "未加载", "count": 0}
+                return {"status": "未加载", "count": 0, "device": self.device}
             
             # 获取向量存储中的文档数量
             index_to_docstore_id = self.vector_store.index_to_docstore_id
@@ -515,6 +538,7 @@ class RAGManager:
             info = {
                 "status": "已加载",
                 "count": count,
+                "device": self.device,
                 "metadata": metadata
             }
             
@@ -522,7 +546,7 @@ class RAGManager:
             
         except Exception as e:
             logger.error(f"获取向量存储信息失败: {str(e)}")
-            return {"status": "错误", "error": str(e)}
+            return {"status": "错误", "error": str(e), "device": self.device}
 
     def batch_load_documents(self, file_paths: List[str]) -> List[Document]:
         """
