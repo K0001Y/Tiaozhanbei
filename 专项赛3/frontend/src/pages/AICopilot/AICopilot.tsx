@@ -1,10 +1,10 @@
 import React from 'react'
 
-const AICopilot = () => {
+const AICopilot: React.FC = () => {
   return (
-    <div>
-      
-    </div>
+    <>
+
+    </>
   )
 }
 

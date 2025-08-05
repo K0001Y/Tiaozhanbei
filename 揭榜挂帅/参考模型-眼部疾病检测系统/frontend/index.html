@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>眼部疾病诊断系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f7ff 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 150, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 顶部波浪效果 */
+        .wave-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background-repeat: repeat-x;
+            background-position: 0 bottom;
+            transform-origin: center bottom;
+        }
+        
+        .wave-one {
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" fill="%231a6dcc22"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18 138.3 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" /></svg>');
+            animation: wave 12s linear infinite;
+        }
+        
+        .wave-two {
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" fill="%231a6dcc33"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18 138.3 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" /></svg>');
+            animation: wave 18s linear -0.125s infinite, swell 8s ease -1.25s infinite;
+            opacity: 0.5;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(0) translateZ(0) scaleY(1); }
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.55); }
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
+        }
+        
+        @keyframes swell {
+            0%, 100% { transform: translateX(-25%) scale(1); }
+            50% { transform: translateX(-25%) scale(1.05); }
+        }
+        
+        header {
+            position: relative;
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%);
+            color: white;
+            padding: 40px 50px;
+            text-align: center;
+            z-index: 1;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            animation: fadeInDown 1s ease;
+        }
+        
+        header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+        
+        .main-content {
+            display: flex;
+            padding: 40px;
+            gap: 40px;
+            align-items: stretch;
+            min-height: calc(100vh - 300px);
+        }
+        
+        .upload-section, .result-section {
+            flex: 1;
+            background: #f8fbff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .upload-section:hover, .result-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .section-title {
+            color: #1a6dcc;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            padding-bottom: 18px;
+            border-bottom: 3px solid #e0eeff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: #1a6dcc;
+            border-radius: 3px;
+        }
+        
+        .section-title i {
+            font-size: 1.8rem;
+            background: #e6f7ff;
+            padding: 12px;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(26, 109, 204, 0.2);
+        }
+        
+        .upload-group {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            border: 2px dashed #cce6ff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .upload-group:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #1a6dcc, #2c8ae0);
+        }
+        
+        .group-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .upload-area {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .upload-box {
+            flex: 1;
+            min-width: 220px;
+            background: #f0f9ff;
+            border-radius: 15px;
+            padding: 30px 25px;
+            text-align: center;
+            border: 2px dashed #99d0ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-box:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 109, 204, 0.1) 0%, rgba(44, 138, 224, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .upload-box:hover {
+            background: #e6f5ff;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-box:hover:after {
+            opacity: 1;
+        }
+        
+        .upload-box i {
+            font-size: 3.2rem;
+            color: #1a6dcc;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .upload-box:hover i {
+            transform: scale(1.1);
+        }
+        
+        .upload-box h3 {
+            color: #1a6dcc;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .upload-box p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        /* 图片预览相关样式 */
+        .upload-box.has-image {
+            padding: 15px;
+            background: #f8fbff;
+        }
+        
+        .upload-box.has-image .upload-content {
+            display: none;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .upload-box.has-image .image-preview {
+            display: block;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white !important;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+        }
+        
+        .remove-image:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+        
+        .remove-image i {
+            color: white !important;
+            font-size: 0.8rem !important;
+            margin-top: 1rem !important;
+        }
+        
+        .file-info {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%);
+            transition: width 0.3s ease;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .upload-box.has-image {
+            padding: 15px;
+        }
+        
+        .upload-box.has-image .upload-content {
+            display: none;
+        }
+        
+        .upload-box.has-image .image-preview {
+            display: block;
+        }
+        
+        /* 上传进度条 */
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%);
+            transition: width 0.3s ease;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        /* 文件大小提示 */
+        .file-info {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .add-group {
+            background: #e6f7ff;
+            color: #1a6dcc;
+            border: 2px dashed #99d0ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .add-group:hover {
+            background: #d4f0ff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(26, 109, 204, 0.15);
+        }
+        
+        .add-group i {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .add-group:hover i {
+            transform: rotate(90deg);
+        }
+        
+        .info-note {
+            background: #e6f7ff;
+            border-left: 4px solid #1a6dcc;
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 0 0 25px 0;
+            font-size: 1.05rem;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(26, 109, 204, 0.2); }
+            70% { box-shadow: 0 0 0 10px rgba(26, 109, 204, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(26, 109, 204, 0); }
+        }
+        
+        .diagnose-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%);
+            color: white;
+            border: none;
+            padding: 22px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(26, 109, 204, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .diagnose-btn:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .diagnose-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(26, 109, 204, 0.5);
+        }
+        
+        .diagnose-btn:hover:after {
+            left: 100%;
+        }
+        
+        .diagnose-btn:active {
+            transform: translateY(2px);
+        }
+        
+        /* 重新诊断状态样式 */
+        .diagnose-btn.diagnosed {
+            background: linear-gradient(90deg, #ff9800 0%, #ffc107 100%) !important;
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
+        }
+        
+        .diagnose-btn.diagnosed:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(255, 152, 0, 0.5);
+        }
+        
+        /* 诊断结果表格样式 */
+        .diagnosis-result {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            border: 2px solid #e6f7ff;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .diagnosis-result.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .diagnosis-result h3 {
+            color: #1a6dcc;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .diagnosis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .diagnosis-table th,
+        .diagnosis-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e0eeff;
+        }
+        
+        .diagnosis-table th {
+            background: linear-gradient(90deg, #e6f7ff 0%, #d4f0ff 100%);
+            color: #1a6dcc;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .diagnosis-table td {
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .diagnosis-table tr:hover {
+            background: #f8fbff;
+        }
+        
+        .diagnosis-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .group-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .diagnosis-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #e8f5e8;
+            color: #4caf50;
+        }
+        
+        .status-warning {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .status-error {
+            background: #ffebee;
+            color: #f44336;
+        }
+        
+        /* 错误提示样式 */
+        .error-message {
+            background: #ffebee;
+            color: #f44336;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border-left: 4px solid #f44336;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-preview {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .image-card {
+            flex: 1;
+            min-width: 270px;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.4s ease;
+        }
+        
+        .image-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .image-header {
+            background: linear-gradient(90deg, #e6f7ff 0%, #d4f0ff 100%);
+            padding: 18px 25px;
+            font-weight: 600;
+            color: #1a6dcc;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .image-placeholder {
+            height: 250px;
+            background: #f8fbff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-placeholder:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 109, 204, 0.05) 0%, rgba(44, 138, 224, 0.1) 100%);
+        }
+        
+        .image-placeholder i {
+            font-size: 4rem;
+            color: #cce6ff;
+            opacity: 0.6;
+        }
+        
+        .improvements {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .improvements:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #1a6dcc, #2c8ae0);
+        }
+        
+        .improvements h3 {
+            color: #1a6dcc;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .improvement-list {
+            list-style-type: none;
+        }
+        
+        .improvement-list li {
+            padding: 15px 0;
+            padding-left: 40px;
+            position: relative;
+            border-bottom: 1px solid #f0f7ff;
+            font-size: 1.05rem;
+            transition: transform 0.3s ease;
+            cursor: default;
+        }
+        
+        .improvement-list li:hover {
+            transform: translateX(10px);
+            color: #1a6dcc;
+        }
+        
+        .improvement-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .improvement-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 15px;
+            width: 28px;
+            height: 28px;
+            background: #e6f7ff;
+            color: #1a6dcc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 10px rgba(26, 109, 204, 0.2);
+        }
+        
+        .ai-assistant {
+            background: white;
+            border-radius: 18px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .ai-assistant:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #1a6dcc, #2c8ae0);
+        }
+        
+        .chat-header {
+            background: linear-gradient(90deg, #e6f7ff 0%, #d4f0ff 100%);
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0eeff;
+            color: #1a6dcc;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fbff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInMessage 0.3s ease;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #1a6dcc, #2c8ae0);
+        }
+        
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+        }
+        
+        .message-content {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            position: relative;
+            font-size: 1rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, #1a6dcc, #2c8ae0);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+        
+        .message.ai .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0eeff;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .message.user .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .chat-input {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e0eeff;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        
+        .input-group textarea {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0eeff;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.05);
+            line-height: 1.4;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #1a6dcc;
+            box-shadow: 0 0 0 3px rgba(26, 109, 204, 0.2);
+        }
+        
+        .send-btn {
+            background: linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(26, 109, 204, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 80px;
+            justify-content: center;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 109, 204, 0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: white;
+            border: 1px solid #e0eeff;
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            max-width: 80px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #1a6dcc;
+            border-radius: 50%;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingDots {
+            0%, 60%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 滚动条样式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .diagnosis-chart {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            display: none;
+        }
+        
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #7f8c8d;
+            font-size: 1rem;
+            border-top: 1px solid #e0eeff;
+            background: #f8fbff;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header {
+                padding: 30px 20px;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.6s ease both;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        
+        /* 删除按钮样式 */
+        .delete-group-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-group-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+        
+        /* 删除动画 */
+        @keyframes slideOut {
+            from { 
+                transform: translateY(0); 
+                opacity: 1; 
+                max-height: 300px; 
+                margin-bottom: 30px;
+            }
+            to { 
+                transform: translateY(-30px); 
+                opacity: 0; 
+                max-height: 0;
+                margin-bottom: 0;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wave-header">
+            <div class="wave wave-one"></div>
+            <div class="wave wave-two"></div>
+        </div>
+        
+        <header>
+            <h1>眼部疾病诊疗系统</h1>
+            <p>请上传眼部疾病照片，我们将为您提供专业的AI诊断建议</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> 图像上传区域</h2>
+                <div class="info-note slide-in delay-4">
+                    普通照片与紫外线照片两两为一组上传，便于对比分析
+                </div>
+                <div class="upload-group slide-in">
+                    <h3 class="group-title">
+                        <i class="fas fa-images"></i> 图像组 #1
+                        <button class="delete-group-btn" onclick="deleteGroup(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </h3>
+                    <div class="upload-area">
+                        <div class="upload-box slide-in delay-1" data-type="normal">
+                            <div class="upload-content">
+                                <i class="fas fa-camera"></i>
+                                <h3>普通照片</h3>
+                                <p>上传日常拍摄的眼部照片</p>
+                            </div>
+                            <div class="image-preview">
+                                <img src="" alt="预览图片">
+                                <button class="remove-image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <div class="file-info"></div>
+                            </div>
+                            <div class="upload-progress"></div>
+                        </div>
+                        <div class="upload-box slide-in delay-2" data-type="uv">
+                            <div class="upload-content">
+                                <i class="fas fa-microscope"></i>
+                                <h3>紫外线图像</h3>
+                                <p>上传紫外线设备拍摄图像</p>
+                            </div>
+                            <div class="image-preview">
+                                <img src="" alt="预览图片">
+                                <button class="remove-image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <div class="file-info"></div>
+                            </div>
+                            <div class="upload-progress"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-group slide-in delay-3">
+                    <i class="fas fa-plus-circle"></i> 添加新组
+                </div>
+                
+                <button class="diagnose-btn slide-in delay-5">
+                    <i class="fas fa-stethoscope"></i> 开始诊断
+                </button>
+                
+                <!-- 诊断结果展示区域 -->
+                <div class="diagnosis-result" id="diagnosisResult">
+                    <h3><i class="fas fa-chart-line"></i> 诊断结果</h3>
+                    <table class="diagnosis-table">
+                        <thead>
+                            <tr>
+                                <th>图像组</th>
+                                <th>诊断结果</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diagnosisTableBody">
+                            <!-- 动态生成的诊断结果 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h2 class="section-title"><i class="fas fa-robot"></i> AI智能助手</h2>
+                
+                <div class="ai-assistant fade-in delay-4">
+                    <div class="chat-header">
+                        <i class="fas fa-comments"></i> 智能对话
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                您好！我是AI医疗助手，可以为您提供眼部疾病相关的专业咨询。请描述您的症状或提出问题，我将为您详细解答。
+                                <div class="message-time">刚刚</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <div class="input-group">
+                            <textarea id="messageInput" placeholder="请输入您的问题..." rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                发送
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 眼部疾病监测系统 | 专业医疗解决方案 | 准确率高达xxx%</p>
+        </footer>
+    </div>
+
+    <script>
+        // 图像组计数器
+        let groupCounter = 1;
+        
+        // 图片压缩配置
+        const imageConfig = {
+            maxWidth: 800,
+            maxHeight: 600,
+            quality: 0.8,
+            maxSize: 2 * 1024 * 1024 // 2MB
+        };
+        
+        // 图片压缩函数
+        function compressImage(file, callback) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                // 计算新的尺寸
+                let { width, height } = img;
+                const maxWidth = imageConfig.maxWidth;
+                const maxHeight = imageConfig.maxHeight;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                // 设置画布尺寸
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 绘制压缩后的图片
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 转换为blob
+                canvas.toBlob(callback, 'image/jpeg', imageConfig.quality);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 创建文件输入元素
+        function createFileInput() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            return input;
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(uploadBox, file) {
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件！');
+                return;
+            }
+            
+            // 检查文件大小
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                alert('图片文件过大，请选择小于10MB的图片！');
+                return;
+            }
+            
+            const progressBar = uploadBox.querySelector('.upload-progress');
+            const preview = uploadBox.querySelector('.image-preview');
+            const img = preview.querySelector('img');
+            const fileInfo = preview.querySelector('.file-info');
+            
+            // 显示进度条
+            progressBar.style.width = '10%';
+            
+            // 压缩图片
+            compressImage(file, function(compressedBlob) {
+                progressBar.style.width = '50%';
+                
+                // 创建预览URL
+                const previewURL = URL.createObjectURL(compressedBlob);
+                
+                // 显示预览
+                img.src = previewURL;
+                fileInfo.textContent = `${formatFileSize(compressedBlob.size)}`;
+                
+                // 添加图片数据到uploadBox
+                uploadBox.imageData = {
+                    originalFile: file,
+                    compressedBlob: compressedBlob,
+                    previewURL: previewURL
+                };
+                
+                // 更新UI状态
+                uploadBox.classList.add('has-image');
+                progressBar.style.width = '100%';
+                
+                // 重置上传状态
+                uploadBox.dataset.uploading = 'false';
+                
+                // 隐藏进度条
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 500);
+            });
+        }
+        
+        // 移除图片
+        function removeImage(button) {
+            const uploadBox = button.closest('.upload-box');
+            const preview = uploadBox.querySelector('.image-preview');
+            const img = preview.querySelector('img');
+            
+            // 清理URL对象
+            if (uploadBox.imageData && uploadBox.imageData.previewURL) {
+                URL.revokeObjectURL(uploadBox.imageData.previewURL);
+            }
+            
+            // 清理数据
+            delete uploadBox.imageData;
+            img.src = '';
+            
+            // 重置上传状态
+            uploadBox.dataset.uploading = 'false';
+            
+            // 更新UI状态
+            uploadBox.classList.remove('has-image');
+        }
+        
+        // 为上传框添加点击事件
+        function addUploadEvent(uploadBox) {
+            // 检查是否已经绑定过事件，避免重复绑定
+            if (uploadBox.dataset.eventsBound === 'true') {
+                return;
+            }
+            
+            // 标记已绑定事件
+            uploadBox.dataset.eventsBound = 'true';
+            
+            // 添加删除按钮事件
+            const removeBtn = uploadBox.querySelector('.remove-image');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    removeImage(this);
+                });
+            }
+            
+            uploadBox.addEventListener('click', function(e) {
+                // 如果点击的是删除按钮，不触发上传
+                if (e.target.closest('.remove-image')) {
+                    return;
+                }
+                
+                // 如果已有图片，不重复上传
+                if (this.classList.contains('has-image')) {
+                    return;
+                }
+                
+                // 防止重复触发
+                if (this.dataset.uploading === 'true') {
+                    return;
+                }
+                
+                this.dataset.uploading = 'true';
+                
+                const fileInput = createFileInput();
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handleImageUpload(uploadBox, file);
+                    }
+                    // 重置上传状态
+                    this.dataset.uploading = 'false';
+                };
+                
+                // 如果用户取消文件选择，也要重置状态
+                fileInput.onclick = () => {
+                    setTimeout(() => {
+                        if (!fileInput.files.length) {
+                            this.dataset.uploading = 'false';
+                        }
+                    }, 1000);
+                };
+                
+                fileInput.click();
+                
+                // 添加原有的点击动画效果
+                this.style.backgroundColor = '#d4f0ff';
+                this.style.borderColor = '#1a6dcc';
+                const icon = this.querySelector('.upload-content i');
+                if (icon) icon.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    this.style.backgroundColor = '#f0f9ff';
+                    this.style.borderColor = '#99d0ff';
+                    if (icon) icon.style.transform = 'scale(1)';
+                }, 500);
+            });
+        }
+        
+        // API请求函数模板
+        async function requestDiagnosis(imageGroups) {
+            try {
+                // TODO: 替换为实际的后端API地址
+                const response = await fetch('/api/diagnosis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        groups: imageGroups // 格式: [{ groupId: 1, normalImage: "base64...", uvImage: "base64..." }]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data;
+                
+                // 期望的返回数据格式:
+                // {
+                //     success: true,
+                //     results: [
+                //         { groupId: 1, diagnosis: "眼部正常，未发现异常" },
+                //         { groupId: 2, diagnosis: "疑似结膜炎，建议进一步检查" }
+                //     ]
+                // }
+                
+            } catch (error) {
+                console.error('诊断请求失败:', error);
+                throw error;
+            }
+        }
+        
+        // 生成模拟诊断数据（用于演示）
+        function generateMockDiagnosisData() {
+            const groups = document.querySelectorAll('.upload-group');
+            const mockResults = [];
+            
+            const diagnosisTexts = [
+                "眼部健康状况良好，未发现明显异常",
+                "轻微干眼症征象，建议增加眨眼频率并使用人工泪液",
+                "疑似结膜炎早期症状，建议及时就医检查",
+                "角膜表面轻微不规则，需要进一步观察",
+                "眼睑边缘有轻微炎症，注意眼部卫生"
+            ];
+            
+            groups.forEach((group, index) => {
+                const groupTitle = group.querySelector('.group-title').textContent.trim();
+                const randomDiagnosis = diagnosisTexts[Math.floor(Math.random() * diagnosisTexts.length)];
+                mockResults.push({
+                    groupId: index + 1,
+                    groupName: groupTitle,
+                    diagnosis: randomDiagnosis
+                });
+            });
+            
+            return {
+                success: true,
+                results: mockResults
+            };
+        }
+        
+        // 显示诊断结果
+        function showDiagnosisResults(data) {
+            const resultContainer = document.getElementById('diagnosisResult');
+            const tableBody = document.getElementById('diagnosisTableBody');
+            
+            // 清空之前的结果
+            tableBody.innerHTML = '';
+            
+            if (data.success && data.results) {
+                // 生成表格行
+                data.results.forEach(result => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="group-name">${result.groupName}</td>
+                        <td>${result.diagnosis}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // 显示结果容器
+                resultContainer.classList.add('show');
+            } else {
+                // 显示错误信息
+                showDiagnosisError('诊断数据格式错误');
+            }
+        }
+        
+        // 显示诊断错误
+        function showDiagnosisError(errorMessage) {
+            const resultContainer = document.getElementById('diagnosisResult');
+            const tableBody = document.getElementById('diagnosisTableBody');
+            
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="2">
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            诊断失败: ${errorMessage}
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            resultContainer.classList.add('show');
+        }
+        
+        // 隐藏诊断结果
+        function hideDiagnosisResults() {
+            const resultContainer = document.getElementById('diagnosisResult');
+            resultContainer.classList.remove('show');
+        }
+        
+        // 创建新图像组的函数
+        function createNewGroup(groupNumber) {
+            const newGroup = document.createElement('div');
+            newGroup.className = 'upload-group slide-in';
+            newGroup.innerHTML = `
+                <h3 class="group-title">
+                    <i class="fas fa-images"></i> 图像组 #${groupNumber}
+                    <button class="delete-group-btn" onclick="deleteGroup(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </h3>
+                <div class="upload-area">
+                    <div class="upload-box slide-in delay-1" data-type="normal">
+                        <div class="upload-content">
+                            <i class="fas fa-camera"></i>
+                            <h3>普通照片</h3>
+                            <p>上传日常拍摄的眼部照片</p>
+                        </div>
+                        <div class="image-preview">
+                            <img src="" alt="预览图片">
+                            <button class="remove-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="file-info"></div>
+                        </div>
+                        <div class="upload-progress"></div>
+                    </div>
+                    <div class="upload-box slide-in delay-2" data-type="uv">
+                        <div class="upload-content">
+                            <i class="fas fa-microscope"></i>
+                            <h3>紫外线图像</h3>
+                            <p>上传紫外线设备拍摄图像</p>
+                        </div>
+                        <div class="image-preview">
+                            <img src="" alt="预览图片">
+                            <button class="remove-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="file-info"></div>
+                        </div>
+                        <div class="upload-progress"></div>
+                    </div>
+                </div>
+            `;
+            
+            // 为新的上传框添加上传事件
+            newGroup.querySelectorAll('.upload-box').forEach(addUploadEvent);
+            
+            return newGroup;
+        }
+        
+        // 删除图像组的函数
+        function deleteGroup(button) {
+            const group = button.closest('.upload-group');
+            group.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                group.remove();
+            }, 300);
+        }
+        
+        // 添加交互效果
+        document.querySelectorAll('.upload-box').forEach(addUploadEvent);
+        
+        document.querySelector('.add-group').addEventListener('click', function() {
+            const addButton = this;
+            const uploadSection = document.querySelector('.upload-section');
+            
+            // 更新按钮状态
+            addButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中...';
+            addButton.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                // 创建新的图像组
+                groupCounter++;
+                const newGroup = createNewGroup(groupCounter);
+                
+                // 将新组插入到"添加新组"按钮之前
+                uploadSection.insertBefore(newGroup, addButton);
+                
+                // 添加淡入动画
+                newGroup.style.opacity = '0';
+                newGroup.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    newGroup.style.transition = 'all 0.1s ease';
+                    newGroup.style.opacity = '1';
+                    newGroup.style.transform = 'translateY(0)';
+                }, 50);
+                
+                // 恢复按钮状态
+                addButton.innerHTML = '<i class="fas fa-check"></i> 新图像组已添加';
+                
+                setTimeout(() => {
+                    addButton.innerHTML = '<i class="fas fa-plus-circle"></i> 添加新组';
+                    addButton.style.pointerEvents = 'auto';
+                }, 1000);
+            }, 300);
+        });
+        
+        document.querySelector('.diagnose-btn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            // 如果按钮当前是"重新诊断"状态，则重置并重新开始
+            if (btn.classList.contains('diagnosed')) {
+                btn.classList.remove('diagnosed');
+                btn.style.background = 'linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%)';
+                hideDiagnosisResults(); // 隐藏之前的结果
+            }
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 诊断中...';
+            btn.disabled = true;
+            
+            // 模拟诊断过程
+            setTimeout(async () => {
+                try {
+                    // 这里可以替换为真实的API调用
+                    // const diagnosisData = await requestDiagnosis(imageGroups);
+                    
+                    // 目前使用模拟数据
+                    const diagnosisData = generateMockDiagnosisData();
+                    
+                    // 更新按钮状态为诊断完成
+                    btn.innerHTML = '<i class="fas fa-check"></i> 诊断完成';
+                    btn.style.background = 'linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%)';
+                    
+                    // 显示诊断结果
+                    showDiagnosisResults(diagnosisData);
+                    
+                    // 1.5秒后显示"重新诊断"并保持
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-redo-alt"></i> 重新诊断';
+                        btn.style.background = 'linear-gradient(90deg, #ff9800 0%, #ffc107 100%)';
+                        btn.disabled = false;
+                        btn.classList.add('diagnosed');
+                    }, 1500);
+                    
+                } catch (error) {
+                    // 诊断失败处理
+                    btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 诊断失败';
+                    btn.style.background = 'linear-gradient(90deg, #f44336 0%, #e57373 100%)';
+                    
+                    // 显示错误信息
+                    showDiagnosisError(error.message || '网络连接失败，请重试');
+                    
+                    // 3秒后恢复到原始状态
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = 'linear-gradient(90deg, #1a6dcc 0%, #2c8ae0 100%)';
+                        btn.disabled = false;
+                    }, 3000);
+                }
+            }, 3000);
+        });
+        
+        // 聊天功能相关
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        
+        // 自动调整textarea高度
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+        
+        // 格式化时间
+        function formatTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        
+        // 添加消息到聊天区域
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const avatar = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    ${avatar}
+                </div>
+                <div class="message-content">
+                    ${content}
+                    <div class="message-time">${formatTime()}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 显示输入指示器
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-indicator" style="display: block;">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 隐藏输入指示器
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        // 调用AI API (示例)
+        async function callAIAPI(message) {
+            try {
+                // TODO: 替换为实际的AI API地址
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: 'eye_disease_consultation'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.reply || data.response || '抱歉，我现在无法回答您的问题。';
+                
+            } catch (error) {
+                console.error('AI API调用失败:', error);
+                // 返回模拟回复
+                return generateMockReply(message);
+            }
+        }
+        
+        // 生成模拟AI回复
+        function generateMockReply(userMessage) {
+            const replies = [
+                "根据您的描述，这可能是眼部疲劳引起的。建议您适当休息，避免长时间用眼，并保持充足的睡眠。",
+                "您提到的症状需要进一步观察。建议您注意眼部卫生，避免揉眼，如症状持续请及时就医。",
+                "这种情况在临床上比较常见。建议您使用人工泪液缓解干涩，同时调整用眼习惯，每小时休息5-10分钟。",
+                "您的症状可能与多种因素有关。建议您保持良好的作息时间，均衡饮食，多吃富含维生素A的食物。",
+                "感谢您的咨询。根据医学指南，建议您定期进行眼部检查，及早发现和预防眼部疾病。如有严重不适，请及时就医。"
+            ];
+            
+            // 根据用户消息长度和内容选择回复
+            if (userMessage.includes('疼') || userMessage.includes('痛')) {
+                return "眼部疼痛可能由多种原因引起，如眼疲劳、干眼症、结膜炎等。建议您暂停用眼，适当休息。如疼痛持续或加重，请尽快就医检查。";
+            } else if (userMessage.includes('红') || userMessage.includes('充血')) {
+                return "眼红通常是炎症的表现，可能是结膜炎、角膜炎等。建议您避免揉眼，保持眼部清洁，如症状持续超过2天，建议就医诊治。";
+            } else if (userMessage.includes('干') || userMessage.includes('涩')) {
+                return "眼干涩是现代人常见问题，多与长时间用眼、环境干燥有关。建议您使用人工泪液，保持室内湿度，定时远眺放松眼部肌肉。";
+            } else if (userMessage.includes('模糊') || userMessage.includes('看不清')) {
+                return "视物模糊可能涉及屈光不正、白内障、青光眼等多种情况。建议您尽快到眼科进行专业检查，明确病因后对症治疗。";
+            }
+            
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // 禁用发送按钮
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 发送中';
+            
+            // 添加用户消息
+            addMessage(message, true);
+            
+            // 清空输入框
+            messageInput.value = '';
+            autoResizeTextarea(messageInput);
+            
+            // 显示输入指示器
+            showTypingIndicator();
+            
+            try {
+                // 模拟API调用延迟
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+                
+                // 调用AI API
+                const aiReply = await callAIAPI(message);
+                
+                // 隐藏输入指示器
+                hideTypingIndicator();
+                
+                // 添加AI回复
+                addMessage(aiReply, false);
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('抱歉，服务暂时不可用，请稍后再试。', false);
+            } finally {
+                // 恢复发送按钮
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 发送';
+                messageInput.focus();
+            }
+        }
+        
+        // 绑定事件
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+        
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        document.querySelector('.consult-btn').addEventListener('click', function() {
+            const input = document.querySelector('.input-group input');
+            if(input.value.trim() !== '') {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                setTimeout(() => {
+                    this.innerHTML = '咨询';
+                    alert('AI助手：根据您的描述，建议保持皮肤清洁干燥，避免抓挠，并尽快联系皮肤科医生进行专业诊断。');
+                    input.value = '';
+                }, 1500);
+            } else {
+                input.focus();
+                input.style.borderColor = '#ff6b6b';
+                input.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.2)';
+                setTimeout(() => {
+                    input.style.borderColor = '#e0eeff';
+                    input.style.boxShadow = 'inset 0 3px 10px rgba(0, 0, 0, 0.05)';
+                }, 2000);
+            }
+        });
+        
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化上传事件
+            document.querySelectorAll('.upload-box').forEach(addUploadEvent);
+            
+            // 初始化元素动画
+            const elements = document.querySelectorAll('.slide-in, .fade-in');
+            elements.forEach(el => {
+                el.style.opacity = '0';
+            });
+            
+            setTimeout(() => {
+                elements.forEach(el => {
+                    el.style.opacity = '1';
+                });
+            }, 300);
+        });
+    </script>
+</body>
+</html>
