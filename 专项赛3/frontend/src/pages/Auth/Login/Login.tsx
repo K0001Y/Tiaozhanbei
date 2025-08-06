@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../../store/userStore.ts';
-import { LoginRequest } from '../../../types/auth.ts';
+import { useUserStore } from '../../../store/userStore';
+import { LoginRequest } from '../../../types/auth';
 import './Login.scss';
 
 const Login: React.FC = () => {
@@ -14,7 +14,7 @@ const Login: React.FC = () => {
     clearError, 
     clearFieldErrors,
     isAuthenticated 
-  } = useAuthStore();
+  } = useUserStore();
 
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',

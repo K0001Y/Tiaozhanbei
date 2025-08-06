@@ -1,51 +1,102 @@
 // 文件名: Login.scss
-// 位置: src/pages/Login.scss
+// 位置: src/pages/Auth/Login/Login.scss
 
-$primary-color: #667eea;
-$secondary-color: #764ba2;
-$error-color: #ef4444;
-$success-color: #10b981;
-$text-color: #1f2937;
-$text-light: #6b7280;
-$border-color: #d1d5db;
-$background-light: #f3f4f6;
+// 设计系统颜色
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --border-focus: #d1d5db;
+  --background-light: #f8fafc;
+  --background-card: #ffffff;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
 
 .login-container {
   min-height: 100vh;
+  width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  background: var(--primary-gradient);
   padding: 20px;
   position: relative;
+  overflow: hidden;
 
+  // 添加动态背景效果
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+  }
+
+  // 添加浮动的装饰元素
+  &::after {
+    content: '';
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite;
   }
 }
 
 .login-card {
-  background: white;
-  border-radius: 16px;
+  background: var(--background-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    var(--shadow-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   padding: 48px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  // 卡片悬浮效果
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
 
   @media (max-width: 480px) {
     padding: 32px 24px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
+    margin: 16px;
   }
 }
 
@@ -56,7 +107,7 @@ $background-light: #f3f4f6;
   h1 {
     font-size: 32px;
     font-weight: 700;
-    color: $text-color;
+    color: var(--primary-color);
     margin-bottom: 8px;
     letter-spacing: -0.025em;
 
@@ -66,9 +117,10 @@ $background-light: #f3f4f6;
   }
 
   p {
-    color: $text-light;
+    color: var(--text-secondary);
     font-size: 15px;
     line-height: 1.5;
+    margin-top: 10px;
   }
 }
 
@@ -84,7 +136,7 @@ $background-light: #f3f4f6;
 
   label {
     font-weight: 600;
-    color: $text-color;
+    color: var(--text-primary);
     margin-bottom: 8px;
     font-size: 14px;
     letter-spacing: 0.025em;
@@ -92,31 +144,31 @@ $background-light: #f3f4f6;
 
   input {
     padding: 14px 16px;
-    border: 2px solid $border-color;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background-color: white;
+    background-color: var(--background-card);
 
     &::placeholder {
-      color: $text-light;
+      color: var(--text-muted);
     }
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
+      border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       transform: translateY(-1px);
     }
 
     &:disabled {
-      background-color: $background-light;
+      background-color: var(--background-light);
       cursor: not-allowed;
       opacity: 0.7;
     }
 
     &.error {
-      border-color: $error-color;
+      border-color: var(--error-color);
       background-color: #fef2f2;
 
       &:focus {
@@ -127,7 +179,7 @@ $background-light: #f3f4f6;
 }
 
 .field-error {
-  color: $error-color;
+  color: var(--error-color);
   font-size: 13px;
   margin-top: 6px;
   display: flex;
@@ -143,7 +195,7 @@ $background-light: #f3f4f6;
 .error-message {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border: 1px solid #fecaca;
-  color: $error-color;
+  color: var(--error-color);
   padding: 16px;
   border-radius: 10px;
   font-size: 14px;
@@ -159,7 +211,7 @@ $background-light: #f3f4f6;
 }
 
 .login-button {
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  background: var(--primary-gradient);
   color: white;
   border: none;
   padding: 16px 24px;
@@ -223,21 +275,21 @@ $background-light: #f3f4f6;
   border-top: 1px solid #e5e7eb;
 
   p {
-    color: $text-light;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.5;
   }
 }
 
 .auth-link {
-  color: $primary-color;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
   transition: all 0.2s ease;
 
   &:hover {
-    color: $secondary-color;
+    color: var(--secondary-color);
     text-decoration: underline;
   }
 }

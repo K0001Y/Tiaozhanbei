@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { authService } from '../services/authService';
 import { User, LoginRequest, RegisterRequest } from '../types/auth';
 
-interface AuthState {
+interface UserState {
   // 状态
   user: User | null;
   token: string | null;
@@ -38,7 +38,7 @@ const initialState = {
   isAuthenticated: false,
 };
 
-export const useAuthStore = create<AuthState>()(
+export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
       ...initialState,

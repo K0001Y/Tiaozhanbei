@@ -1,10 +1,21 @@
 .App {
   text-align: center;
+  min-height: 100vh;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    scrollbar-width: none;
-    background: #ffffff;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none;
+  background: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #666;
 }

@@ -1,65 +1,120 @@
 // 文件名: Register.scss
-// 位置: src/pages/Register.scss
+// 位置: src/pages/Auth/Register/Register.scss
 
-$primary-color: #667eea;
-$secondary-color: #764ba2;
-$error-color: #ef4444;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$text-color: #1f2937;
-$text-light: #6b7280;
-$border-color: #d1d5db;
-$background-light: #f3f4f6;
+// 继承登录页的设计系统
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --border-focus: #d1d5db;
+  --background-light: #f8fafc;
+  --background-card: #ffffff;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
 
 .register-container {
   min-height: 100vh;
+  width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  background: var(--secondary-gradient); // 使用不同的渐变色
   padding: 20px;
   position: relative;
+  overflow: hidden;
 
+  // 注册页专用的动态背景效果
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: 
+      radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+    animation: floatReverse 25s ease-in-out infinite;
+  }
+
+  // 装饰性元素
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 15%;
+    left: 8%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    animation: breathe 6s ease-in-out infinite;
   }
 }
 
 .register-card {
-  background: white;
-  border-radius: 16px;
+  background: var(--background-card);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    var(--shadow-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   padding: 48px;
   width: 100%;
-  max-width: 440px;
+  max-width: 480px; // 注册页稍宽一些
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 25px 50px -12px rgba(240, 147, 251, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
 
   @media (max-width: 480px) {
     padding: 32px 24px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
+    margin: 16px;
   }
 }
 
 .register-header {
   text-align: center;
   margin-bottom: 36px;
+  position: relative;
 
   h1 {
     font-size: 32px;
     font-weight: 700;
-    color: $text-color;
+    color: var(--text-primary);
     margin-bottom: 8px;
     letter-spacing: -0.025em;
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 
     @media (max-width: 480px) {
       font-size: 28px;
@@ -67,133 +122,201 @@ $background-light: #f3f4f6;
   }
 
   p {
-    color: $text-light;
-    font-size: 15px;
-    line-height: 1.5;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    margin-top: 10px;
   }
 }
 
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+  position: relative;
 
   label {
     font-weight: 600;
-    color: $text-color;
+    color: var(--text-primary);
     margin-bottom: 8px;
     font-size: 14px;
     letter-spacing: 0.025em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: var(--accent-color);
+      border-radius: 50%;
+    }
+
+    .required {
+      color: var(--error-color);
+      margin-left: 2px;
+    }
   }
 
   input {
-    padding: 14px 16px;
-    border: 2px solid $border-color;
-    border-radius: 10px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    background-color: white;
-
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--background-card);
+    position: relative;
+    
     &::placeholder {
-      color: $text-light;
+      color: var(--text-muted);
+      font-weight: 400;
     }
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-color);
+      box-shadow: 
+        0 0 0 3px rgba(240, 147, 251, 0.1),
+        var(--shadow-md);
       transform: translateY(-1px);
     }
 
     &:disabled {
-      background-color: $background-light;
+      background-color: var(--background-light);
       cursor: not-allowed;
       opacity: 0.7;
     }
 
     &.error {
-      border-color: $error-color;
+      border-color: var(--error-color);
       background-color: #fef2f2;
 
       &:focus {
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        box-shadow: 
+          0 0 0 3px rgba(239, 68, 68, 0.1),
+          var(--shadow-md);
       }
     }
+
+    &.success {
+      border-color: var(--success-color);
+      background-color: #f0fdf4;
+
+      &:focus {
+        box-shadow: 
+          0 0 0 3px rgba(16, 185, 129, 0.1),
+          var(--shadow-md);
+      }
+    }
+  }
+
+  .password-hint {
+    margin-top: 5px;
+    font-size: 13px;
   }
 }
 
 .field-error {
-  color: $error-color;
+  color: var(--error-color);
   font-size: 13px;
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  animation: slideIn 0.3s ease;
+  gap: 6px;
+  animation: slideInUp 0.3s ease;
+  font-weight: 500;
 
   &::before {
     content: '⚠️';
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
-.password-hint {
-  color: $text-light;
-  font-size: 12px;
-  margin-top: 6px;
-  padding: 8px 12px;
-  background-color: #f8fafc;
-  border-radius: 6px;
-  border-left: 3px solid $warning-color;
-  line-height: 1.4;
+.field-success {
+  color: var(--success-color);
+  font-size: 13px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: slideInUp 0.3s ease;
+  font-weight: 500;
 
   &::before {
-    content: '💡';
-    margin-right: 6px;
+    content: '✅';
+    font-size: 14px;
   }
 }
 
 .error-message {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  background: 
+    linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border: 1px solid #fecaca;
-  color: $error-color;
-  padding: 16px;
-  border-radius: 10px;
+  color: var(--error-color);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
   font-size: 14px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  animation: slideIn 0.3s ease;
+  gap: 10px;
+  animation: slideInUp 0.3s ease;
+  font-weight: 500;
 
   .error-icon {
-    font-size: 16px;
+    font-size: 18px;
+    animation: shake 0.5s ease;
+  }
+}
+
+.success-message {
+  background: 
+    linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  color: var(--success-color);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  animation: slideInUp 0.3s ease;
+  font-weight: 500;
+
+  .success-icon {
+    font-size: 18px;
+    animation: bounce 0.6s ease;
   }
 }
 
 .register-button {
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  background: var(--secondary-gradient);
   color: white;
   border: none;
-  padding: 16px 24px;
-  border-radius: 10px;
+  padding: 18px 24px;
+  border-radius: var(--radius-lg);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 16px;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: var(--shadow-md);
 
   &::before {
     content: '';
@@ -203,12 +326,14 @@ $background-light: #f3f4f6;
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 15px 25px -5px rgba(102, 126, 234, 0.4);
+    box-shadow: 
+      0 15px 25px -5px rgba(240, 147, 251, 0.4),
+      var(--shadow-lg);
 
     &::before {
       left: 100%;
@@ -216,18 +341,22 @@ $background-light: #f3f4f6;
   }
 
   &:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(-1px);
   }
 
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
+    
+    &::before {
+      display: none;
+    }
   }
 
   .loading-spinner {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-top: 2px solid white;
     border-radius: 50%;
@@ -239,25 +368,218 @@ $background-light: #f3f4f6;
   text-align: center;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 
   p {
-    color: $text-light;
+    color: var(--text-secondary);
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
+    font-weight: 400;
   }
 }
 
 .auth-link {
-  color: $primary-color;
+  color: var(--accent-color);
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
   transition: all 0.2s ease;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--secondary-gradient);
+    transition: width 0.3s ease;
+  }
 
   &:hover {
-    color: $secondary-color;
-    text-decoration: underline;
+    color: var(--secondary-color);
+    
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--background-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    cursor: pointer;
+    margin: 0;
+
+    &::before {
+      display: none;
+    }
+
+    .terms-link {
+      color: var(--accent-color);
+      text-decoration: underline;
+      font-weight: 500;
+
+      &:hover {
+        color: var(--secondary-color);
+      }
+    }
+  }
+}
+
+// 注册页专用动画
+@keyframes floatReverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(8px) rotate(-1deg); }
+  66% { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.12;
+  }
+  50% { 
+    transform: scale(1.2);
+    opacity: 0.18;
+  }
+}
+
+@keyframes wiggle {
+  0%, 7%, 14%, 21%, 100% {
+    transform: rotate(0deg);
+  }
+  3.5% {
+    transform: rotate(-5deg);
+  }
+  10.5%, 17.5% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .register-container {
+    padding: 16px;
+  }
+  
+  .register-card {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .form-group {
+    gap: 18px;
+  }
+
+
+}
+
+@media (max-width: 480px) {
+  .register-header {
+    margin-bottom: 28px;
+    
+    &::before {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    
+    h1 {
+      font-size: 24px;
+    }
+    
+    p {
+      font-size: 14px;
+    }
+  }
+  
+  .form-group input {
+    padding: 14px 16px;
+    font-size: 16px;
+  }
+  
+  .register-button {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+
+  .terms-checkbox {
+    padding: 12px;
+    gap: 10px;
+  }
+}
+
+// 深色模式支持
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+    --border-focus: #4b5563;
+    --background-light: #1f2937;
+    --background-card: #111827;
   }
 }
 

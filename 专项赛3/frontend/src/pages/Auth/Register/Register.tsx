@@ -2,8 +2,8 @@
 // 位置: src/pages/Register.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { RegisterRequest } from '../types/auth';
+import { useUserStore } from '../../../store/userStore';
+import { RegisterRequest } from '../../../types/auth';
 import './Register.scss';
 
 const Register: React.FC = () => {
@@ -17,7 +17,7 @@ const Register: React.FC = () => {
     clearFieldErrors,
     setFieldError,
     isAuthenticated 
-  } = useAuthStore();
+  } = useUserStore();
 
   const [formData, setFormData] = useState<RegisterRequest>({
     username: '',

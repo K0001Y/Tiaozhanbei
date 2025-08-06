@@ -1,0 +1,339 @@
+:root {
+  --primary: #2c6fbb;
+  --primary-light: #e0ebf7;
+  --secondary: #4caf50;
+  --dark: #2c3e50;
+  --light: #f8f9fa;
+  --gray: #6c757d;
+  --border: #dee2e6;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f5ff;
+  color: #333;
+  line-height: 1.6;
+}
+
+.medical-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* 侧边导航 */
+.sidebar {
+  position: fixed;
+  width: 260px;
+  background: linear-gradient(180deg, var(--primary) 0%, #1a4b8f 100%);
+  height: 100vh;
+  color: white;
+  padding: 20px 0;
+  box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: var(--transition);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+
+  i {
+    font-size: 28px;
+    margin-right: 12px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+}
+
+.nav-item {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+
+  &:hover, &.active {
+    background: rgba(255,255,255,0.15);
+  }
+
+  &:hover::before, &.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: white;
+  }
+
+  i {
+    font-size: 20px;
+    width: 30px;
+    margin-right: 10px;
+  }
+
+  span {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+/* 主内容区 */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  width: calc(100vw - 260px);
+  margin-left: 260px;
+  scrollbar-width: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+
+  h2 {
+    color: var(--dark);
+    font-size: 24px;
+    font-weight: 600;
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid var(--primary-light);
+  }
+
+  .user-title {
+    font-size: 12px;
+    color: var(--gray);
+  }
+}
+
+/* 卡片样式 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+  }
+}
+
+.card-header {
+  background: var(--primary-light);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+
+  i {
+    font-size: 24px;
+    color: var(--primary);
+    margin-right: 12px;
+  }
+
+  h3 {
+    color: var(--dark);
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.card-body {
+  padding: 20px;
+
+  p {
+    color: var(--gray);
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+}
+
+/* 表单样式 */
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark);
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: var(--transition);
+
+  &:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(44, 111, 187, 0.15);
+  }
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+
+  &.btn-primary {
+    background: var(--primary);
+    color: white;
+
+    &:hover {
+      background: #1a4b8f;
+    }
+  }
+
+  &.btn-secondary {
+    background: var(--secondary);
+    color: white;
+
+    &:hover {
+      background: #3d8b40;
+    }
+  }
+}
+
+.btn-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* 图片上传区域 */
+.image-upload {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: var(--transition);
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  i {
+    font-size: 48px;
+    color: var(--gray);
+    margin-bottom: 15px;
+  }
+
+  h4 {
+    color: var(--dark);
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: var(--gray);
+    font-size: 14px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+
+  &.delay-1 { animation-delay: 0.1s; }
+  &.delay-2 { animation-delay: 0.2s; }
+  &.delay-3 { animation-delay: 0.3s; }
+}
+
+/* 模块内容区 */
+.content-area {
+  min-height: 500px;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .medical-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 10px 0;
+  }
+  
+  .logo {
+    padding: 10px 20px;
+  }
+  
+  .nav-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-item {
+    padding: 10px 15px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+}
