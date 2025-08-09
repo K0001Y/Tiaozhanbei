@@ -2,9 +2,62 @@
 
 [toc]
 
-## 1. 认证相关接口 (authRoutes)
+## 数据库模式设计
 
-### 1.1 用户注册
+```sql
+use medical_assistant;
+
+-- 用户表
+CREATE TABLE `users` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(50) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `age` INT NOT NULL,
+    `gender` ENUM('男', '女') NOT NULL,
+    `phone` VARCHAR(20),
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `username_unique` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 知识库内容表
+CREATE TABLE `library` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `tags` VARCHAR(500),
+    `file_path` VARCHAR(500),
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 疾病信息表
+CREATE TABLE `diseases` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `source` VARCHAR(100),
+    `description` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 病历表
+CREATE TABLE `records` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `user_id` INT NOT NULL,
+    `symptoms` TEXT NOT NULL,
+    `diagnosis` VARCHAR(255),
+    `prescription` TEXT,
+    `created_at` DATETIME,
+    `file_path` VARCHAR(500),
+    PRIMARY KEY (`id`),
+    KEY `user_id` (`user_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+## API 接口文档
+
+### 1. 认证相关接口 (authRoutes)
+
+#### 1.1 用户注册
 
 **基本信息**
 
@@ -65,7 +118,7 @@
 
 ---
 
-### 1.2 用户登录
+#### 1.2 用户登录
 
 **基本信息**
 
@@ -103,7 +156,16 @@
         "name": "张三",
         "age": 35,
         "gender": "男",
-        "phone": "13800138000"
+        "phone": "13800138000",
+        "records": [
+          {
+            "recordId": 1,
+            "symptoms": "头痛、头晕",
+            "disease": "高血压",
+            "prescription": "低盐饮食、适量运动",
+            "time": "2024-01-01T10:00:00.000Z"
+          }
+        ]
       },
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     }
@@ -121,7 +183,7 @@
 
 ---
 
-### 1.3 获取用户信息
+#### 1.3 获取用户信息
 
 **基本信息**
 
@@ -143,7 +205,16 @@
       "name": "张三",
       "age": 35,
       "gender": "男",
-      "phone": "13800138000"
+      "phone": "13800138000",
+      "records": [
+        {
+          "recordId": 1,
+          "symptoms": "头痛、头晕",
+          "disease": "高血压",
+          "prescription": "低盐饮食、适量运动",
+          "time": "2024-01-01T10:00:00.000Z"
+        }
+      ]
     }
   }
 }
@@ -151,9 +222,9 @@
 
 ---
 
-## 2. 知识库信息接口 (libraryRoutes)
+### 2. 知识库信息接口 (libraryRoutes)
 
-### 2.1 获取知识库列表
+#### 2.1 获取知识库列表
 
 **基本信息**
 
@@ -198,7 +269,7 @@
 
 ---
 
-### 2.2 上传资料至知识库
+#### 2.2 上传资料至知识库
 
 **基本信息**
 
@@ -232,9 +303,9 @@ fileName: 高血压诊疗指南.txt
 
 ---
 
-## 3. 病理检索接口 (diseaseRoutes)
+### 3. 病理检索接口 (diseaseRoutes)
 
-### 3.1 获取检索结果
+#### 3.1 获取检索结果
 
 **基本信息**
 
@@ -273,9 +344,9 @@ fileName: 高血压诊疗指南.txt
 
 ---
 
-## 4. 辅助望诊接口 (searchRoutes)
+### 4. 辅助望诊接口 (searchRoutes)
 
-### 4.1 图片望诊
+#### 4.1 图片望诊
 
 **基本信息**
 
@@ -306,14 +377,13 @@ image: [图片文件]
   "message": "望诊分析成功",
   "data": {
     "results": "遗传因素、饮食不当、缺乏运动。头痛、头晕、心悸。药物治疗、生活方式改变。低盐饮食、适量运动、戒烟限酒。",
-    "analysisId": "watch_123456789"
   }
 }
 ```
 
 ---
 
-### 4.2 望诊补充
+#### 4.2 望诊补充
 
 **基本信息**
 
@@ -326,7 +396,7 @@ image: [图片文件]
 **请求参数**
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
-| analysisId | String | 是 | 之前望诊的分析ID |
+| prevAnalysis | String | 是 | 之前望诊的分析 |
 | additionalInfo | String | 是 | 补充的望诊信息 |
 | additionalFile | File | 否 | 附加的图片文件 |
 
@@ -352,9 +422,9 @@ additionalFile: [图片文件]
 
 ---
 
-## 5. 辅助问诊接口 (inquiryRoutes)
+### 5. 辅助问诊接口 (inquiryRoutes)
 
-### 5.1 初步问诊
+#### 5.1 初步问诊
 
 **基本信息**
 
@@ -387,14 +457,13 @@ additionalFile: [图片文件]
   "message": "问诊分析成功",
   "data": {
     "results": "遗传因素、饮食不当、缺乏运动。头痛、头晕、心悸。药物治疗、生活方式改变。低盐饮食、适量运动、戒烟限酒。",
-    "analysisId": "inquiry_123456789"
   }
 }
 ```
 
 ---
 
-### 5.2 问诊补充
+#### 5.2 问诊补充
 
 **基本信息**
 
@@ -406,6 +475,7 @@ additionalFile: [图片文件]
 **请求参数**
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
+| prevInquiry | String | 是 | 之前问诊的分析 |
 | additionalInfo | String | 是 | 补充的问诊信息 |
 | additionalFile | File | 否 | 附加的图片文件 |
 
@@ -431,9 +501,9 @@ additionalFile: [检查报告图片]
 
 ---
 
-## 病历生成接口 (recordRoutes)
+### 6. 病历生成接口 (recordRoutes)
 
-### 6.1 生成病历
+#### 6.1 生成病历
 
 **基本信息**
 
@@ -472,7 +542,7 @@ additionalFile: [检查报告图片]
 }
 ```
 
-### 6.2 导入病历
+#### 6.2 导入病历
 
 **基本信息**
 
@@ -507,7 +577,7 @@ recordImage: [file]
 }
 ```
 
-### 6.3 保存病历
+#### 6.3 保存病历
 
 **基本信息**
 
@@ -517,10 +587,14 @@ recordImage: [file]
 - 认证: 需要Bearer Token
 
 **请求参数**
+
 | 参数名 | 类型 | 必选 | 描述 |
 | ----------- | ------ | ---- | ------------------------ |
 | recordImage | File | 是 | 要保存的病历图片 |
 | patientId | Number | 是 | 患者的唯一标识 |
+| symptoms | String | 是 | 症状描述 |
+| disease | String | 是 | 疾病描述 |
+| prescription | String | 是 | 药物处方 |
 
 **请求体示例**
 
@@ -534,10 +608,81 @@ patientId: 1
 ```json
 {
   "success": true,
-  "message": "病历保存成功"
+  "message": "病历保存成功",
+  "data": {
+    "recordId": 123,
+    "createdAt": "2024-08-08T10:30:00Z"
+  }
+}
+```
+
+#### 6.4 获取病历列表
+
+**基本信息**
+
+- 路径: `/api/record/list`
+- 方法: `GET`
+- 描述: 获取当前用户的病历记录列表
+- 认证: 需要Bearer Token
+
+**查询参数**
+
+| 参数名 | 类型 | 必选 | 描述 |
+| ----------- | ------ | ---- | ------------------------ |
+| page | Number | 否 | 页码，默认为1 |
+| limit | Number | 否 | 每页记录数，默认为10 |
+| startDate | String | 否 | 开始日期 (YYYY-MM-DD) |
+| endDate | String | 否 | 结束日期 (YYYY-MM-DD) |
+
+**响应示例**
+
+```json
+{
+  "success": true,
+  "message": "获取病历列表成功",
+  "data": {
+    "records": [
+      {
+        "recordId": 123,
+        "symptoms": "主诉头痛、头晕",
+        "disease": "可能与遗传因素、饮食不当、缺乏运动有关",
+        "prescription": "建议低盐饮食、适量运动、戒烟限酒",
+        "date": "2024-08-08"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "limit": 10
+  }
 }
 ```
 
 ---
 
-需要接入AI配合实现的接口有 3.1, 4.1, 4.2, 5.1, 5.2, 6.1, 6.2。
+## 说明
+
+### 诊断工作流程
+
+1. **望诊**: 用户上传图片 → AI分析 → 结果存储到前端store
+2. **问诊**: 用户提交症状 → AI分析 → 结果存储到前端store  
+3. **病历生成**: 从前端store读取望诊/问诊结果 → 发送到后端生成病历
+4. **病历保存**: 将生成的病历保存到数据库
+
+### 需要AI配合实现的接口
+
+以下接口需要接入AI模型来实现核心功能：
+
+- **3.1 获取检索结果** - 需要模型进行疾病知识检索和匹配
+- **4.1 图片望诊** - 需要视觉模型分析医学图像
+- **4.2 望诊补充** - 需要模型综合分析图像和文本
+- **5.1 初步问诊** - 需要模型进行症状分析
+- **5.2 问诊补充** - 需要模型进行问诊分析
+- **6.1 生成病历** - 需要模型整合分析结果生成病历
+- **6.2 导入病历** - 需要模型识别和解析病历图片生成新病历
+
+### 数据库关系说明
+
+- `users` 表存储用户基本信息
+- `records` 表通过 `user_id` 关联用户，存储病历信息
+- `library` 表存储医学知识库内容，支持全文检索
+- `diseases` 表存储标准疾病信息，支持症状匹配
