@@ -1,0 +1,206 @@
+[
+  {
+    "test_case": {
+      "user_input": "我最近头疼得厉害，是怎么回事？",
+      "expected_intent": "diagnosis",
+      "description": "明确的医疗症状（头痛）"
+    },
+    "detected_intent": "diagnosis",
+    "confidence": 1.0,
+    "keywords": [
+      "头疼",
+      "厉害"
+    ],
+    "reasoning": "用户提到'头疼'和'厉害'，这些词汇通常与医疗症状相关，因此可以判断用户意图寻求诊断或医疗建议。",
+    "matches_expected": true,
+    "route": "diagnosis",
+    "response_time": 2.043185,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "如何缓解感冒症状？",
+      "expected_intent": "diagnosis",
+      "description": "寻求治疗建议"
+    },
+    "detected_intent": "question",
+    "confidence": 1,
+    "keywords": [
+      "如何",
+      "缓解",
+      "感冒症状",
+      "症状"
+    ],
+    "reasoning": "用户在询问一个一般性的问题，而不是寻求具体的医疗诊断或描述症状。",
+    "matches_expected": false,
+    "route": "conversation",
+    "response_time": 1.002765,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "什么是高血压？",
+      "expected_intent": "question",
+      "description": "一般医疗问题"
+    },
+    "detected_intent": "question",
+    "confidence": 1,
+    "keywords": [
+      "什么是",
+      "高血压"
+    ],
+    "reasoning": "用户在询问关于高血压的一般信息，而不是寻求具体的医疗诊断或描述症状。",
+    "matches_expected": true,
+    "route": "conversation",
+    "response_time": 0.98394,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "今天天气真好",
+      "expected_intent": "unclear",
+      "description": "非医疗相关陈述"
+    },
+    "detected_intent": "question",
+    "confidence": 0.5,
+    "keywords": [
+      "天气"
+    ],
+    "reasoning": "用户提到的是今天的天气情况，这属于一般性的询问，而非寻求医疗诊断或描述症状。因此，将此意图分类为'question'。",
+    "matches_expected": false,
+    "route": "conversation",
+    "response_time": 1.161895,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "我的病历上显示血压偏高",
+      "expected_intent": "diagnosis",
+      "description": "包含医疗关键词'病历'"
+    },
+    "detected_intent": "diagnosis",
+    "confidence": 0.95,
+    "keywords": [
+      "病历",
+      "显示",
+      "血压",
+      "偏高",
+      "病历"
+    ],
+    "reasoning": "用户提到的关键词包括“病历”、“显示”、“血压”和“偏高”，这些词汇都与医疗相关，尤其是血压偏高这一症状，通常会关联到医疗诊断或治疗建议。因此，根据关键词和上下文，可以推断用户的主要意图是寻求医疗诊断或治疗建议。",
+    "matches_expected": true,
+    "route": "diagnosis",
+    "response_time": 1.72175,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "我想知道心脏CT检查有什么风险",
+      "expected_intent": "diagnosis",
+      "description": "包含医疗关键词'CT'"
+    },
+    "detected_intent": "question",
+    "confidence": 0.95,
+    "keywords": [
+      "know",
+      "what",
+      "risk",
+      "heart",
+      "CT",
+      "check",
+      "检查",
+      "CT"
+    ],
+    "reasoning": "用户在询问关于心脏CT检查的具体信息，这属于一般问题的范畴。虽然提到了医疗检查，但没有明确表示寻求诊断或医疗建议，因此被分类为'question'意图。",
+    "matches_expected": false,
+    "route": "conversation",
+    "response_time": 1.438602,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "我最近做了B超检查，医生说肝脏有点问题",
+      "expected_intent": "diagnosis",
+      "description": "包含医疗关键词'B超'和描述病情"
+    },
+    "detected_intent": "diagnosis",
+    "confidence": 0.9,
+    "keywords": [
+      "最近",
+      "做了",
+      "B超检查",
+      "医生",
+      "说",
+      "肝脏",
+      "有点问题",
+      "检查",
+      "B超"
+    ],
+    "reasoning": "用户提到了最近进行了B超检查，并且医生提到肝脏有健康问题，这通常与寻求医疗诊断相关。因此，该文本被分类为'diagnosis'意图。",
+    "matches_expected": true,
+    "route": "diagnosis",
+    "response_time": 1.473296,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "请帮我解释一下这个化验单的结果",
+      "expected_intent": "diagnosis",
+      "description": "包含医疗关键词'化验'"
+    },
+    "detected_intent": "question",
+    "confidence": 0.8,
+    "keywords": [
+      "请",
+      "帮我",
+      "解释",
+      "化验单",
+      "结果",
+      "化验"
+    ],
+    "reasoning": "用户在询问关于化验单结果的问题，虽然涉及医疗相关词汇，但提问方式更倾向于一般性询问，而不是寻求具体的医疗诊断或建议。",
+    "matches_expected": false,
+    "route": "conversation",
+    "response_time": 1.299781,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "我可以吃什么水果？",
+      "expected_intent": "question",
+      "description": "一般饮食问题，不是明确的诊断请求"
+    },
+    "detected_intent": "question",
+    "confidence": 1.0,
+    "keywords": [
+      "我可以",
+      "吃",
+      "什么",
+      "水果"
+    ],
+    "reasoning": "用户在询问一般性的问题，即可以吃某种水果，没有涉及医疗诊断、症状或病历等医疗相关词汇。",
+    "matches_expected": true,
+    "route": "conversation",
+    "response_time": 1.191557,
+    "error": null
+  },
+  {
+    "test_case": {
+      "user_input": "你好，请问你是谁？",
+      "expected_intent": "unclear",
+      "description": "询问系统身份，非医疗相关"
+    },
+    "detected_intent": "question",
+    "confidence": 0.9,
+    "keywords": [
+      "你好",
+      "请问",
+      "你是谁"
+    ],
+    "reasoning": "用户输入的是一个一般性的问题，询问对方的身份，没有涉及任何医疗相关词汇或意图。因此，被分类为'question'意图。",
+    "matches_expected": false,
+    "route": "conversation",
+    "response_time": 1.224075,
+    "error": null
+  }
+]

@@ -15,7 +15,7 @@ from typing import List, Optional
 
 # 导入你的RAG管理器
 from Rag_manager import RAGManager
-from V2.config import DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
+from config import DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
 
 # 配置日志
 logging.basicConfig(

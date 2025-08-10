@@ -9,7 +9,7 @@ import torch
 from typing import Dict, Any
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from transformers import AutoModel, AutoTokenizer
-from V2.config import DEFAULT_EMBEDDING_MODEL
+from config import DEFAULT_EMBEDDING_MODEL, DEFAULT_EMBEDDING_PATH
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class EmbeddingModelManager:
     """嵌入模型管理类"""
     
-    def __init__(self, embedding_model_path: str = "model"):
+    def __init__(self, embedding_model_path: str = DEFAULT_EMBEDDING_PATH):
         """
         初始化嵌入模型管理器
         :param embedding_model_path: 嵌入模型路径
@@ -29,7 +29,7 @@ class EmbeddingModelManager:
             self.device = self._get_device()
             
             # 确保必要的目录存在
-            os.makedirs("model", exist_ok=True)
+            os.makedirs(DEFAULT_EMBEDDING_PATH, exist_ok=True)
             
             logger.info(f"嵌入模型管理器初始化成功，使用设备: {self.device}")
             
@@ -71,9 +71,9 @@ class EmbeddingModelManager:
             # 定义必需的文件
             required_files = [
                 'config.json',
-                'pytorch_model.bin',  # 或者 model.safetensors
+                'model.safetensors',  # 或者 model.safetensors
                 'tokenizer_config.json',
-                'vocab.txt'  # 或者其他 tokenizer 文件
+                'tokenizer.json'  # 或者其他 tokenizer 文件
             ]
         
             # 检查本地模型文件是否完整

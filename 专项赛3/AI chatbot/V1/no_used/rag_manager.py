@@ -13,7 +13,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.prompts import ChatPromptTemplate
 
-from V2.config import (
+from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
     DEFAULT_EMBEDDING_MODEL,

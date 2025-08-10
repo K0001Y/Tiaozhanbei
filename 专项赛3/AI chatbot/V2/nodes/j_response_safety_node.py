@@ -332,7 +332,7 @@ class ResponseSafetyNode:
         
         return response
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -341,7 +341,7 @@ class ResponseSafetyNode:
             
             if not response:
                 logger.warning("响应为空，无法进行安全检查")
-                return state, "to_output"
+                return state
             
             # 执行安全检查
             violations = []
@@ -400,7 +400,7 @@ class ResponseSafetyNode:
                 logger.info("未检测到安全违规")
                 updated_state["response"] = self._add_disclaimer_if_needed(response)
             
-            return updated_state, "to_output"
+            return updated_state
         
         except Exception as e:
             error_msg = f"响应安全检查过程中出错: {str(e)}"
@@ -416,7 +416,7 @@ class ResponseSafetyNode:
                 **state,
                 "error": error_msg,
                 "response": (state.get("response", "") + safety_reminder)
-            }, "to_output"
+            }
 
 # 导出节点实例以便在图中使用
 response_safety_node = ResponseSafetyNode()

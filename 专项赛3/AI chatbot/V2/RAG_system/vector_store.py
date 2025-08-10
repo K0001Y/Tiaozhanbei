@@ -10,10 +10,11 @@ from typing import List, Dict, Any
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.schema import Document
-from V2.config import (
+from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
-    DEFAULT_VECTOR_STORE_PATH
+    DEFAULT_VECTOR_STORE_PATH,
+    
 )
 
 # 配置日志
@@ -33,7 +34,7 @@ class VectorStoreManager:
             self.vector_store = None
             
             # 确保必要的目录存在
-            os.makedirs("RAG", exist_ok=True)
+            os.makedirs(DEFAULT_VECTOR_STORE_PATH, exist_ok=True)
             
             logger.info("向量存储管理器初始化成功")
             
@@ -66,7 +67,7 @@ class VectorStoreManager:
             )
             
             # 保存空向量存储到本地
-            vector_store_path = os.path.join("RAG", "vector_store")
+            vector_store_path = os.path.join( "vector_store")
             self.save_vector_store(self.vector_store, vector_store_path)
             
             # 保存元数据
@@ -81,7 +82,7 @@ class VectorStoreManager:
                 "device": device
             }
             
-            metadata_path = os.path.join("RAG", "metadata.json")
+            metadata_path = os.path.join(DEFAULT_VECTOR_STORE_PATH, "metadata.json")
             with open(metadata_path, 'w', encoding='utf-8') as f:
                 json.dump(metadata, f, ensure_ascii=False, indent=2)
             
@@ -140,11 +141,11 @@ class VectorStoreManager:
             self.vector_store.add_documents(split_documents)
             
             # 保存更新后的向量存储
-            vector_store_path = os.path.join("RAG", "vector_store")
+            vector_store_path = os.path.join( DEFAULT_VECTOR_STORE_PATH, "vector_store")
             self.save_vector_store(self.vector_store, vector_store_path)
             
             # 更新元数据
-            metadata_path = os.path.join("RAG", "metadata.json")
+            metadata_path = os.path.join( DEFAULT_VECTOR_STORE_PATH, "metadata.json")
             existing_metadata = {}
             if os.path.exists(metadata_path):
                 with open(metadata_path, 'r', encoding='utf-8') as f:
@@ -190,10 +191,11 @@ class VectorStoreManager:
             
             # 指定相对路径：RAG/
             if not os.path.isabs(vector_store_path):
-                vector_store_path = os.path.join("RAG", vector_store_path)
-            
-            if not os.path.exists(vector_store_path + ".faiss"):
-                raise FileNotFoundError(f"向量存储文件不存在: {vector_store_path}")
+                vector_store_path = os.path.join( DEFAULT_VECTOR_STORE_PATH, vector_store_path)
+                
+            index_file = os.path.join(vector_store_path, "index.faiss")
+            if not os.path.exists(index_file):
+                raise FileNotFoundError(f"向量存储文件不存在: {index_file}")
             
             if not self.embedding_model:
                 raise ValueError("嵌入模型未加载")
@@ -226,7 +228,7 @@ class VectorStoreManager:
             
             # 保存向量存储到指定相对路径RAG/
             if not os.path.isabs(vector_store_path):
-                vector_store_path = os.path.join("RAG", vector_store_path)
+                vector_store_path = os.path.join( DEFAULT_VECTOR_STORE_PATH, vector_store_path)
             
             # 确保目录存在
             os.makedirs(os.path.dirname(vector_store_path), exist_ok=True)
@@ -255,7 +257,7 @@ class VectorStoreManager:
             count = len(index_to_docstore_id) if index_to_docstore_id else 0
             
             # 读取元数据
-            metadata_path = os.path.join("RAG", "metadata.json")
+            metadata_path = os.path.join( DEFAULT_VECTOR_STORE_PATH, "metadata.json")
             metadata = {}
             if os.path.exists(metadata_path):
                 with open(metadata_path, 'r', encoding='utf-8') as f:

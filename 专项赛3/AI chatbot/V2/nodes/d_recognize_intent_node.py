@@ -10,6 +10,18 @@ from langchain_community.llms import LlamaCpp
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
+from config import (
+    DEFAULT_MODEL_NAME,
+    DEFAULT_BASE_URL,
+    DEFAULT_API_KEY,
+    DEFAULT_MODEL_CONFIGS,
+    ALI_API_KEY,
+    ALI_BASE_URL
+)
+
+ali_url = ALI_BASE_URL
+ali_api = ALI_API_KEY
+
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,10 +55,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-3.5-turbo",      # 模型名称
+    "model": "tongyi-intent-detect-v3",      # 模型名称
     "temperature": 0,              # 温度参数（0表示最确定性）
-    "api_key": "sk-your-api-key",  # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": ali_api,  # 你的API密钥
+    "api_base": ali_url, # API基础URL
     "timeout": 30,                 # 请求超时时间（秒）
     "max_tokens": 1000             # 最大输出标记数
 }
@@ -110,7 +122,7 @@ class RecognizeIntentNode:
         else:
             raise ValueError(f"不支持的LLM提供商: {LLM_PROVIDER}")
     
-    def __call__(self, state: State) -> tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取用户输入
@@ -198,9 +210,9 @@ class RecognizeIntentNode:
             
             # 根据意图决定路由
             if intent == "diagnosis":
-                return updated_state, "diagnosis"
+                return updated_state
             else:
-                return updated_state, "conversation"
+                return updated_state
         
         except Exception as e:
             error_msg = f"意图识别过程中出错: {str(e)}"
@@ -217,8 +229,7 @@ class RecognizeIntentNode:
                     "keywords": [],
                     "reasoning": f"处理过程中出错: {str(e)}"
                 }
-            }, "conversation"
-
+            }
 
 # 导出节点实例以便在图中使用
 recognize_intent_node = RecognizeIntentNode()

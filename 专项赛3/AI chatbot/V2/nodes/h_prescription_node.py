@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.llms import LlamaCpp
 from langchain.chains import LLMChain
-
+from config import ALI_API_KEY, ALI_BASE_URL
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -41,10 +41,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-4",            # 使用强大的模型进行中医处方
+    "model": "qwen-plus-2025-07-28",            # 使用强大的模型进行中医处方
     "temperature": 0.2,          # 适当的创造性，但保持专业性
-    "api_key": "sk-your-api-key", # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": ALI_API_KEY, # 你的API密钥
+    "api_base": ALI_BASE_URL, # API基础URL
     "timeout": 90,               # 较长的超时时间
     "max_tokens": 4000           # 足够生成详细处方的空间
 }
@@ -284,7 +284,7 @@ class PrescriptionNode:
             return "\n".join([f"- {item}" for item in contraindications])
         return str(contraindications)
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -308,7 +308,7 @@ class PrescriptionNode:
                     "error": error_msg,
                     "response": response,
                     "conversation_state": "prescription_error"
-                }, "to_safety_check"
+                }
             
             # 准备处方链的输入
             prescription_input = {
@@ -324,7 +324,7 @@ class PrescriptionNode:
             prescription_result = self.prescription_chain.invoke(prescription_input)
             
             # 解析结果
-            prescription_data = prescription_result
+            prescription_data = prescription_result['text']
             
             # 更新状态中的处方数据
             updated_state = {
@@ -364,7 +364,7 @@ class PrescriptionNode:
             # 更新最终响应
             updated_state["response"] = final_response
             
-            return updated_state, "to_safety_check"
+            return updated_state
         
         except Exception as e:
             error_msg = f"处方推荐过程中出错: {str(e)}"
@@ -383,7 +383,7 @@ class PrescriptionNode:
                 "error": error_msg,
                 "response": fallback_response,
                 "conversation_state": "prescription_error"
-            }, "to_safety_check"
+            }
     
     def _create_fallback_response(self, diagnosis_data, prescription_data, symptoms_list):
         """创建备用响应"""

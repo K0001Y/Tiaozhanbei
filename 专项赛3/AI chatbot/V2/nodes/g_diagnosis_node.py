@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.llms import LlamaCpp
 from langchain.chains import LLMChain
-
+from config import ALI_API_KEY, ALI_BASE_URL
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,10 +40,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-4",            # 使用更强大的模型进行中医辨证
+    "model": "qwen-plus-2025-07-28",            # 使用更强大的模型进行中医辨证
     "temperature": 0.1,          # 低温度确保稳定的医疗诊断
-    "api_key": "sk-your-api-key", # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": ALI_API_KEY, # 你的API密钥
+    "api_base": ALI_BASE_URL, # API基础URL
     "timeout": 90,               # 更长的超时时间用于复杂分析
     "max_tokens": 3000           # 更大的输出空间
 }
@@ -210,7 +210,7 @@ class DiagnosisNode:
         
         return "\n".join(formatted)
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -230,10 +230,11 @@ class DiagnosisNode:
             # 运行链
             logger.info("开始中医辨证分析...")
             result = self.chain.invoke(chain_input)
-            
+            logger.info(f"LLM原始输出: {result}")
+            logger.info(f"LLM原始输出类型: {type(result)}")
             # 解析结果
-            parsed_output = result
-            
+            parsed_output = result['text']
+            logger.info(f"解析后的输出: {parsed_output}")
             # 构建诊断数据
             diagnosis_data = {
                 "pattern_type": parsed_output.get("pattern_type", "未能确定证型"),
@@ -253,7 +254,7 @@ class DiagnosisNode:
                 "conversation_state": "diagnosis_complete"
             }
             
-            return updated_state, "to_prescription"
+            return updated_state
         
         except Exception as e:
             error_msg = f"辨证分析过程中出错: {str(e)}"
@@ -274,7 +275,7 @@ class DiagnosisNode:
                 "error": error_msg,
                 "diagnosis_data": default_diagnosis,
                 "conversation_state": "diagnosis_error"
-            }, "to_prescription"
+            }
 
 # 导出节点实例以便在图中使用
 diagnosis_node = DiagnosisNode()

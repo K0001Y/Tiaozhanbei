@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.llms import LlamaCpp
 from langchain.chains import LLMChain
-
+from config import DEFAULT_API_KEY,DEFAULT_BASE_URL
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,10 +38,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-3.5-turbo",    # 生成追问可以使用较轻量级模型
+    "model": "deepseek-chat",    # 生成追问可以使用较轻量级模型
     "temperature": 0.3,          # 适当的创造性
-    "api_key": "sk-your-api-key", # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": DEFAULT_API_KEY, # 你的API密钥
+    "api_base": DEFAULT_BASE_URL, # API基础URL
     "timeout": 30,               # 请求超时时间
     "max_tokens": 500            # 足够生成追问的标记数
 }
@@ -207,7 +207,7 @@ class FollowUpQuestionNode:
         
         return filtered_info
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -237,7 +237,7 @@ class FollowUpQuestionNode:
                     **state,
                     "missing_info_list": [],
                     "conversation_state": "ready_for_diagnosis"
-                }, "to_diagnosis"
+                }
             
             # 如果过滤后没有新的缺失信息，也没有症状，使用一个通用问题
             if not filtered_missing_info and not symptoms_list:
@@ -273,7 +273,7 @@ class FollowUpQuestionNode:
                 "conversation_state": "awaiting_follow_up"
             }
             
-            return updated_state, "to_output"
+            return updated_state
         
         except Exception as e:
             error_msg = f"生成追问过程中出错: {str(e)}"
@@ -287,7 +287,7 @@ class FollowUpQuestionNode:
                 "error": error_msg,
                 "response": default_question,
                 "conversation_state": "awaiting_follow_up"
-            }, "to_output"
+            }
 
 # 导出节点实例以便在图中使用
 follow_up_question_node = FollowUpQuestionNode()

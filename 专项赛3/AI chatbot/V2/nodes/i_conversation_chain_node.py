@@ -4,8 +4,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.llms import LlamaCpp
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
+from langchain.chains import LLMChain
+from config import ALI_API_KEY, ALI_BASE_URL
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -35,10 +35,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-3.5-turbo",    # 对话问答可以使用3.5模型
+    "model": "qwen-plus-2025-07-28",    # 对话问答可以使用3.5模型
     "temperature": 0.4,          # 适当的创造性
-    "api_key": "sk-your-api-key", # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": ALI_API_KEY, # 你的API密钥
+    "api_base": ALI_BASE_URL, # API基础URL
     "timeout": 30,               # 请求超时时间
     "max_tokens": 2000           # 较长的回复空间
 }
@@ -71,14 +71,10 @@ class ConversationChainNode:
         # 创建对话提示模板
         self.conversation_prompt = self._create_conversation_prompt()
         
-        # 创建内存对象
-        self.memory = ConversationBufferMemory()
-        
-        # 创建对话链
-        self.chain = ConversationChain(
+        # 创建LLM链（不再使用ConversationChain）
+        self.conversation_chain = LLMChain(
             llm=self.llm,
             prompt=self.conversation_prompt,
-            memory=self.memory,
             verbose=True
         )
         
@@ -138,7 +134,7 @@ class ConversationChainNode:
         6. 如果问题超出中医范畴，可以适当引入现代医学知识，但要明确区分
         7. 对于无法确定的信息，坦诚表明自己的局限性
         
-        用户问题: {input}
+        用户问题: {user_input}
         
         助手回答:
         """
@@ -148,7 +144,7 @@ class ConversationChainNode:
     def _format_history(self, messages):
         """格式化消息历史"""
         if not messages:
-            return ""
+            return "这是一次新的对话。"
         
         formatted_history = []
         for msg in messages:
@@ -159,7 +155,44 @@ class ConversationChainNode:
         
         return "\n".join(formatted_history)
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def _prepare_chain_input(self, user_input, messages, relevant_context):
+        """准备链的输入参数"""
+        # 格式化历史消息
+        history = self._format_history(messages)
+        
+        # 处理相关上下文
+        if not relevant_context:
+            relevant_context = (
+                "中医是中国传统医学，有数千年历史。核心理论包括阴阳五行、脏腑经络、气血津液等。"
+                "诊断方法有望闻问切，治疗手段包括中药、针灸、推拿、气功等。强调整体观念和辨证论治。"
+            )
+        
+        return {
+            "user_input": user_input,
+            "history": history,
+            "relevant_context": relevant_context
+        }
+    
+    def _validate_response(self, response):
+        """验证响应质量"""
+        if not response or not response.strip():
+            return False
+        
+        # 检查响应长度
+        if len(response.strip()) < 10:
+            return False
+        
+        # 检查是否包含基本的中医元素（可选）
+        tcm_keywords = ["中医", "阴阳", "五行", "气血", "脏腑", "经络", "辨证", "治疗", "养生"]
+        user_friendly_words = ["您", "建议", "可以", "帮助", "了解"]
+        
+        # 响应应该专业但友好
+        has_tcm_content = any(keyword in response for keyword in tcm_keywords)
+        has_friendly_tone = any(word in response for word in user_friendly_words)
+        
+        return has_tcm_content or has_friendly_tone
+    
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -167,39 +200,18 @@ class ConversationChainNode:
             messages = state.get("messages", [])
             relevant_context = state.get("relevant_context", "")
             
-            # 如果没有相关上下文，使用通用回复
-            if not relevant_context:
-                relevant_context = (
-                    "中医是中国传统医学，有数千年历史。核心理论包括阴阳五行、脏腑经络、气血津液等。"
-                    "诊断方法有望闻问切，治疗手段包括中药、针灸、推拿、气功等。强调整体观念和辨证论治。"
-                )
-            
-            # 格式化历史消息
-            history = self._format_history(messages)
-            
-            # 同步内存
-            self.memory.clear()  # 清除旧内存
-            if history:
-                self.memory.chat_memory.add_user_message("历史对话：" + history)
-            
             # 准备链的输入
-            chain_input = {
-                "input": user_input,
-                "relevant_context": relevant_context,
-                "history": history
-            }
+            chain_input = self._prepare_chain_input(user_input, messages, relevant_context)
             
-            # 运行链
-            logger.info("生成对话回复...")
-            result = self.chain.invoke(chain_input)
-            response = result.get('response', '')
+            # 记录调用信息
+            logger.info(f"处理用户输入: {user_input[:50]}...")
+            logger.info("开始生成对话回复...")
             
-            # 如果响应为空，使用默认回复
-            if not response:
-                response = (
-                    "很抱歉，我无法提供关于这个问题的具体回答。"
-                    "您是想了解中医相关的内容吗？如果是，请提供更多细节，我会尽力协助您。"
-                )
+            # 运行对话链
+            result = self.conversation_chain.invoke(chain_input)
+            response = result.get('text', '').strip()
+            
+           
             
             logger.info(f"生成的回复: {response[:100]}...")
             
@@ -209,23 +221,24 @@ class ConversationChainNode:
                 "response": response
             }
             
-            return updated_state, "to_safety_check"
+            return updated_state
         
         except Exception as e:
             error_msg = f"生成对话回复过程中出错: {str(e)}"
-            logger.error(error_msg)
+            logger.error(error_msg, exc_info=True)
             
-            # 发生错误时的默认回复
-            default_response = (
-                "很抱歉，我在处理您的问题时遇到了技术困难。"
-                "请重新表述您的问题，或稍后再试。如果您有关于中医的具体问题，我很乐意为您解答。"
+            fallback_response += (
+                "\n\n很抱歉，我在处理您的问题时遇到了技术困难。"
+                "请重新表述您的问题，或稍后再试。"
             )
+            
+            
             
             return {
                 **state,
                 "error": error_msg,
-                "response": default_response
-            }, "to_safety_check"
+                "response": fallback_response
+            }
 
 # 导出节点实例以便在图中使用
 conversation_chain_node = ConversationChainNode()

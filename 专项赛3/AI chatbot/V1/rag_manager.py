@@ -15,7 +15,7 @@ from langchain_community.vectorstores import FAISS
 from transformers import AutoModel, AutoTokenizer
 from langchain.schema import Document
 from utils import FileHandler, DocumentLoader
-from V2.config import (
+from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
     DEFAULT_EMBEDDING_MODEL,

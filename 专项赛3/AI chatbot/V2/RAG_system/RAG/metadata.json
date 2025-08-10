@@ -1,0 +1,10 @@
+{
+  "documents_count": 0,
+  "chunks_count": 0,
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "vector_store_path": "vector_store",
+  "created_time": "2025-08-10T01:25:11.657301",
+  "is_empty": true,
+  "device": "cuda"
+}

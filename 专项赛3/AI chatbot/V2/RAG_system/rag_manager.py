@@ -8,18 +8,18 @@ import logging
 from typing import List, Optional, Dict, Any
 from langchain.schema import Document
 from utils import FileHandler, DocumentLoader
-from V2.config import (
+from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_VECTOR_STORE_PATH,
     SUPPORTED_ENCODINGS,
-    DEFAULT_PROMPT_TEMPLATE
+    DEFAULT_EMBEDDING_PATH 
 )
 
-from embedding_model import EmbeddingModelManager
-from vector_store import VectorStoreManager
-from retriever import RetrieverManager
+from RAG_system.embedding_model import EmbeddingModelManager
+from RAG_system.vector_store import VectorStoreManager
+from RAG_system.retriever import RetrieverManager
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class RAGManager:
     """RAG功能管理器类"""
     
-    def __init__(self, embedding_model_path: str = "model"):
+    def __init__(self, embedding_model_path: str = DEFAULT_EMBEDDING_PATH):
         """
         初始化RAG管理器
         :param embedding_model_path: 嵌入模型路径
@@ -46,8 +46,8 @@ class RAGManager:
             self.file_handler = FileHandler()
             
             # 确保必要的目录存在
-            os.makedirs("model", exist_ok=True)
-            os.makedirs("RAG", exist_ok=True)
+            os.makedirs(DEFAULT_EMBEDDING_PATH, exist_ok=True)
+            os.makedirs(DEFAULT_VECTOR_STORE_PATH, exist_ok=True)
             
             # 获取设备
             self.device = self.embedding_manager._get_device()
@@ -159,7 +159,7 @@ class RAGManager:
         """
         return self.retriever_manager.create_retriever(vector_store)
     
-    def _start_rag_manager(self, vector_store_path: str = DEFAULT_VECTOR_STORE_PATH):
+    def _start_rag_manager(self, vector_store_path: str = "vector_store"):
         """
         启动RAG管理器
         :param vector_store_path: 向量存储路径
@@ -193,10 +193,13 @@ class RAGManager:
             # 初始化向量存储管理器
             self.vector_store_manager = VectorStoreManager(self.embedding_manager.embedding_model)
             
-            # 检查本地向量存储并加载
-            full_vector_path = os.path.join("RAG", vector_store_path) if not os.path.isabs(vector_store_path) else vector_store_path
             
-            if os.path.exists(full_vector_path + ".faiss"):
+            vector_store_path = "vector_store" 
+            # 检查本地向量存储并加载
+            full_vector_path = os.path.join(DEFAULT_VECTOR_STORE_PATH, vector_store_path) 
+            index_file = os.path.join(full_vector_path, "index.faiss")
+            logger.info(f"检查向量存储路径: {index_file}")
+            if os.path.exists(index_file):
                 logger.info("发现本地向量存储，正在加载")
                 self._load_vector_store(vector_store_path)
             else:

@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.llms import LlamaCpp
 from langchain.chains import LLMChain
-
+from config import ALI_API_KEY, ALI_BASE_URL
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,10 +38,10 @@ LLM_PROVIDER = "openai"
 
 # OpenAI配置
 OPENAI_CONFIG = {
-    "model": "gpt-4",            # 使用更高能力的模型提取症状
+    "model": "qwen-plus-latest",            # 使用更高能力的模型提取症状
     "temperature": 0.1,          # 低温度确保更稳定的结果
-    "api_key": "sk-your-api-key", # 你的API密钥
-    "api_base": "https://api.openai.com/v1", # API基础URL
+    "api_key": ALI_API_KEY, # 你的API密钥
+    "api_base": ALI_BASE_URL, # API基础URL
     "timeout": 60,               # 较长的超时时间
     "max_tokens": 2000           # 充足的输出长度
 }
@@ -187,7 +187,7 @@ class SymptomExtractionNode:
         
         return "\n".join(formatted_history)
     
-    def __call__(self, state: State) -> Tuple[State, str]:
+    def __call__(self, state: State) -> State:
         """节点主函数"""
         try:
             # 获取输入
@@ -209,11 +209,14 @@ class SymptomExtractionNode:
             # 运行链
             logger.info("开始提取症状...")
             result = self.chain.invoke(chain_input)
-            
+            logger.info(f"LLM原始输出: {result}")
             # 解析结果
-            parsed_output = result
+            parsed_output = result['text']
+            logger.info(f"解析后的输出: {parsed_output}")
             symptoms = parsed_output.get("symptoms", [])
             missing_info = parsed_output.get("missing_info", [])
+            logger.info(f"症状: {symptoms}")
+            logger.info(f"缺失信息: {missing_info}")
             
             logger.info(f"提取到 {len(symptoms)} 个症状和 {len(missing_info)} 个缺失信息")
             
@@ -224,14 +227,21 @@ class SymptomExtractionNode:
                 "missing_info_list": missing_info
             }
             
-            # 确定路由
-            if missing_info or len(symptoms) < SYMPTOM_THRESHOLD:
-                logger.info("需要更多信息，路由到后续问题节点")
-                return updated_state, "follow_up"
+            # 确定路由 - 关键修改在这里
+            if len(symptoms) < SYMPTOM_THRESHOLD:
+                logger.info(f"提取到{len(symptoms)}个症状，少于阈值{SYMPTOM_THRESHOLD}，需要更多信息")
+                return {
+                    **updated_state,
+                    "next_node": "follow_up",
+                    "route_reason": "insufficient_symptoms"
+                }
             else:
-                logger.info("症状信息充足，路由到诊断节点")
-                return updated_state, "diagnosis"
-        
+                logger.info(f"提取到{len(symptoms)}个症状，达到阈值{SYMPTOM_THRESHOLD}，信息充足")
+                return {
+                    **updated_state,
+                    "next_node": "diagnosis", 
+                    "route_reason": "sufficient_symptoms"
+                }   
         except Exception as e:
             error_msg = f"症状提取过程中出错: {str(e)}"
             logger.error(error_msg)
@@ -242,7 +252,7 @@ class SymptomExtractionNode:
                 "error": error_msg,
                 "symptoms_list": [],
                 "missing_info_list": ["由于处理错误，需要您重新描述症状"]
-            }, "follow_up"
+            }
 
 # 导出节点实例以便在图中使用
 symptom_extraction_node = SymptomExtractionNode()

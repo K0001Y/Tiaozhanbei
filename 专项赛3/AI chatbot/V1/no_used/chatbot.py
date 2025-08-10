@@ -14,7 +14,7 @@ from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-from V2.config import (
+from config import (
     DEFAULT_MODEL_NAME,
     DEFAULT_BASE_URL,
     DEFAULT_MODEL_CONFIGS,

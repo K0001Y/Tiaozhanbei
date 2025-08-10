@@ -127,7 +127,7 @@ def initialize_chatbot() -> bool:
         
         # 1. 检查配置导入
         try:
-            from V2.config import (
+            from config import (
                 DEFAULT_MODEL_NAME, 
                 DEFAULT_BASE_URL, 
                 DEFAULT_MODEL_CONFIGS,

@@ -8,13 +8,13 @@ import logging
 from typing import List, Optional, Dict, Any
 from langchain.schema import Document
 from utils import FileHandler, DocumentLoader
-from V2.config import (
+from config import (
     DEFAULT_CHUNK_SIZE, 
     DEFAULT_CHUNK_OVERLAP, 
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_VECTOR_STORE_PATH,
     SUPPORTED_ENCODINGS,
-    DEFAULT_PROMPT_TEMPLATE
+    DEFAULT_EMBEDDING_PATH 
 )
 
 from embedding_model import EmbeddingModelManager
@@ -46,8 +46,8 @@ class RAGManager:
             self.file_handler = FileHandler()
             
             # 确保必要的目录存在
-            os.makedirs("model", exist_ok=True)
-            os.makedirs("RAG", exist_ok=True)
+            os.makedirs(DEFAULT_EMBEDDING_PATH, exist_ok=True)
+            os.makedirs(DEFAULT_VECTOR_STORE_PATH, exist_ok=True)
             
             # 获取设备
             self.device = self.embedding_manager._get_device()

@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import List, Optional
 
 # 导入你的RAG管理器
-from Rag_manager import RAGManager
-from V2.config import DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
+from RAG_system.rag_manager import RAGManager
+from config import DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP, DEFAULT_EMBEDDING_MODEL, DEFAULT_EMBEDDING_PATH, DEFAULT_VECTOR_STORE_PATH
 
 # 配置日志
 logging.basicConfig(
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class VectorStoreConverter:
     """向量存储转换器"""
     
-    def __init__(self, embedding_model_path: str = "model"):
+    def __init__(self, embedding_model_path: str = "DEFAULT_EMBEDDING_MODEL"):
         """
         初始化转换器
         :param embedding_model_path: 嵌入模型路径
