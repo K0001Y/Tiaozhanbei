@@ -52,7 +52,7 @@ const SearchModule: React.FC = () => {
     <div className="search-module">
       <div className="card">
         <div className="card-header">
-          <i className="fas fa-search-medical"></i>
+          <i className="fas fa-search"></i>
           <h3>病理检索</h3>
         </div>
         <div className="card-body">

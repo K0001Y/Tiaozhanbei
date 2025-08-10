@@ -137,7 +137,7 @@ const Register: React.FC = () => {
               placeholder="请输入用户名"
               required
               disabled={isLoading}
-              className={fieldErrors.username ? 'error' : ''}
+              className={`form-control ${fieldErrors.username ? 'error' : ''}`}
             />
             {fieldErrors.username && (
               <span className="field-error">{fieldErrors.username}</span>
@@ -155,7 +155,7 @@ const Register: React.FC = () => {
               placeholder="请输入您的邮箱"
               required
               disabled={isLoading}
-              className={fieldErrors.email ? 'error' : ''}
+              className={`form-control ${fieldErrors.email ? 'error' : ''}`}
             />
             {fieldErrors.email && (
               <span className="field-error">{fieldErrors.email}</span>
@@ -173,7 +173,7 @@ const Register: React.FC = () => {
               placeholder="请输入密码"
               required
               disabled={isLoading}
-              className={fieldErrors.password ? 'error' : ''}
+              className={`form-control ${fieldErrors.password ? 'error' : ''}`}
             />
             {fieldErrors.password && (
               <span className="field-error">{fieldErrors.password}</span>
@@ -194,7 +194,7 @@ const Register: React.FC = () => {
               placeholder="请再次输入密码"
               required
               disabled={isLoading}
-              className={fieldErrors.confirmPassword ? 'error' : ''}
+              className={`form-control ${fieldErrors.confirmPassword ? 'error' : ''}`}
             />
             {fieldErrors.confirmPassword && (
               <span className="field-error">{fieldErrors.confirmPassword}</span>

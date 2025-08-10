@@ -13,17 +13,17 @@ interface NavigationItem {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [activeModule, setActiveModule] = useState<string>('dashboard');
+  const [activeModule, setActiveModule] = useState<string>('ai-assist');
   const [currentTitle, setCurrentTitle] = useState<string>('辅助诊疗');
 
   const navigationItems: NavigationItem[] = [
+    { id: 'ai-assist', label: '智能助手', icon: 'fas fa-robot' },
     { id: 'dashboard', label: '患者信息', icon: 'fas fa-home' },
     { id: 'knowledge', label: '知识库', icon: 'fas fa-book-medical' },
     { id: 'search', label: '病理检索', icon: 'fas fa-search' },
     { id: 'diagnosis', label: '辅助望诊', icon: 'fas fa-eye' },
-    { id: 'inquiry', label: '辅助问切', icon: 'fas fa-user-md' },
+    { id: 'inquiry', label: '辅助问诊', icon: 'fas fa-user-md' },
     { id: 'record', label: '病历生成', icon: 'fas fa-file-medical' },
-    { id: 'ai-assist', label: '智能助手', icon: 'fas fa-robot' },
   ];
 
   const handleNavigation = (moduleId: string, moduleLabel: string) => {
@@ -57,13 +57,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="main-content">
         <div className="header">
           <h2 id="module-title">{currentTitle}</h2>
-          <div className="user-info">
-            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="用户头像" />
-            <div>
-              <div>张医生</div>
-              <div className="user-title">副主任医师</div>
-            </div>
-          </div>
         </div>
 
         {/* 动态内容区域 */}

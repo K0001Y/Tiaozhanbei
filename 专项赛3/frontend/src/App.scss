@@ -6,10 +6,45 @@
 body {
   margin: 0;
   padding: 0;
+  // 隐藏滚动条 - Firefox
   scrollbar-width: none;
+  // 隐藏滚动条 - IE/Edge
+  -ms-overflow-style: none;
   background: #ffffff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  // 隐藏滚动条 - Webkit (Chrome, Safari)
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
+
+// 为所有可能出现滚动条的容器设置隐藏样式
+.main-content {
+  // 隐藏滚动条但保持滚动功能
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}
+
+// 全局滚动条隐藏样式
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}
+
+// 如果您想要完全禁用滚动（不推荐），可以使用：
+// .main-content {
+//   overflow: hidden;
+// }
 
 .loading {
   display: flex;

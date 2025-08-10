@@ -94,6 +94,40 @@ body {
   }
 }
 
+/* 智能助手模块特殊样式 - 突出显示 */
+.nav-item:first-child {
+  background: linear-gradient(135deg, #4dabf7 0%, #339af0 35%, #74c0fc 70%, #4dabf7 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(77, 171, 247, 0.4);
+  margin: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  
+  &:hover {
+    background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 25%, #a5d8ff 60%, #74c0fc 100%);
+    box-shadow: 0 6px 20px rgba(77, 171, 247, 0.5);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  &::before {
+    background: rgba(255, 255, 255, 0.9) !important;
+    width: 6px !important;
+    border-radius: 0 3px 3px 0;
+  }
+  
+  i {
+    color: white;
+    font-size: 22px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  span {
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
 /* 主内容区 */
 .main-content {
   flex: 1;
@@ -118,33 +152,7 @@ body {
   }
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-
-  img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
-    border: 2px solid var(--primary-light);
-  }
-
-  .user-title {
-    font-size: 12px;
-    color: var(--gray);
-  }
-}
-
 /* 卡片样式 */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
-}
-
 .card {
   background: white;
   border-radius: 12px;
@@ -208,11 +216,18 @@ body {
   border-radius: 8px;
   font-size: 16px;
   transition: var(--transition);
+  background-color: #fafbfc;
+  color: #2c3e50;
 
   &:focus {
     border-color: var(--primary);
     outline: none;
     box-shadow: 0 0 0 3px rgba(44, 111, 187, 0.15);
+    background-color: #ffffff;
+  }
+
+  &::placeholder {
+    color: #6c757d;
   }
 }
 
@@ -288,26 +303,12 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease forwards;
-
-  &.delay-1 { animation-delay: 0.1s; }
-  &.delay-2 { animation-delay: 0.2s; }
-  &.delay-3 { animation-delay: 0.3s; }
-}
-
 /* 模块内容区 */
 .content-area {
   min-height: 500px;
 }
 
 /* 响应式设计 */
-@media (max-width: 992px) {
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  }
-}
-
 @media (max-width: 768px) {
   .medical-layout {
     flex-direction: column;

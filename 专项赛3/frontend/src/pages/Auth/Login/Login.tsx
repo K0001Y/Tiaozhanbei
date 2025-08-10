@@ -85,7 +85,7 @@ const Login: React.FC = () => {
               placeholder="请输入您的邮箱"
               required
               disabled={isLoading}
-              className={fieldErrors.email ? 'error' : ''}
+              className={`form-control ${fieldErrors.email ? 'error' : ''}`}
             />
             {fieldErrors.email && (
               <span className="field-error">{fieldErrors.email}</span>
@@ -103,7 +103,7 @@ const Login: React.FC = () => {
               placeholder="请输入您的密码"
               required
               disabled={isLoading}
-              className={fieldErrors.password ? 'error' : ''}
+              className={`form-control ${fieldErrors.password ? 'error' : ''}`}
             />
             {fieldErrors.password && (
               <span className="field-error">{fieldErrors.password}</span>

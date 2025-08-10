@@ -1,6 +1,197 @@
-// 基础变量继承自Layout.scss
+//医疗系统主要内容区域样式
 .medical-system {
   width: 100%;
+
+  // 主要内容区域宽度限制
+  .card, .patient-info-grid, .records-list {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  label {
+    color: #333;
+    font-weight: 500;
+  }
+
+  // 统一输入框、文本框样式为浅色
+  input, textarea, select {
+    background-color: #fafbfc !important;
+    color: #2c3e50 !important;
+    border: 1px solid #dee2e6 !important;
+
+    &:focus {
+      background-color: #ffffff !important;
+      border-color: var(--primary) !important;
+    }
+
+    &::placeholder {
+      color: #6c757d !important;
+    }
+  }
+}
+
+// Dashboard模块 - 患者信息展示样式
+.dashboard-module {
+  .patient-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 20px;
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      
+      label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .info-value {
+        font-size: 16px;
+        font-weight: 500;
+        color: #2c3e50;
+        padding: 12px 16px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  .record-count {
+    margin-left: auto;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .empty-records {
+    padding: 40px 20px;
+  }
+
+  .records-list {
+    .record-item {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+      }
+
+      .record-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #dee2e6;
+
+        .record-id {
+          font-weight: 600;
+          color: var(--primary);
+          font-size: 16px;
+        }
+
+        .record-date {
+          color: #6c757d;
+          font-size: 14px;
+        }
+      }
+
+      .record-content {
+        margin-bottom: 16px;
+
+        .record-field {
+          margin-bottom: 12px;
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+
+          label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            min-width: 80px;
+            margin-bottom: 0;
+            text-transform: none;
+            letter-spacing: normal;
+          }
+
+          span {
+            color: #2c3e50;
+            font-size: 14px;
+            line-height: 1.5;
+            flex: 1;
+          }
+        }
+      }
+
+      .record-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+
+        .btn-sm {
+          padding: 6px 12px;
+          font-size: 13px;
+          border-radius: 6px;
+        }
+
+        .btn-outline {
+          border: 1px solid #dee2e6;
+          background: white;
+          color: #6c757d;
+
+          &:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+          }
+
+          i {
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .patient-info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .record-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .record-actions {
+      justify-content: center;
+    }
+  }
 }
 
 // 搜索模块特有样式
@@ -16,6 +207,7 @@
     .search-btn {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
+      width: 106px;
     }
   }
 
@@ -88,44 +280,257 @@
 
 // 病历模块样式
 .record-module {
+  .btn-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    // 图标样式
+    .btn i {
+      margin-right: 8px;
+    }
+  }
+
+  // 只定义病历模块特有的按钮状态，使用全局样式的风格
+  .btn-success {
+    background: var(--secondary);
+    color: white;
+
+    &:hover {
+      background: #3d8b40;
+    }
+  }
+
+  .btn-disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border: 1px solid #dee2e6;
+    
+    &:hover {
+      background: #e9ecef;
+    }
+    
+    &:disabled {
+      background: #e9ecef;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+  }
+
+  .record-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+
+    .placeholder-icon {
+      font-size: 48px;
+      color: #adb5bd;
+      margin-bottom: 20px;
+    }
+
+    .placeholder-content {
+      max-width: 500px;
+
+      h4 {
+        color: #495057;
+        margin-bottom: 16px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      p {
+        color: #6c757d;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        strong {
+          color: #2c5aa0;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
   .medical-record {
     margin-top: 20px;
     background: white;
-    border: 1px solid var(--border);
+    border: 2px solid #2c5aa0;
     border-radius: 8px;
-    padding: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: 'Microsoft YaHei', serif;
+    line-height: 1.6;
+    position: relative;
     
-    h4 {
-      color: var(--dark);
-      margin-bottom: 20px;
-      text-align: center;
+    // 确保截图时有清晰的白色背景
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      z-index: -1;
+      border-radius: 6px;
     }
-  }
-  
-  .record-basic-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
     
-    .info-item {
-      .info-label {
-        font-weight: 600;
-        margin-bottom: 5px;
+    .record-header {
+      text-align: center;
+      border-bottom: 2px solid #2c5aa0;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+      position: relative;
+      
+      h3 {
+        color: #2c5aa0;
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 2px;
       }
     }
   }
   
+  .record-basic-info {
+    margin-bottom: 25px;
+    
+    .info-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      
+      .info-item {
+        flex: 1;
+        min-width: 200px;
+        padding: 12px 15px;
+        border-right: 1px solid #ddd;
+        display: flex;
+        
+        &:last-child {
+          border-right: none;
+        }
+        
+        .info-label {
+          font-weight: 600;
+          color: #333;
+          margin-right: 8px;
+          min-width: 80px;
+        }
+        
+        .info-value {
+          color: #555;
+          flex: 1;
+        }
+      }
+    }
+  }
+
   .record-section {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
     
     .section-label {
       font-weight: 600;
-      margin-bottom: 5px;
+      color: #2c5aa0;
+      background: #e3f2fd;
+      padding: 12px 15px;
+      border-bottom: 1px solid #e0e0e0;
+      margin: 0;
+      font-size: 16px;
+      border-radius: 6px 6px 0 0;
     }
     
-    .ai-diagnosis {
-      color: var(--primary);
+    .section-content {
+      padding: 15px;
+      background: white;
+      color: #333;
+      min-height: 60px;
+      border-radius: 0 0 6px 6px;
+      
+      &.diagnosis-content {
+        white-space: pre-line;
+        font-weight: 500;
+        color: #d32f2f;
+      }
+      
+      &.prescription-content {
+        white-space: pre-line;
+        background: #f8f9fa;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+    }
+  }
+
+  .ai-disclaimer {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #fff3cd, #fef9e7);
+    border: 1px solid #ffeaa7;
+    border-left: 4px solid #f39c12;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.08);
+    line-height: 1.4;
+
+    .disclaimer-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+
+      i {
+        color: #f39c12;
+        font-size: 16px;
+      }
+
+      .disclaimer-title {
+        font-weight: 600;
+        color: #7d5b00;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+    }
+
+    .disclaimer-content {
+      flex: 1;
+      font-size: 12px;
+      color: #856404;
+      margin: 0;
+    }
+
+    // 响应式设计 - 小屏幕时垂直排列
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      
+      .disclaimer-content {
+        line-height: 1.5;
+      }
     }
   }
 }
@@ -140,6 +545,26 @@
     font-size: 14px;
     color: var(--primary);
   }
+
+  .supplement-section {
+    .chat-messages {
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+      width: 100%;
+    }
+  }
+}
+
+.inquiry-module {
+  .supplement-section {
+    .chat-messages {
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+      width: 100%;
+    }
+  }
 }
 
 // AI助手模块样式
@@ -147,13 +572,43 @@
   .clear-btn {
     margin-left: auto;
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 16px;
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    
+    i {
+      color: white !important;
+    }
+    
+    &:hover {
+      background-color: #218838;
+      border-color: #1e7e34;
+      color: white;
+      
+      i {
+        color: white !important;
+      }
+    }
+    
+    &:focus, &:active {
+      background-color: #1e7e34;
+      border-color: #1c7430;
+      color: white;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      
+      i {
+        color: white !important;
+      }
+    }
   }
   
   .chat-container {
-    height: 600px;
+    height: 800px;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    width: 100%;
   }
   
   .chat-messages {
@@ -252,11 +707,33 @@
     .input-group {
       display: flex;
       gap: 10px;
-      align-items: flex-end;
+      position: relative;
       
       textarea {
         flex: 1;
         resize: none;
+        min-height: 50px;
+      }
+      
+      .input-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+      }
+      
+      .file-btn {
+        height: 40px;
+        min-width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
       }
       
       .send-btn {
@@ -273,6 +750,181 @@
       }
     }
   }
+
+  // 欢迎界面样式
+  .welcome-container {
+    height: 600px;
+    background: #f0f5ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    color: #2c3e50;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .welcome-content {
+    text-align: center;
+    max-width: 600px;
+    margin-bottom: 60px;
+  }
+
+  .ai-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #4dabf7, #339af0);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    box-shadow: 0 8px 32px rgba(77, 171, 247, 0.3);
+
+    i {
+      font-size: 36px;
+      color: white;
+    }
+  }
+
+  .welcome-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .welcome-subtitle {
+    font-size: 16px;
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .welcome-input-container {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 700px;
+  }
+
+  .welcome-input-group {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(44, 111, 187, 0.15);
+    }
+  }
+
+  .welcome-input {
+    flex: 1;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: #2c3e50;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+
+    &::placeholder {
+      color: #adb5bd;
+    }
+  }
+
+  .welcome-input-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .file-btn, .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &.file-btn {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 1px solid #e9ecef;
+
+      &:hover {
+        background: #e9ecef;
+        color: #495057;
+      }
+    }
+
+    &.send-btn {
+      background: var(--primary);
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: #1a4b8f;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .selected-file {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #2c3e50;
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      i {
+        color: var(--primary);
+      }
+    }
+
+    .remove-file {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+
+      &:hover {
+        background: rgba(220, 53, 69, 0.1);
+      }
+    }
+  }
 }
 
 @keyframes typing {
@@ -284,19 +936,267 @@
   }
 }
 
+// 分析结果和补充对话框样式
+.analysis-result {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #f8f9fa;
+
+  .result-header {
+    background: #e9ecef;
+    padding: 12px 16px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #dee2e6;
+
+    h4 {
+      margin: 0;
+      color: #495057;
+      font-size: 16px;
+      font-weight: 600;
+
+      i {
+        margin-right: 8px;
+        color: var(--primary);
+      }
+    }
+  }
+
+  .result-content {
+    padding: 16px;
+
+    pre {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 0;
+      color: #2c3e50;
+      font-family: inherit;
+    }
+  }
+}
+
+.supplement-section {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: white;
+
+  .supplement-header {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h4 {
+      margin: 0;
+      color: #495057;
+      font-size: 16px;
+      font-weight: 600;
+
+      i {
+        margin-right: 8px;
+        color: var(--primary);
+      }
+    }
+  }
+
+  .chat-messages {
+    padding: 16px;
+    border: 1px solid #f1f3f4;
+    border-radius: 8px;
+    background: #fafbfc;
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    width: 100%;
+    margin-bottom: 0;
+
+    .message {
+      display: flex;
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+
+        i {
+          color: var(--primary);
+        }
+      }
+
+      .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      .message-text {
+        white-space: pre-line;
+        margin-bottom: 5px;
+
+        .message-file {
+          margin-top: 8px;
+          padding: 8px;
+          background: rgba(255, 255, 255, 0.5);
+          border-radius: 8px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          font-size: 12px;
+
+          i {
+            margin-right: 6px;
+          }
+        }
+      }
+
+      .message-time {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+
+      // 用户消息样式
+      &.user {
+        flex-direction: row-reverse;
+
+        .message-avatar {
+          margin-left: 12px;
+          margin-right: 0;
+        }
+
+        .message-content {
+          background: var(--primary);
+          color: white;
+          text-align: right;
+        }
+      }
+
+      // AI消息样式
+      &.ai {
+        .message-content {
+          background: white;
+          color: var(--dark);
+        }
+      }
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+
+      span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: typing 1.4s infinite ease-in-out;
+
+        &:nth-child(1) { animation-delay: -0.32s; }
+        &:nth-child(2) { animation-delay: -0.16s; }
+        &:nth-child(3) { animation-delay: 0s; }
+      }
+    }
+  }
+
+  .supplement-input {
+    padding: 16px;
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+
+      textarea {
+        flex: 1;
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .input-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 100px;
+      }
+    }
+
+    .selected-file {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #e9ecef;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #495057;
+
+      i {
+        margin-right: 8px;
+      }
+
+      .btn-link {
+        padding: 0;
+        color: #dc3545;
+        
+        &:hover {
+          color: #c82333;
+        }
+      }
+    }
+  }
+}
+
 // 响应式设计
 @media (max-width: 768px) {
   .record-basic-info {
     grid-template-columns: 1fr;
   }
+
+  .record-module {
+    .medical-record {
+      padding: 20px 15px;
+      
+      .record-basic-info {
+        .info-row {
+          flex-direction: column;
+          
+          .info-item {
+            min-width: auto;
+            border-right: none;
+            border-bottom: 1px solid #ddd;
+            
+            &:last-child {
+              border-bottom: none;
+            }
+          }
+        }
+      }
+    }
+  }
   
   .ai-assist-module {
     .chat-container {
-      height: 500px;
+      height: 700px;
     }
     
     .chat-messages .message-content {
-      max-width: 85%;
+      max-width: 90%;
     }
   }
   
@@ -311,5 +1211,41 @@
     .search-btn {
       border-radius: 8px;
     }
+  }
+
+  .supplement-section {
+    .chat-messages .message .message-content {
+      max-width: 90%;
+    }
+
+    .supplement-input .input-group {
+      flex-direction: column;
+      align-items: stretch;
+
+      .input-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+
+// 统一的清空按钮样式
+.clear-chat-btn {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+  color: white !important;
+  
+  &:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: white !important;
+  }
+  
+  &:focus, &:active {
+    background-color: #1e7e34 !important;
+    border-color: #1c7430 !important;
+    color: white !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
   }
 }
