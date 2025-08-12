@@ -159,6 +159,7 @@
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       transform: translateY(-1px);
+      background-color: var(--background-card); // 保持原始背景色
     }
 
     &:disabled {
@@ -169,10 +170,11 @@
 
     &.error {
       border-color: var(--error-color);
-      background-color: #fef2f2;
+      background-color: var(--background-card); // 保持原始背景色
 
       &:focus {
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: var(--background-card); // 保持原始背景色
       }
     }
   }

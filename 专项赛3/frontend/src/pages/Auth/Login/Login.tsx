@@ -17,7 +17,7 @@ const Login: React.FC = () => {
   } = useUserStore();
 
   const [formData, setFormData] = useState<LoginRequest>({
-    email: '',
+    username: '',
     password: ''
   });
 
@@ -75,20 +75,20 @@ const Login: React.FC = () => {
           )}
 
           <div className="form-group">
-            <label htmlFor="email">邮箱地址</label>
+            <label htmlFor="username">用户名</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
-              placeholder="请输入您的邮箱"
+              placeholder="请输入您的用户名"
               required
               disabled={isLoading}
-              className={`form-control ${fieldErrors.email ? 'error' : ''}`}
+              className={`form-control ${fieldErrors.username ? 'error' : ''}`}
             />
-            {fieldErrors.email && (
-              <span className="field-error">{fieldErrors.email}</span>
+            {fieldErrors.username && (
+              <span className="field-error">{fieldErrors.username}</span>
             )}
           </div>
 

@@ -1,5 +1,17 @@
 // API服务类 - 处理所有API调用
-const API_BASE_URL = 'http://localhost:3000/api';
+import { API_ENDPOINTS } from '../config/env';
+
+const API_BASE_URL = API_ENDPOINTS.BASE;
+
+// Zustand persist存储类型定义
+interface UserStorageData {
+  state?: {
+    token?: string | null;
+    user?: Record<string, unknown> | null;
+    isAuthenticated?: boolean;
+  };
+  token?: string | null; // 向后兼容
+}
 
 interface UserProfile {
   userId: number;
@@ -26,7 +38,22 @@ interface ApiResponse<T> {
 
 class ApiService {
   private getAuthToken(): string | null {
-    return localStorage.getItem('token');
+    try {
+      // 从Zustand persist存储中获取token
+      const userStorage = localStorage.getItem('user-storage');
+      if (userStorage) {
+        const parsedStorage: UserStorageData = JSON.parse(userStorage);
+        
+        // 支持Zustand persist的标准格式
+        const token = parsedStorage.state?.token || parsedStorage.token;
+        
+        return token || null;
+      }
+      return null;
+    } catch (error) {
+      console.error('获取认证token失败:', error);
+      return null;
+    }
   }
 
   private async request<T>(
@@ -35,9 +62,12 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     const token = this.getAuthToken();
     
-    const defaultHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+    const defaultHeaders: HeadersInit = {};
+    
+    // 只有当body不是FormData时才设置Content-Type
+    if (!(options.body instanceof FormData)) {
+      defaultHeaders['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       defaultHeaders['Authorization'] = `Bearer ${token}`;
@@ -112,7 +142,8 @@ class ApiService {
   // 图片望诊
   async analyzeImage(formData: FormData): Promise<ApiResponse<{
     results: string;
-    analysisId: string;
+    imageId: string;
+    imagePath: string;
   }>> {
     const token = this.getAuthToken();
     
@@ -138,6 +169,35 @@ class ApiService {
     }
   }
 
+  // 望诊补充
+  async completeWatchAnalysis(formData: FormData): Promise<ApiResponse<{
+    results: string;
+    updatedAt: string;
+  }>> {
+    const token = this.getAuthToken();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/watch/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || '请求失败');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('望诊补充错误:', error);
+      throw error;
+    }
+  }
+
   // 问诊分析
   async analyzeInquiry(inquiryData: {
     age: number;
@@ -153,28 +213,15 @@ class ApiService {
     });
   }
 
-  // 生成病历
-  async generateRecord(recordData: {
-    patientInfo: string;
-    watchResults?: string;
-    inquiryResults?: string;
-  }): Promise<ApiResponse<{
-    symptoms: string;
-    disease: string;
-    prescription: string;
+  // 问诊补充
+  async completeInquiry(formData: FormData): Promise<ApiResponse<{
+    results: string;
+    updatedAt: string;
   }>> {
-    return this.request('/record', {
-      method: 'POST',
-      body: JSON.stringify(recordData),
-    });
-  }
-
-  // 保存病历
-  async saveRecord(formData: FormData): Promise<ApiResponse<void>> {
     const token = this.getAuthToken();
     
     try {
-      const response = await fetch(`${API_BASE_URL}/record/save`, {
+      const response = await fetch(`${API_BASE_URL}/inquiry/complete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -189,6 +236,64 @@ class ApiService {
       }
 
       return data;
+    } catch (error) {
+      console.error('问诊补充错误:', error);
+      throw error;
+    }
+  }
+
+  // 从病历图片导入生成
+  async importRecord(imageFile: File): Promise<ApiResponse<any>> {
+    try {
+      const formData = new FormData();
+      formData.append('recordImage', imageFile);
+      
+      console.log('导入病历图片，文件:', imageFile.name);
+      return await this.request('/record/import', {
+        method: 'POST',
+        body: formData
+      });
+    } catch (error) {
+      console.error('导入病历图片错误:', error);
+      throw error;
+    }
+  }
+
+  // 生成病历
+  async generateRecord(diagnosis: any, inquiry: any): Promise<ApiResponse<any>> {
+    try {
+      console.log('生成病历，参数:', { diagnosis, inquiry });
+      return await this.request('/record/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          diagnosis,
+          inquiry
+        }),
+      });
+    } catch (error) {
+      console.error('生成病历错误:', error);
+      throw error;
+    }
+  }
+
+  // 保存病历
+  async saveRecord(recordData: {
+    symptoms: string;
+    diagnosis?: string;
+    prescription?: string;
+  }): Promise<ApiResponse<any>> {
+    try {
+      console.log('保存病历，参数:', recordData);
+      return await this.request('/record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recordData),
+      });
     } catch (error) {
       console.error('保存病历错误:', error);
       throw error;
@@ -232,6 +337,49 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('文件上传错误:', error);
+      throw error;
+    }
+  }
+
+  // 删除知识库资料
+  async deleteLibraryFile(libraryId: number): Promise<ApiResponse<void>> {
+    return this.request(`/library/${libraryId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 获取病历历史
+  async getRecordHistory(page: number = 1, limit: number = 10): Promise<ApiResponse<any>> {
+    try {
+      return await this.request(`/record?page=${page}&limit=${limit}`, {
+        method: 'GET',
+      });
+    } catch (error) {
+      console.error('获取病历历史错误:', error);
+      throw error;
+    }
+  }
+
+  // 获取病历详情
+  async getRecordDetail(recordId: number): Promise<ApiResponse<any>> {
+    try {
+      return await this.request(`/record/${recordId}`, {
+        method: 'GET',
+      });
+    } catch (error) {
+      console.error('获取病历详情错误:', error);
+      throw error;
+    }
+  }
+
+  // 删除病历
+  async deleteRecord(recordId: number): Promise<ApiResponse<void>> {
+    try {
+      return await this.request(`/record/${recordId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('删除病历错误:', error);
       throw error;
     }
   }

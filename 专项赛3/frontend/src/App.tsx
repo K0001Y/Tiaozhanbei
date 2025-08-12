@@ -25,21 +25,21 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: (
-      //<ProtectedRoute>
+      <ProtectedRoute>
         <Layout>
           <MedicalSystem />
         </Layout>
-      //</ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
   {
     path: "/medical",
     element: (
-      //<ProtectedRoute>
+      <ProtectedRoute>
         <Layout>
           <MedicalSystem />
         </Layout>
-      //</ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
   {

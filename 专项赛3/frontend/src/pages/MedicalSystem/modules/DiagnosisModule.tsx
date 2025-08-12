@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { message } from 'antd';
+import { apiService } from '../../../services/apiService';
+import { useMedicalStore } from '../../../store/medicalStore';
 
 interface SupplementMessage {
   id: number;
@@ -20,6 +22,12 @@ const DiagnosisModule: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSupplementing, setIsSupplementing] = useState(false);
   const supplementMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 使用医疗数据store
+  const { 
+    setDiagnosisResult, 
+    addDiagnosisSupplement 
+  } = useMedicalStore();
 
   // 自动滚动到最新消息
   const scrollToBottomSupplement = () => {
@@ -72,13 +80,41 @@ const DiagnosisModule: React.FC = () => {
     console.log('开始分析图片:', uploadedImage.name);
     console.log('图片描述:', imageDescription);
     
-    // 模拟API调用
-    setTimeout(() => {
-      const mockResult = "根据图像分析，观察到以下特征：\n\n1. 皮肤色泽略显苍白，可能提示气血不足\n2. 舌苔偏厚，舌质偏红，提示可能存在湿热体质\n3. 眼部周围略有暗沉，可能与睡眠不足或肾功能相关\n\n建议结合问诊结果进行综合判断。";
-      setAnalysisResult(mockResult);
-      setShowSupplement(true);
+    try {
+      // 准备FormData
+      const formData = new FormData();
+      formData.append('image', uploadedImage);
+      if (imageDescription) {
+        formData.append('description', imageDescription);
+      }
+
+      // 调用真实API进行图片分析
+      const response = await apiService.analyzeImage(formData);
+      
+      if (response.success && response.data) {
+        setAnalysisResult(response.data.results);
+        setShowSupplement(true);
+        
+        // 保存望诊结果到store
+        const diagnosisResult = {
+          imageUrl: URL.createObjectURL(uploadedImage),
+          description: imageDescription,
+          analysisReport: response.data.results,
+          supplements: [],
+          timestamp: new Date().toISOString()
+        };
+        setDiagnosisResult(diagnosisResult);
+        
+        message.success('图片分析完成');
+      } else {
+        message.error(response.message || '图片分析失败');
+      }
+    } catch (error) {
+      console.error('图片分析失败:', error);
+      message.error('图片分析失败，请稍后重试');
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
   const handleSupplement = async () => {
@@ -97,27 +133,62 @@ const DiagnosisModule: React.FC = () => {
     };
 
     setSupplementMessages(prev => [...prev, userMessage]);
+    const currentInput = supplementInput;
+    const currentFile = supplementFile;
     setSupplementInput('');
     setSupplementFile(null);
     setIsSupplementing(true);
 
-    // 模拟AI回复
-    setTimeout(() => {
-      const aiMessage: SupplementMessage = {
+    try {
+      // 准备FormData
+      const formData = new FormData();
+      formData.append('prevAnalysis', analysisResult);
+      formData.append('additionalInfo', currentInput);
+      if (currentFile) {
+        formData.append('additionalFile', currentFile);
+      }
+
+      // 调用真实API进行补充分析
+      const response = await apiService.completeWatchAnalysis(formData);
+      
+      if (response.success && response.data) {
+        // 在对话框中显示详细的补充分析结果，而不是简单确认消息
+        const aiMessage: SupplementMessage = {
+          id: Date.now() + 1,
+          type: 'ai',
+          content: response.data.results, // 显示完整的补充分析结果
+          timestamp: new Date()
+        };
+        
+        setSupplementMessages(prev => [...prev, aiMessage]);
+        
+        // 保存补充分析到store
+        const supplement = {
+          description: currentInput,
+          analysis: response.data.results,
+          timestamp: new Date().toISOString()
+        };
+        addDiagnosisSupplement(supplement);
+        
+        message.success('补充分析完成');
+      } else {
+        message.error(response.message || '补充分析失败');
+      }
+    } catch (error) {
+      console.error('补充分析失败:', error);
+      message.error('补充分析失败，请稍后重试');
+      
+      // 发生错误时添加错误提示消息
+      const errorMessage: SupplementMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        content: `感谢您的补充信息。结合新的资料，我对之前的分析进行以下更新：\n\n根据您提供的补充信息，建议关注以下几个方面：\n1. 注意观察症状的变化规律\n2. 建议适当调整作息时间\n3. 可考虑中医调理方案\n\n更新后的综合分析已保存到您的望诊结果中。`,
+        content: '抱歉，补充分析失败，请稍后重试。',
         timestamp: new Date()
       };
-      
-      setSupplementMessages(prev => [...prev, aiMessage]);
-      
-      // 更新分析结果
-      const updatedResult = analysisResult + "\n\n【补充分析】\n根据补充信息，进一步确认了上述判断，建议结合个人体质特点制定针对性的调理方案。";
-      setAnalysisResult(updatedResult);
-      
+      setSupplementMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsSupplementing(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

@@ -3,6 +3,19 @@ import { persist } from 'zustand/middleware';
 import { authService } from '../services/authService';
 import { User, LoginRequest, RegisterRequest } from '../types/auth';
 
+// 错误响应类型
+interface ErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+      errors?: Array<{
+        param?: string;
+        msg?: string;
+      }>;
+    };
+  };
+}
+
 interface UserState {
   // 状态
   user: User | null;
@@ -18,8 +31,11 @@ interface UserState {
   // 注册相关方法
   register: (data: RegisterRequest) => Promise<boolean>;
   
+  // 用户信息相关方法
+  getUserProfile: () => Promise<boolean>;
+  
   // 通用方法
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
   clearFieldErrors: () => void;
   setFieldError: (field: string, message: string) => void;
@@ -60,26 +76,22 @@ export const useUserStore = create<UserState>()(
               isLoading: false,
               error: null
             });
-
-            // 保存到 localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
             
             return true;
           }
           
           return false;
-        } catch (err: any) {
-          const errorData = err.response?.data;
+        } catch (err: unknown) {
+          const errorData = (err as ErrorResponse)?.response?.data;
           let errorMessage = '登录失败，请重试';
           let fieldErrors = {};
 
           if (errorData?.errors && Array.isArray(errorData.errors)) {
             // 处理字段级错误
             const newFieldErrors: Record<string, string> = {};
-            errorData.errors.forEach((error: any) => {
+            errorData.errors.forEach((error: { param?: string; msg?: string }) => {
               if (error.param) {
-                newFieldErrors[error.param] = error.msg;
+                newFieldErrors[error.param] = error.msg || '输入有误';
               }
             });
             fieldErrors = newFieldErrors;
@@ -106,35 +118,26 @@ export const useUserStore = create<UserState>()(
           const response = await authService.register(data);
           
           if (response.success) {
-            const { token, user } = response.data;
-            
             set({
-              user,
-              token,
-              isAuthenticated: true,
               isLoading: false,
               error: null
             });
-
-            // 保存到 localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
             
             return true;
           }
           
           return false;
-        } catch (err: any) {
-          const errorData = err.response?.data;
+        } catch (err: unknown) {
+          const errorData = (err as ErrorResponse)?.response?.data;
           let errorMessage = '注册失败，请重试';
           let fieldErrors = {};
 
           if (errorData?.errors && Array.isArray(errorData.errors)) {
             // 处理字段级错误
             const newFieldErrors: Record<string, string> = {};
-            errorData.errors.forEach((error: any) => {
+            errorData.errors.forEach((error: { param?: string; msg?: string }) => {
               if (error.param) {
-                newFieldErrors[error.param] = error.msg;
+                newFieldErrors[error.param] = error.msg || '输入有误';
               }
             });
             fieldErrors = newFieldErrors;
@@ -175,23 +178,52 @@ export const useUserStore = create<UserState>()(
           }
           
           // Token 无效，清除状态
-          get().logout();
+          await get().logout();
           return false;
-        } catch (err) {
+        } catch (err: unknown) {
           // Token 验证失败，清除状态
-          get().logout();
+          console.error('Token验证失败:', err);
+          await get().logout();
+          return false;
+        }
+      },
+
+      // 获取用户资料
+      getUserProfile: async (): Promise<boolean> => {
+        const { token } = get();
+        
+        if (!token) {
+          return false;
+        }
+
+        try {
+          const response = await authService.getProfile();
+          
+          if (response.success) {
+            set({
+              user: response.data.user,
+              error: null
+            });
+            return true;
+          }
+          
+          return false;
+        } catch (err: unknown) {
+          console.error('获取用户资料失败:', err);
           return false;
         }
       },
 
       // 用户登出
-      logout: () => {
-        // 清除 localStorage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        
+      logout: async (): Promise<void> => {
         // 重置状态
         set(initialState);
+        
+        // 手动清理localStorage中的持久化数据
+        localStorage.removeItem('user-storage');
+        
+        // 跳转到登录页
+        window.location.href = '/login';
       },
 
       // 清除错误信息

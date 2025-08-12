@@ -29,15 +29,17 @@
 }
 
 .register-container {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh; // 限制最大高度
   width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--secondary-gradient); // 使用不同的渐变色
-  padding: 20px;
+  padding: 15px; // 减少内边距
   position: relative;
-  overflow: hidden;
+  overflow: hidden; // 禁止滚动
+  box-sizing: border-box;
 
   // 注册页专用的动态背景效果
   &::before {
@@ -76,12 +78,15 @@
     var(--shadow-xl),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  padding: 48px;
+  padding: 28px; // 进一步减少内边距
   width: 100%;
   max-width: 480px; // 注册页稍宽一些
+  max-height: 90vh; // 减少最大高度，为容器padding留出空间
   position: relative;
   z-index: 1;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-y: auto; // 允许卡片内滚动
+  box-sizing: border-box;
   
   transition: all 0.3s ease;
   
@@ -94,22 +99,23 @@
   }
 
   @media (max-width: 480px) {
-    padding: 32px 24px;
+    padding: 20px 18px; // 移动端进一步减少内边距
     border-radius: var(--radius-lg);
-    margin: 16px;
+    margin: 10px;
+    max-height: 98vh; // 移动端更大高度利用率
   }
 }
 
 .register-header {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 20px; // 进一步减少底部边距
   position: relative;
 
   h1 {
-    font-size: 32px;
+    font-size: 28px; // 减小字体
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 6px; // 减少底部边距
     letter-spacing: -0.025em;
     background: var(--secondary-gradient);
     -webkit-background-clip: text;
@@ -117,14 +123,14 @@
     background-clip: text;
 
     @media (max-width: 480px) {
-      font-size: 28px;
+      font-size: 24px;
     }
   }
 
   p {
     color: var(--text-secondary);
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 14px; // 减小字体
+    line-height: 1.4; // 减少行高
     font-weight: 400;
     margin-top: 10px;
   }
@@ -136,15 +142,37 @@
   gap: 0px;
 }
 
+// 表单行布局（年龄和性别）
+.form-group-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px; // 减少行间距
+
+  .form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+
+    .form-group {
+      margin-bottom: 16px; // 减少移动端行间距
+    }
+  }
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
   position: relative;
+  margin-bottom: 16px; // 减少表单组间距
 
   label {
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 6px; // 减少标签与输入框间距
     font-size: 14px;
     letter-spacing: 0.025em;
     display: flex;
@@ -160,14 +188,15 @@
     }
   }
 
-  input {
-    padding: 12px 16px;
+  input, select {
+    padding: 10px 14px;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-lg);
     font-size: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--background-card);
     position: relative;
+    color: var(--text-primary);
     
     &::placeholder {
       color: var(--text-muted);
@@ -181,6 +210,7 @@
         0 0 0 3px rgba(240, 147, 251, 0.1),
         var(--shadow-md);
       transform: translateY(-1px);
+      background-color: var(--background-card); // 保持原始背景色
     }
 
     &:disabled {
@@ -191,19 +221,47 @@
 
     &.error {
       border-color: var(--error-color);
-      background-color: #fef2f2;
+      background-color: var(--background-card); // 保持原始背景色
 
       &:focus {
         box-shadow: 
           0 0 0 3px rgba(239, 68, 68, 0.1),
           var(--shadow-md);
+        background-color: var(--background-card); // 保持原始背景色
       }
     }
   }
 
+  // select特殊样式，保持与深色主题一致
+  select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    // 自定义下拉箭头，使用深色主题颜色
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    
+    // 选项样式
+    option {
+      background-color: var(--background-card);
+      color: var(--text-primary);
+      padding: 8px 12px;
+    }
+    
+    &:focus {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f093fb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    }
+  }
+
   .password-hint {
-    margin-top: 5px;
-    font-size: 13px;
+    margin-top: 4px; // 减少密码提示上边距
+    font-size: 11px; // 减小字体
+    color: var(--text-muted);
+    line-height: 1.2; // 紧凑行高
   }
 }
 
@@ -249,13 +307,13 @@
   background: var(--secondary-gradient);
   color: white;
   border: none;
-  padding: 18px 24px;
+  padding: 10px 24px;
   border-radius: var(--radius-lg);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 16px;
+  margin-top: 12px;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -312,14 +370,14 @@
 
 .register-footer {
   text-align: center;
-  margin-top: 32px;
-  padding-top: 24px;
+  margin-top: 12px; // 进一步减少上边距
+  padding-top: 12px; // 进一步减少内边距
   border-top: 1px solid var(--border-color);
 
   p {
     color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13px; // 减小字体
+    line-height: 1.3; // 进一步减少行高
     font-weight: 400;
   }
 }
@@ -459,12 +517,12 @@
   }
   
   .form-group input {
-    padding: 14px 16px;
+    padding: 10px 16px;
     font-size: 16px;
   }
   
   .register-button {
-    padding: 16px 20px;
+    padding: 10px 20px;
     font-size: 15px;
   }
 
@@ -520,11 +578,11 @@
   }
   
   .form-group input {
-    padding: 12px 14px;
+    padding: 10px 14px;
     font-size: 16px; // 防止iOS缩放
   }
   
   .register-button {
-    padding: 14px 20px;
+    padding: 10px 20px;
   }
 }

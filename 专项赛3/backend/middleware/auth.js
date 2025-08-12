@@ -17,7 +17,7 @@ const auth = async (req, res, next) => {
     
     // 从数据库验证用户是否存在
     const [users] = await pool.execute(
-      'SELECT id, username, email FROM users WHERE id = ?',
+      'SELECT id, username, name FROM users WHERE id = ?',
       [decoded.userId]
     );
 
@@ -31,6 +31,7 @@ const auth = async (req, res, next) => {
     req.user = users[0];
     next();
   } catch (error) {
+    console.error('认证失败 - 错误:', error.message);
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         success: false,

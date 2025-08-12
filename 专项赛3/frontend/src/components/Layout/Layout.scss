@@ -315,9 +315,15 @@ body {
   }
   
   .sidebar {
+    position: relative;
     width: 100%;
     height: auto;
     padding: 10px 0;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
   }
   
   .logo {

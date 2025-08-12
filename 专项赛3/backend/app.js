@@ -4,8 +4,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const { createUserTable } = require('./config/database');
+const { createTables } = require('./config/database');
 const authRoutes = require('./routes/auth');
+const libraryRoutes = require('./routes/library');
+const diseaseRoutes = require('./routes/disease');
+const watchRoutes = require('./routes/watch');
+const inquiryRoutes = require('./routes/inquiry');
+const recordRoutes = require('./routes/record');
 
 const app = express();
 
@@ -19,29 +24,37 @@ app.use(cors({
 }));
 
 // 限流中间件
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: 100, // 限制每个IP 15分钟内最多100个请求
-  message: {
-    success: false,
-    message: '请求过于频繁，请稍后再试'
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15分钟
+//   max: 100, // 限制每个IP 15分钟内最多100个请求
+//   message: {
+//     success: false,
+//     message: '请求过于频繁，请稍后再试'
+//   }
+// });
+
+// 认证限流中间件 - 测试期间注释掉
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15分钟
+//   max: 5, // 登录注册限制更严格
+//   message: {
+//     success: false,
+//     message: '登录/注册请求过于频繁，请15分钟后再试'
+//   }
+// });
+
+// app.use('/api/', limiter);
+// app.use('/api/auth', authLimiter); // 测试期间注释掉
+
+// 解析中间件 - 对文件上传路径完全跳过JSON解析
+app.use((req, res, next) => {
+  // 完全跳过文件上传路径的JSON解析
+  if (req.path === '/api/record/import') {
+    return next();
   }
+  // 对其他路径使用JSON解析
+  express.json({ limit: '10mb' })(req, res, next);
 });
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: 5, // 登录注册限制更严格
-  message: {
-    success: false,
-    message: '登录/注册请求过于频繁，请15分钟后再试'
-  }
-});
-
-app.use('/api/', limiter);
-app.use('/api/auth', authLimiter);
-
-// 解析中间件
-app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // 请求日志中间件
@@ -52,6 +65,13 @@ app.use((req, res, next) => {
 
 // 路由
 app.use('/api/auth', authRoutes);
+app.use('/api/library', libraryRoutes);
+app.use('/api/search', diseaseRoutes);
+app.use('/api/watch', watchRoutes);
+app.use('/api/inquiry', inquiryRoutes);
+app.use('/api/record', recordRoutes);
+app.use('/api/inquiry', inquiryRoutes);
+app.use('/api/inquiry', inquiryRoutes);
 
 // 根路径
 app.get('/', (req, res) => {
@@ -91,13 +111,13 @@ app.use('*', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 
 // 启动服务器
 const startServer = async () => {
   try {
     // 创建数据库表
-    await createUserTable();
+    await createTables();
     
     app.listen(PORT, () => {
       console.log(`🚀 服务器运行在端口 ${PORT}`);

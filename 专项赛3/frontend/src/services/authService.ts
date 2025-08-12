@@ -1,11 +1,14 @@
 import axios from 'axios';
-import { LoginRequest, RegisterRequest, AuthResponse } from '../types/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, RegisterResponse } from '../types/auth';
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const authAPI = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // 请求拦截器 - 添加 token
@@ -32,25 +35,25 @@ authAPI.interceptors.response.use(
 export const authService = {
   // 用户登录
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await authAPI.post('/auth/login', data);
+    const response = await authAPI.post('/api/auth/login', data);
     return response.data;
   },
 
   // 用户注册
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await authAPI.post('/auth/register', data);
+  register: async (data: RegisterRequest): Promise<RegisterResponse> => {
+    const response = await authAPI.post('/api/auth/register', data);
     return response.data;
   },
 
   // 验证 token
   verifyToken: async (): Promise<AuthResponse> => {
-    const response = await authAPI.get('/auth/verify');
+    const response = await authAPI.get('/api/auth/verify');
     return response.data;
   },
 
   // 获取用户信息
   getProfile: async (): Promise<AuthResponse> => {
-    const response = await authAPI.get('/auth/profile');
+    const response = await authAPI.get('/api/auth/profile');
     return response.data;
   }
 };

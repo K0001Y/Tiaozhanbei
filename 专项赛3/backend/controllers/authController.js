@@ -17,18 +17,18 @@ const register = async (req, res) => {
       });
     }
 
-    const { username, email, password } = req.body;
+    const { username, password, name, age, gender, phone } = req.body;
 
     // 检查用户是否已存在
     const [existingUsers] = await pool.execute(
-      'SELECT id FROM users WHERE email = ? OR username = ?',
-      [email, username]
+      'SELECT id FROM users WHERE username = ?',
+      [username]
     );
 
     if (existingUsers.length > 0) {
       return res.status(400).json({
         success: false,
-        message: '用户名或邮箱已被注册'
+        message: '用户名已存在'
       });
     }
 
@@ -38,28 +38,13 @@ const register = async (req, res) => {
 
     // 创建用户
     const [result] = await pool.execute(
-      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-      [username, email, hashedPassword]
-    );
-
-    // 生成JWT token
-    const token = jwt.sign(
-      { userId: result.insertId },
-      jwtConfig.secret,
-      { expiresIn: jwtConfig.expiresIn }
+      'INSERT INTO users (username, password, name, age, gender, phone) VALUES (?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, name, age, gender, phone]
     );
 
     res.status(201).json({
       success: true,
-      message: '注册成功',
-      data: {
-        token,
-        user: {
-          id: result.insertId,
-          username,
-          email
-        }
-      }
+      message: '注册成功'
     });
   } catch (error) {
     console.error('注册错误:', error);
@@ -83,31 +68,37 @@ const login = async (req, res) => {
       });
     }
 
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     // 查找用户
     const [users] = await pool.execute(
-      'SELECT id, username, email, password FROM users WHERE email = ?',
-      [email]
+      'SELECT id, username, password, name, age, gender, phone FROM users WHERE username = ?',
+      [username]
     );
 
     if (users.length === 0) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: '邮箱或密码错误'
+        message: '用户名或密码错误'
       });
     }
 
     const user = users[0];
 
     // 验证密码
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({
         success: false,
-        message: '邮箱或密码错误'
+        message: '用户名或密码错误'
       });
     }
+
+    // 获取用户的病历记录
+    const [records] = await pool.execute(
+      'SELECT id as recordId, symptoms, diagnosis as disease, prescription, created_at as time FROM records WHERE user_id = ? ORDER BY created_at DESC',
+      [user.id]
+    );
 
     // 生成JWT token
     const token = jwt.sign(
@@ -120,12 +111,16 @@ const login = async (req, res) => {
       success: true,
       message: '登录成功',
       data: {
-        token,
         user: {
-          id: user.id,
+          userId: user.id,
           username: user.username,
-          email: user.email
-        }
+          name: user.name,
+          age: user.age,
+          gender: user.gender,
+          phone: user.phone,
+          records: records
+        },
+        token
       }
     });
   } catch (error) {
@@ -141,7 +136,7 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const [users] = await pool.execute(
-      'SELECT id, username, email, avatar, created_at FROM users WHERE id = ?',
+      'SELECT id, username, name, age, gender, phone FROM users WHERE id = ?',
       [req.user.id]
     );
 
@@ -152,11 +147,27 @@ const getProfile = async (req, res) => {
       });
     }
 
+    const user = users[0];
+
+    // 获取用户的病历记录
+    const [records] = await pool.execute(
+      'SELECT id as recordId, symptoms, diagnosis as disease, prescription, created_at as time FROM records WHERE user_id = ? ORDER BY created_at DESC',
+      [user.id]
+    );
+
     res.json({
       success: true,
       message: '获取用户信息成功',
       data: {
-        user: users[0]
+        user: {
+          userId: user.id,
+          username: user.username,
+          name: user.name,
+          age: user.age,
+          gender: user.gender,
+          phone: user.phone,
+          records: records
+        }
       }
     });
   } catch (error) {

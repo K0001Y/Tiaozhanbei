@@ -1,87 +1,73 @@
 import React, { useState, useEffect } from 'react';
-// TODO: 后续实现真实API调用时启用
-// import { apiService, UserProfile, MedicalRecord } from '../../../services/apiService';
-import { UserProfile, MedicalRecord } from '../../../services/apiService';
+import { UserProfile } from '../../../services/apiService';
+import { MedicalRecord } from '../../../types/auth';
+import { useUserStore } from '../../../store/userStore';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardModule: React.FC = () => {
-  // TODO: 后续实现真实API调用，当前使用静态示例数据
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [loading] = useState(false); // 设为false以直接显示静态数据
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // 静态示例数据
-  const staticProfile: UserProfile = {
-    userId: 12345,
-    username: 'zhangsan',
-    name: '张三',
-    age: 35,
-    gender: '男',
-    phone: '138****8888'
-  };
+  // 获取用户store和导航
+  const { user, logout } = useUserStore();
+  const navigate = useNavigate();
 
-  const staticRecords: MedicalRecord[] = [
-    {
-      recordId: 1,
-      symptoms: '头痛、发热、咳嗽',
-      disease: '上呼吸道感染',
-      prescription: '阿莫西林胶囊 500mg，每日3次；布洛芬片 200mg，发热时服用',
-      date: '2024-08-05'
-    },
-    {
-      recordId: 2,
-      symptoms: '胃痛、恶心、食欲不振',
-      disease: '慢性胃炎',
-      prescription: '奥美拉唑肠溶胶囊 20mg，每日2次；铝碳酸镁片 500mg，餐前服用',
-      date: '2024-07-20'
-    },
-    {
-      recordId: 3,
-      symptoms: '腰痛、腿部酸痛',
-      disease: '腰肌劳损',
-      prescription: '双氯芬酸钠缓释片 75mg，每日1次；活血止痛胶囊，每日3次',
-      date: '2024-06-15'
-    }
-  ];
-
-  useEffect(() => {
-    // 使用静态数据初始化
-    setUserProfile(staticProfile);
-    setMedicalRecords(staticRecords);
-    
-    // TODO: 后续替换为真实API调用
-    // fetchUserProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // TODO: 后续启用真实API调用
-  /*
-  const fetchUserProfile = async () => {
+  // 处理退出登录
+  const handleLogout = async () => {
     try {
-      setLoading(true);
-      setError('');
-      
-      const response = await apiService.getUserProfile();
-      
-      if (response.success && response.data) {
-        setUserProfile(response.data.user);
-        
-        // 如果登录时有病历数据，可以从localStorage获取
-        const storedRecords = localStorage.getItem('userRecords');
-        if (storedRecords) {
-          setMedicalRecords(JSON.parse(storedRecords));
-        }
-      } else {
-        setError(response.message || '获取用户信息失败');
-      }
+      setIsLoggingOut(true);
+      await logout();
+      navigate('/auth/login');
     } catch (err) {
-      setError('网络错误，请稍后重试');
-      console.error('获取用户信息失败:', err);
+      console.error('退出登录失败:', err);
+      // 即使出错也跳转到登录页
+      navigate('/auth/login');
     } finally {
-      setLoading(false);
+      setIsLoggingOut(false);
     }
   };
-  */
+
+  // 加载用户数据
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        if (!user) {
+          setError('用户未登录');
+          navigate('/auth');
+          return;
+        }
+
+        // 使用store中的用户信息
+        const profile: UserProfile = {
+          userId: user.userId || 0,
+          username: user.username || '',
+          name: user.name || '',
+          age: user.age || 0,
+          gender: user.gender || '',
+          phone: user.phone || ''
+        };
+        
+        setUserProfile(profile);
+        
+        // 设置医疗记录，如果用户有记录则使用，否则使用空数组
+        setMedicalRecords(user.records || []);
+        
+      } catch (err) {
+        console.error('加载用户数据失败:', err);
+        setError('加载用户数据失败，请稍后重试');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [user, navigate]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '未知日期';
@@ -112,8 +98,31 @@ const DashboardModule: React.FC = () => {
               className="btn btn-primary" 
               onClick={() => {
                 setError('');
-                setUserProfile(staticProfile);
-                setMedicalRecords(staticRecords);
+                const loadUserData = async () => {
+                  try {
+                    setLoading(true);
+                    if (!user) {
+                      navigate('/auth');
+                      return;
+                    }
+                    const profile: UserProfile = {
+                      userId: user.userId || 0,
+                      username: user.username || '',
+                      name: user.name || '',
+                      age: user.age || 0,
+                      gender: user.gender || '',
+                      phone: user.phone || ''
+                    };
+                    setUserProfile(profile);
+                    setMedicalRecords(user.records || []);
+                  } catch (err) {
+                    console.error('重新加载失败:', err);
+                    setError('重新加载失败');
+                  } finally {
+                    setLoading(false);
+                  }
+                };
+                loadUserData();
               }}
               style={{ marginTop: '10px' }}
             >
@@ -132,6 +141,19 @@ const DashboardModule: React.FC = () => {
         <div className="card-header">
           <i className="fas fa-user-injured"></i>
           <h3>患者信息</h3>
+          <button 
+            className="logout-btn"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            title="退出登录"
+          >
+            {isLoggingOut ? (
+              <i className="fas fa-spinner fa-spin"></i>
+            ) : (
+              <i className="fas fa-sign-out-alt"></i>
+            )}
+            {isLoggingOut ? '退出中...' : '退出登录'}
+          </button>
         </div>
         <div className="card-body">
           <div className="patient-info-grid">
@@ -189,10 +211,10 @@ const DashboardModule: React.FC = () => {
           ) : (
             <div className="records-list">
               {medicalRecords.map((record, index) => (
-                <div key={record.recordId || index} className="record-item">
+                <div key={record.id || index} className="record-item">
                   <div className="record-header">
-                    <span className="record-id">病历 #{record.recordId || index + 1}</span>
-                    <span className="record-date">{formatDate(record.date)}</span>
+                    <span className="record-id">病历 #{record.id || index + 1}</span>
+                    <span className="record-date">{formatDate(record.created_at)}</span>
                   </div>
                   
                   <div className="record-content">
@@ -203,7 +225,7 @@ const DashboardModule: React.FC = () => {
                     
                     <div className="record-field">
                       <label>诊断结果：</label>
-                      <span>{record.disease || '未记录'}</span>
+                      <span>{record.diagnosis || '未记录'}</span>
                     </div>
                     
                     <div className="record-field">

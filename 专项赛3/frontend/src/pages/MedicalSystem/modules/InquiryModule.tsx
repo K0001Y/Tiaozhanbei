@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { message } from 'antd';
+import { apiService } from '../../../services/apiService';
+import { useUserStore } from '../../../store/userStore';
+import { useMedicalStore } from '../../../store/medicalStore';
 
 interface InquiryData {
   symptoms: string;
@@ -17,6 +20,7 @@ interface SupplementMessage {
 }
 
 const InquiryModule: React.FC = () => {
+  const { user } = useUserStore();
   const [inquiryData, setInquiryData] = useState<InquiryData>({
     symptoms: '',
     duration: '',
@@ -24,6 +28,7 @@ const InquiryModule: React.FC = () => {
     additionalNotes: ''
   });
   const [analysisResult, setAnalysisResult] = useState<string>('');
+  const [analysisId, setAnalysisId] = useState<string>('');
   const [showSupplement, setShowSupplement] = useState(false);
   const [supplementMessages, setSupplementMessages] = useState<SupplementMessage[]>([]);
   const [supplementInput, setSupplementInput] = useState('');
@@ -31,6 +36,12 @@ const InquiryModule: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSupplementing, setIsSupplementing] = useState(false);
   const supplementMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 使用医疗数据store
+  const { 
+    setInquiryResult, 
+    addInquirySupplement
+  } = useMedicalStore();
 
   // 自动滚动到最新消息
   const scrollToBottomSupplement = () => {
@@ -65,17 +76,46 @@ const InquiryModule: React.FC = () => {
       return;
     }
 
+    if (!user?.age || !user?.gender) {
+      message.warning('请先完善个人信息（年龄和性别）');
+      return;
+    }
+
     setIsAnalyzing(true);
-    console.log('开始问切诊断', inquiryData);
     
-    // 模拟API调用
-    setTimeout(() => {
-      const mockResult = `根据您提供的症状信息分析：\n\n【症状概述】\n主要症状：${inquiryData.symptoms}\n持续时间：${inquiryData.duration || '未指定'}\n严重程度：${inquiryData.severity || '未指定'}\n\n【初步分析】\n1. 根据症状描述，可能涉及${inquiryData.symptoms.includes('头') ? '头部' : '身体'}相关问题\n2. 建议关注症状的发展趋势和伴随症状\n3. 如症状持续或加重，建议及时就医\n\n【中医角度分析】\n从中医角度来看，此类症状可能与气血运行、脏腑功能等相关，建议结合舌诊、脉诊等进行综合判断。`;
+    try {
+      const symptomsText = `主要症状：${inquiryData.symptoms}\n持续时间：${inquiryData.duration || '未指定'}\n严重程度：${inquiryData.severity || '未指定'}\n其他信息：${inquiryData.additionalNotes || '无'}`;
       
-      setAnalysisResult(mockResult);
-      setShowSupplement(true);
+      const response = await apiService.analyzeInquiry({
+        age: user.age,
+        gender: user.gender,
+        symptoms: symptomsText
+      });
+
+      if (response.success) {
+        setAnalysisResult(response.data?.results || '');
+        setAnalysisId(response.data?.analysisId || '');
+        setShowSupplement(true);
+        
+        // 保存问诊结果到store
+        const inquiryResult = {
+          symptoms: symptomsText,
+          analysisReport: response.data?.results || '',
+          supplements: [],
+          timestamp: new Date().toISOString()
+        };
+        setInquiryResult(inquiryResult);
+        
+        message.success('问诊分析完成');
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error('问诊分析失败:', error);
+      message.error(error instanceof Error ? error.message : '问诊分析失败，请重试');
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
   const handleSupplement = async () => {
@@ -94,27 +134,63 @@ const InquiryModule: React.FC = () => {
     };
 
     setSupplementMessages(prev => [...prev, userMessage]);
+    const currentInput = supplementInput;
+    const currentFile = supplementFile;
     setSupplementInput('');
     setSupplementFile(null);
     setIsSupplementing(true);
 
-    // 模拟AI回复
-    setTimeout(() => {
-      const aiMessage: SupplementMessage = {
+    try {
+      // 准备FormData
+      const formData = new FormData();
+      formData.append('analysisId', analysisId);
+      formData.append('additionalInfo', currentInput);
+      
+      if (currentFile) {
+        formData.append('additionalFile', currentFile);
+      }
+
+      const response = await apiService.completeInquiry(formData);
+
+      if (response.success) {
+        // 在对话框中显示详细的补充分析结果
+        const aiMessage: SupplementMessage = {
+          id: Date.now() + 1,
+          type: 'ai',
+          content: response.data?.results || '补充分析完成',
+          timestamp: new Date()
+        };
+        
+        setSupplementMessages(prev => [...prev, aiMessage]);
+        
+        // 保存补充分析到store，但不更新上面的主报告
+        const supplement = {
+          additionalInfo: currentInput,
+          analysis: response.data?.results || '',
+          timestamp: new Date().toISOString()
+        };
+        addInquirySupplement(supplement);
+        
+        message.success('补充信息已处理');
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error('问诊补充失败:', error);
+      message.error(error instanceof Error ? error.message : '补充分析失败，请重试');
+      
+      // 添加错误提示消息
+      const errorMessage: SupplementMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        content: `感谢您的补充信息。基于新的描述，我对问诊结果进行以下更新：\n\n1. 结合补充信息，症状的具体特征更加明确\n2. 建议注意观察症状与日常生活习惯的关联性\n3. 推荐适当的调理方法和注意事项\n\n更新后的分析结果已整合到您的问诊记录中，可用于后续的病历生成。`,
+        content: '抱歉，处理补充信息时出现错误，请稍后重试。',
         timestamp: new Date()
       };
       
-      setSupplementMessages(prev => [...prev, aiMessage]);
-      
-      // 更新分析结果
-      const updatedResult = analysisResult + "\n\n【补充分析】\n结合补充信息，进一步明确了症状特点，建议采取综合性的调理方案，包括生活方式调整和必要的医疗干预。";
-      setAnalysisResult(updatedResult);
-      
+      setSupplementMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsSupplementing(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

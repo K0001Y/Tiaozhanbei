@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: parseInt(process.env.VITE_FRONTEND_PORT || '3001'),
     open: true,
   },
   build: {

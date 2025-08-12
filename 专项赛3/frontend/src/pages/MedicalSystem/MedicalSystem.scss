@@ -33,6 +33,47 @@
 
 // Dashboard模块 - 患者信息展示样式
 .dashboard-module {
+  .card-header {
+    position: relative;
+    
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      &:hover:not(:disabled) {
+        background: #c82333;
+        transform: translateY(-50%) translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+      }
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: translateY(-50%);
+      }
+      
+      i {
+        font-size: 14px;
+        margin: 0;
+        color: white;
+      }
+    }
+  }
+
   .patient-info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -241,6 +282,20 @@
 
 // 知识库模块样式
 .knowledge-module {
+  // 减少知识库模块的内边距
+  .card-body {
+    padding: 15px 20px; // 减少上下内边距
+  }
+
+  // 优化表单组间距
+  .form-group {
+    margin-bottom: 12px; // 减少底部间距
+  }
+
+  .search-upload-section {
+    margin-bottom: 15px; // 减少搜索区域的底部间距
+  }
+
   .knowledge-table {
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -248,20 +303,27 @@
     
     .table-header {
       display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
+      grid-template-columns: 2fr 1fr 1fr 80px; // 4列：资料名称、分类、上传时间、操作
       background: var(--primary-light);
-      padding: 12px 15px;
+      padding: 10px 15px; // 减少垂直内边距
       font-weight: 600;
+      font-size: 0.9rem; // 稍微减小字体
     }
     
     .table-row {
       display: grid;
-      grid-template-columns: 3fr 1fr 1fr;
-      padding: 12px 15px;
+      grid-template-columns: 2fr 1fr 1fr 80px; // 与表头保持一致
+      padding: 10px 15px; // 减少垂直内边距
       border-bottom: 1px solid var(--border);
+      align-items: center; // 垂直居中对齐
+      font-size: 0.9rem; // 稍微减小字体
       
       &:last-child {
         border-bottom: none;
+      }
+      
+      &:hover {
+        background: #f8f9fa; // 悬停效果
       }
       
       .delete-btn {
@@ -269,9 +331,16 @@
         border: none;
         color: #dc3545;
         cursor: pointer;
+        padding: 6px 8px; // 减少按钮内边距
+        border-radius: 4px;
+        transition: all 0.2s;
+        justify-self: center; // 按钮在最后一列居中
+        font-size: 0.85rem; // 稍微减小图标
         
         &:hover {
           color: #a02834;
+          background: rgba(220, 53, 69, 0.1);
+          transform: scale(1.1); // 悬停时稍微放大
         }
       }
     }
