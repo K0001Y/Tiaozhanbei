@@ -1,17 +1,16 @@
 import os
 from pathlib import Path
-import numpy as np
-from PIL import Image
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from PIL import Image
 import timm
 
-# ------------------------
-# 1. 数据集类
-# ------------------------
+# ------------------------ #
+# 数据集类
+# ------------------------ #
 class LesionDataset(Dataset):
     def __init__(self, image_dir, mask_dir, transform_img=None, transform_mask=None):
         self.image_dir = image_dir
@@ -20,7 +19,7 @@ class LesionDataset(Dataset):
         self.transform_img = transform_img
         self.transform_mask = transform_mask
 
-        # 检查缺失文件
+        # 检查缺失的 mask
         missing = []
         for img_name in self.image_files:
             mask_name = Path(img_name).stem + ".png"
@@ -50,17 +49,19 @@ class LesionDataset(Dataset):
         mask = (mask > 0.5).float()
         return image, mask
 
-# ------------------------
-# 2. 修正版 Swin-UNet（带 skip connection）
-# ------------------------
+# ------------------------ #
+# Swin-UNet 模型
+# ------------------------ #
 class ImprovedSwinUNet(nn.Module):
     def __init__(self):
         super(ImprovedSwinUNet, self).__init__()
-        self.encoder = timm.create_model('swin_tiny_patch4_window7_224',
-                                         pretrained=True,
-                                         features_only=True)
+        self.encoder = timm.create_model(
+            'swin_tiny_patch4_window7_224',
+            pretrained=True,
+            features_only=True
+        )
 
-        # decoder blocks
+        # decoder
         self.up4 = nn.ConvTranspose2d(768, 384, 2, stride=2)
         self.conv4 = nn.Conv2d(384 + 384, 384, 3, padding=1)
 
@@ -76,15 +77,10 @@ class ImprovedSwinUNet(nn.Module):
         self.final_conv = nn.Conv2d(32, 1, kernel_size=1)
 
     def forward(self, x, target_size=None):
-        feats = self.encoder(x)  # list of feature maps [B,H,W,C]
+        feats = self.encoder(x)
+        feats = [f.permute(0, 3, 1, 2) for f in feats]  # NHWC → NCHW
 
-        # 转换成 [B,C,H,W]
-        feats = [f.permute(0, 3, 1, 2) for f in feats]
-
-        f1 = feats[0]  # 96, 56, 56
-        f2 = feats[1]  # 192, 28, 28
-        f3 = feats[2]  # 384, 14, 14
-        f4 = feats[3]  # 768, 7, 7
+        f1, f2, f3, f4 = feats[0], feats[1], feats[2], feats[3]
 
         x = self.up4(f4)
         x = torch.cat([x, f3], dim=1)
@@ -107,46 +103,46 @@ class ImprovedSwinUNet(nn.Module):
             x = F.interpolate(x, size=target_size, mode="bilinear", align_corners=False)
         return x
 
-# ------------------------
-# 3. 训练流程
-# ------------------------
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# ------------------------ #
+# 训练流程
+# ------------------------ #
+if __name__ == "__main__":
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-transform_img = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
-])
+    transform_img = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+    transform_mask = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
 
-transform_mask = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
-])
+    dataset = LesionDataset(
+        image_dir="test_image",  # 训练集路径
+        mask_dir="json_png",     # 训练集mask路径
+        transform_img=transform_img,
+        transform_mask=transform_mask
+    )
+    train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-dataset = LesionDataset(
-    image_dir="test_image",
-    mask_dir="json_png",
-    transform_img=transform_img,
-    transform_mask=transform_mask
-)
-train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
+    model = ImprovedSwinUNet().to(device)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
-model = ImprovedSwinUNet().to(device)
-criterion = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    epochs = 30
+    for epoch in range(epochs):
+        model.train()
+        total_loss = 0
+        for imgs, masks in train_loader:
+            imgs, masks = imgs.to(device), masks.to(device)
+            outputs = model(imgs, target_size=masks.shape[2:])
+            loss = criterion(outputs, masks)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+        print(f"Epoch [{epoch+1}/{epochs}] Loss: {total_loss/len(train_loader):.4f}")
 
-epochs = 30
-for epoch in range(epochs):
-    model.train()
-    total_loss = 0
-    for imgs, masks in train_loader:
-        imgs, masks = imgs.to(device), masks.to(device)
-        outputs = model(imgs, target_size=masks.shape[2:])
-        loss = criterion(outputs, masks)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item()
-    print(f"Epoch [{epoch+1}/{epochs}] Loss: {total_loss/len(train_loader):.4f}")
-
-torch.save(model.state_dict(), "swinunet_lesion.pth")
-print(" 训练完成，模型已保存")
+    torch.save(model.state_dict(), "swinunet_lesion.pth")
+    print("✅ 训练完成，模型已保存！")

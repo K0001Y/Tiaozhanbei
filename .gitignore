@@ -10,6 +10,7 @@ __pycache__/
 *.h5
 *.pkl
 *.faiss
+*.pth
 
 # 环境文件
 .env
@@ -19,3 +20,5 @@ venv/
 .DS_Store
 Thumbs.db
 专项赛3/AI chatbot/model/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2/
+
+揭榜挂帅/基于体表图像的皮肤病检测系统/models/swinunet_lesion.pth
