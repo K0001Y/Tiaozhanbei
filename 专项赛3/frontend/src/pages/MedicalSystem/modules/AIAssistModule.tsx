@@ -56,18 +56,36 @@ const AIAssistModule: React.FC = () => {
     setSelectedFile(null);
     setIsLoading(true);
 
-    // 模拟AI回复
-    setTimeout(() => {
+    try {
+      // 调用7.1 AI智能分析接口
+      const formData = new FormData();
+      
+      // 如果有文本输入，添加query参数
+      if (inputMessage.trim()) {
+        formData.append('query', inputMessage.trim());
+      }
+      
+      // 如果有文件，添加file参数
+      if (selectedFile) {
+        formData.append('file', selectedFile);
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const result = await response.json();
+      
       let responseContent = '';
-      if (userMessage.file) {
-        responseContent = `我已收到您上传的文件"${userMessage.file.name}"。`;
-        if (inputMessage) {
-          responseContent += `\n\n关于您的问题："${inputMessage}"，我建议您考虑以下几个方面：\n\n1. 详细记录症状的发生时间和持续时间\n2. 注意观察症状的变化规律\n3. 如果症状持续或加重，建议及时就医\n\n结合您提供的文件，建议进行更深入的分析。`;
-        } else {
-          responseContent += '我正在分析您的文件内容，请稍等片刻。基于文件信息，我会为您提供针对性的医疗建议。';
-        }
+      if (result.success && result.data?.solution) {
+        responseContent = result.data.solution;
       } else {
-        responseContent = `根据您的描述"${inputMessage}"，我建议您考虑以下几个方面：\n\n1. 详细记录症状的发生时间和持续时间\n2. 注意观察症状的变化规律\n3. 如果症状持续或加重，建议及时就医\n\n您还有其他需要咨询的问题吗？`;
+        responseContent = result.message || 'AI分析出现错误，请稍后重试。';
       }
 
       const aiMessage: ChatMessage = {
@@ -76,9 +94,23 @@ const AIAssistModule: React.FC = () => {
         content: responseContent,
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('AI分析请求失败:', error);
+      
+      // 错误时显示友好提示
+      const errorMessage: ChatMessage = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: '抱歉，AI服务暂时不可用。请检查网络连接或稍后重试。',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

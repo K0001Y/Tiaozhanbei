@@ -19,6 +19,7 @@
 | 5.2 | 补充问诊 | `/api/inquiry/complete` | POST | 补充问诊信息和深度分析 |
 | 6.1 | 病历生成 | `/api/record` | POST | 从系统状态生成完整病历报告 |
 | 6.2 | 文档导入 | `/api/import` | POST | OCR识别医学文档并提取信息 |
+| 7.1 | AI智能分析 | `/api/ai/analyze` | POST | *智能分析文本或图片，提供医疗建议* |
 
 ---
 
@@ -261,6 +262,70 @@ curl -X POST http://localhost:8080/api/import \
 
 ---
 
+### 8. AI智能分析API (7.1)
+
+**接口**：`POST /api/ai/analyze`
+
+*_本接口实现格式与上述API类似，支持灵活的输入参数和统一的输出格式_*
+
+#### 输入格式方式一：纯文本查询
+```json
+{
+  "query": "用户查询的文本内容"
+}
+```
+
+#### 输入格式方式二：文件上传
+```
+Content-Type: multipart/form-data
+
+表单字段：
+file (可选) - 图片或文档文件
+```
+
+#### 输入格式方式三：组合输入
+```
+Content-Type: multipart/form-data
+
+表单字段：
+query (可选) - 文本查询内容
+file (可选) - 图片或文档文件
+```
+
+#### 输入示例
+```bash
+# 方式1：纯文本查询
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "我最近经常头痛，还伴有恶心的症状，请帮我分析一下可能的原因"
+  }'
+
+# 方式2：纯文件分析
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -F "file=@medical_image.jpg"
+
+# 方式3：组合分析
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -F "query=请分析这张CT图片" \
+  -F "file=@ct_scan.jpg"
+```
+
+#### 文件要求
+- **图像文件**：JPG, JPEG, PNG, BMP, GIF, WebP
+- **文档文件**：PDF, TXT, DOC, DOCX
+- **文件大小**：建议 < 20MB
+- **分析类型**：医学图像、病历文档、检查报告等
+
+#### 字段说明
+- `query` (可选): 用户的文本查询，描述症状、问题或分析需求
+- `file` (可选): 需要分析的图片或文档文件
+- **注意**：`query` 和 `file` 至少需要提供一项
+
+*_该接口采用统一的响应格式，返回完整的分析解决方案字符串_*
+
+---
+
 ## 📤 统一输出格式
 
 所有API都遵循统一的输出格式：
@@ -358,6 +423,23 @@ curl -X POST http://localhost:8080/api/import \
   -d '{"content":"患者主诉头痛发热。诊断：感冒。建议：多休息。"}'
 ```
 
+### 测试AI智能分析
+```bash
+# 文本分析
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"query":"头痛伴恶心，请分析可能原因"}'
+
+# 图片分析
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -F "file=@medical_image.jpg"
+
+# 组合分析
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -F "query=请分析这个检查结果" \
+  -F "file=@report.pdf"
+```
+
 ---
 
 ## 🚀 开发建议
@@ -384,6 +466,24 @@ const inquiryResult = await fetch('/api/inquiry', {
     duration: '3天'
   })
 }).then(r => r.json());
+
+// AI智能分析 - 文本查询
+const aiTextResult = await fetch('/api/ai/analyze', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    query: '头痛伴恶心，请分析可能原因'
+  })
+}).then(r => r.json());
+
+// AI智能分析 - 文件分析
+const aiFormData = new FormData();
+aiFormData.append('file', fileInput.files[0]);
+aiFormData.append('query', '请分析这张图片');
+const aiFileResult = await fetch('/api/ai/analyze', {
+  method: 'POST',
+  body: aiFormData
+}).then(r => r.json());
 ```
 
 ### Python示例
@@ -402,6 +502,21 @@ with open('image.jpg', 'rb') as f:
 # JSON提交
 response = requests.post('http://localhost:8080/api/inquiry',
                         json={'symptoms': '头痛头晕', 'duration': '3天'})
+
+# AI智能分析 - 文本查询
+response = requests.post('http://localhost:8080/api/ai/analyze',
+                        json={'query': '头痛伴恶心，请分析可能原因'})
+
+# AI智能分析 - 文件上传
+with open('medical_image.jpg', 'rb') as f:
+    response = requests.post('http://localhost:8080/api/ai/analyze',
+                           files={'file': f})
+
+# AI智能分析 - 组合分析
+with open('report.pdf', 'rb') as f:
+    response = requests.post('http://localhost:8080/api/ai/analyze',
+                           files={'file': f},
+                           data={'query': '请分析这个检查报告'})
 ```
 
 ---
@@ -422,3 +537,9 @@ A: RecordAPI需要Graph支持，启动时传入Graph实例
 
 **Q: 跨域请求被阻止？**
 A: 服务器已启用CORS，检查请求头设置
+
+**Q: AI智能分析接口需要什么参数？**
+A: *query* 和 *file* 参数至少提供一项，支持纯文本、纯文件或组合分析
+
+**Q: AI分析支持哪些文件格式？**
+A: *支持常见图像格式（JPG、PNG等）和文档格式（PDF、TXT等），建议文件大小 < 20MB*

@@ -11,6 +11,7 @@ const diseaseRoutes = require('./routes/disease');
 const watchRoutes = require('./routes/watch');
 const inquiryRoutes = require('./routes/inquiry');
 const recordRoutes = require('./routes/record');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -70,8 +71,7 @@ app.use('/api/search', diseaseRoutes);
 app.use('/api/watch', watchRoutes);
 app.use('/api/inquiry', inquiryRoutes);
 app.use('/api/record', recordRoutes);
-app.use('/api/inquiry', inquiryRoutes);
-app.use('/api/inquiry', inquiryRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 根路径
 app.get('/', (req, res) => {
