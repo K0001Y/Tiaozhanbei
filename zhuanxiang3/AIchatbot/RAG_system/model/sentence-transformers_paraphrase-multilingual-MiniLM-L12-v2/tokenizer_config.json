@@ -42,10 +42,11 @@
     }
   },
   "bos_token": "<s>",
-  "clean_up_tokenization_spaces": true,
+  "clean_up_tokenization_spaces": false,
   "cls_token": "<s>",
   "do_lower_case": true,
   "eos_token": "</s>",
+  "extra_special_tokens": {},
   "mask_token": "<mask>",
   "max_length": 128,
   "model_max_length": 512,

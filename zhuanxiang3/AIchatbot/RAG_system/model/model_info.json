@@ -3,7 +3,7 @@
     "model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
     "local_path": "RAG_system/model\\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2",
     "model_kwargs": {
-      "device": "cuda"
+      "device": "cpu"
     },
     "encode_kwargs": {
       "normalize_embeddings": true

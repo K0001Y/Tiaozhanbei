@@ -329,3 +329,21 @@ werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a r
 2025-08-16 17:46:16,548 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:16] "POST /api/watch/complete HTTP/1.1" 200 -
 2025-08-16 17:46:18,573 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:18] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
 2025-08-16 17:46:20,617 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:20] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-17 00:03:16,267 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 00:03:43,187 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.16.103.188:8080
+2025-08-17 00:03:43,188 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 00:21:42,309 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:42] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:21:43,349 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:43] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:21:45,372 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:45] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:21:55,784 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:55] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:21:56,799 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:56] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:21:58,813 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:21:58] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:22:59,924 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:22:59] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:23:00,941 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:23:00] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:23:03,032 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:23:03] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:24:15,615 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:24:15] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:24:16,625 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:24:16] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 00:24:18,639 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 00:24:18] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
