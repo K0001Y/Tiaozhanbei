@@ -1,6 +1,6 @@
 import os
 import sys
-from paddleocr import PaddleOCR, draw_ocr
+from paddleocr import PaddleOCR
 import fitz
 from PIL import Image, ImageDraw, ImageFont
 import cv2

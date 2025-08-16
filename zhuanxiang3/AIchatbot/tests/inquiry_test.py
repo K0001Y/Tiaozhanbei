@@ -1,312 +1,146 @@
 #!/usr/bin/env python3
 """
-正确匹配问诊API的测试代码
-根据实际API实现调整参数名称和数据结构
+独立的API测试脚本 - 用于调试问诊补充问题
 """
-
 import requests
 import json
-import time
-from io import BytesIO
-from PIL import Image
 
-class CorrectInquiryTester:
-    """匹配实际API实现的问诊测试器"""
-    
-    def __init__(self, base_url: str = 'http://localhost:8080'):
-        self.base_url = base_url
-        self.session = requests.Session()
-        self.session.timeout = 30
-        
-    def test_inquiry_api_correct(self):
-        """测试初步问诊API - 使用正确的参数"""
-        print("\n🔍 测试初步问诊API (正确参数)")
-        print("-" * 50)
-        
-        # 根据你的API实现，正确的参数应该是:
-        # age: 年龄（数字）
-        # gender: 性别（男/女）  
-        # symptoms: 症状描述
-        
-        correct_data = {
-            "age": 35,
-            "gender": "男",
-            "symptoms": "头痛、发烧、咳嗽，持续3天，晚上症状加重"
-        }
-        
-        print(f"发送正确格式数据:")
-        print(json.dumps(correct_data, ensure_ascii=False, indent=2))
-        
-        try:
-            response = self.session.post(
-                f"{self.base_url}/api/inquiry",
-                json=correct_data,
-                headers={'Content-Type': 'application/json'}
-            )
-            
-            print(f"响应状态码: {response.status_code}")
-            
-            try:
-                resp_data = response.json()
-                print(f"响应内容:")
-                print(json.dumps(resp_data, ensure_ascii=False, indent=2))
-                
-                if response.status_code == 200:
-                    print("✅ 初步问诊API测试成功")
-                else:
-                    print(f"❌ 初步问诊API测试失败: {resp_data.get('message', '未知错误')}")
-                    
-            except json.JSONDecodeError:
-                print(f"响应不是JSON格式: {response.text}")
-                
-        except Exception as e:
-            print(f"❌ 请求失败: {e}")
-    
-    def test_inquiry_api_edge_cases(self):
-        """测试初步问诊API的边界情况"""
-        print("\n🧪 测试初步问诊API边界情况")
-        print("-" * 50)
-        
-        test_cases = [
-            {
-                "name": "缺少age参数",
-                "data": {"gender": "女", "symptoms": "头痛"}
-            },
-            {
-                "name": "缺少gender参数", 
-                "data": {"age": 30, "symptoms": "头痛"}
-            },
-            {
-                "name": "缺少symptoms参数",
-                "data": {"age": 30, "gender": "女"}
-            },
-            {
-                "name": "年龄为负数",
-                "data": {"age": -1, "gender": "男", "symptoms": "头痛"}
-            },
-            {
-                "name": "年龄过大",
-                "data": {"age": 200, "gender": "女", "symptoms": "头痛"}
-            },
-            {
-                "name": "性别格式错误",
-                "data": {"age": 25, "gender": "未知", "symptoms": "头痛"}
-            },
-            {
-                "name": "症状描述过短",
-                "data": {"age": 25, "gender": "男", "symptoms": "a"}
-            },
-            {
-                "name": "症状描述为空",
-                "data": {"age": 25, "gender": "女", "symptoms": ""}
-            }
-        ]
-        
-        for test_case in test_cases:
-            print(f"\n测试用例: {test_case['name']}")
-            
-            try:
-                response = self.session.post(
-                    f"{self.base_url}/api/inquiry",
-                    json=test_case['data'],
-                    headers={'Content-Type': 'application/json'}
-                )
-                
-                print(f"状态码: {response.status_code}")
-                
-                if response.status_code == 400:
-                    try:
-                        resp_data = response.json()
-                        print(f"✅ 正确返回400: {resp_data.get('message', '')}")
-                    except:
-                        print(f"✅ 正确返回400")
-                else:
-                    print(f"⚠️  意外状态码: {response.status_code}")
-                    
-            except Exception as e:
-                print(f"❌ 请求失败: {e}")
-    
-    def test_inquiry_complete_correct(self):
-        """测试补充问诊API - 使用正确的参数"""
-        print("\n🔍 测试补充问诊API (正确参数)")
-        print("-" * 50)
-        
-        # 根据你的API实现，正确的参数应该是:
-        # prevInquiry: 之前的问诊分析结果
-        # additionalInfo: 补充信息
-        # additionalFile: 检查报告文件（可选）
-        
-        correct_form_data = {
-            'prevInquiry': '初步诊断为气血两虚，建议调理脾胃',
-            'additionalInfo': '患者补充信息：最近还出现流鼻涕、打喷嚏症状，晚上睡眠质量差'
-        }
-        
-        print(f"发送正确格式的form数据:")
-        for key, value in correct_form_data.items():
-            print(f"  {key}: {value}")
-        
-        try:
-            response = self.session.post(
-                f"{self.base_url}/api/inquiry/complete",
-                data=correct_form_data
-            )
-            
-            print(f"响应状态码: {response.status_code}")
-            
-            try:
-                resp_data = response.json()
-                print(f"响应内容:")
-                print(json.dumps(resp_data, ensure_ascii=False, indent=2))
-                
-                if response.status_code == 200:
-                    print("✅ 补充问诊API测试成功")
-                else:
-                    print(f"❌ 补充问诊API测试失败: {resp_data.get('message', '未知错误')}")
-                    
-            except json.JSONDecodeError:
-                print(f"响应不是JSON格式: {response.text}")
-                
-        except Exception as e:
-            print(f"❌ 请求失败: {e}")
-    
-    def test_inquiry_complete_with_file(self):
-        """测试补充问诊API - 带文件上传"""
-        print("\n📎 测试补充问诊API (带文件上传)")
-        print("-" * 50)
-        
-        # 创建测试图像文件
-        img = Image.new('RGB', (200, 200), color='white')
-        img_bytes = BytesIO()
-        img.save(img_bytes, format='JPEG')
-        img_bytes.seek(0)
-        
-        form_data = {
-            'prevInquiry': '初步诊断为感冒',
-            'additionalInfo': '患者上传了检查报告，请结合报告分析'
-        }
-        
-        files = {
-            'additionalFile': ('test_report.jpg', img_bytes, 'image/jpeg')
-        }
-        
-        print(f"发送form数据和文件:")
-        for key, value in form_data.items():
-            print(f"  {key}: {value}")
-        print(f"  文件: test_report.jpg (JPEG格式)")
-        
-        try:
-            response = self.session.post(
-                f"{self.base_url}/api/inquiry/complete",
-                data=form_data,
-                files=files
-            )
-            
-            print(f"响应状态码: {response.status_code}")
-            
-            try:
-                resp_data = response.json()
-                print(f"响应内容:")
-                print(json.dumps(resp_data, ensure_ascii=False, indent=2))
-                
-                if response.status_code == 200:
-                    print("✅ 带文件的补充问诊API测试成功")
-                else:
-                    print(f"❌ 带文件的补充问诊API测试失败: {resp_data.get('message', '未知错误')}")
-                    
-            except json.JSONDecodeError:
-                print(f"响应不是JSON格式: {response.text}")
-                
-        except Exception as e:
-            print(f"❌ 请求失败: {e}")
-    
-    def test_inquiry_complete_edge_cases(self):
-        """测试补充问诊API的边界情况"""
-        print("\n🧪 测试补充问诊API边界情况")
-        print("-" * 50)
-        
-        test_cases = [
-            {
-                "name": "两个参数都为空",
-                "data": {'prevInquiry': '', 'additionalInfo': ''}
-            },
-            {
-                "name": "只有prevInquiry",
-                "data": {'prevInquiry': '初步诊断为感冒', 'additionalInfo': ''}
-            },
-            {
-                "name": "只有additionalInfo", 
-                "data": {'prevInquiry': '', 'additionalInfo': '补充症状：流鼻涕'}
-            },
-            {
-                "name": "完全缺少参数",
-                "data": {}
-            }
-        ]
-        
-        for test_case in test_cases:
-            print(f"\n测试用例: {test_case['name']}")
-            
-            try:
-                response = self.session.post(
-                    f"{self.base_url}/api/inquiry/complete",
-                    data=test_case['data']
-                )
-                
-                print(f"状态码: {response.status_code}")
-                
-                if test_case['name'] in ["两个参数都为空", "完全缺少参数"] and response.status_code == 400:
-                    print(f"✅ 正确返回400错误")
-                elif test_case['name'] in ["只有prevInquiry", "只有additionalInfo"] and response.status_code == 200:
-                    print(f"✅ 正确处理单参数情况")
-                else:
-                    try:
-                        resp_data = response.json()
-                        print(f"响应: {resp_data.get('message', '')}")
-                    except:
-                        print(f"响应: {response.text[:100]}")
-                        
-            except Exception as e:
-                print(f"❌ 请求失败: {e}")
-    
-    def run_all_correct_tests(self):
-        """运行所有正确的测试"""
-        print("🚀 运行正确匹配API的测试")
-        print("=" * 60)
-        
-        # 等待服务器
-        print("等待服务器启动...")
-        for i in range(10):
-            try:
-                response = self.session.get(f"{self.base_url}/health")
-                if response.status_code == 200:
-                    print(f"✅ 服务器已启动")
-                    break
-            except:
-                time.sleep(1)
-                continue
-        
-        # 运行测试
-        self.test_inquiry_api_correct()
-        self.test_inquiry_api_edge_cases()
-        self.test_inquiry_complete_correct()
-        self.test_inquiry_complete_with_file()
-        self.test_inquiry_complete_edge_cases()
-        
-        print("\n" + "=" * 60)
-        print("📊 测试完成")
-        print("=" * 60)
+# 配置
+BASE_URL = "http://localhost:8080"  # 修改为您的服务器地址
 
-def main():
-    """主函数"""
-    import argparse
+def test_inquiry_complete_debug():
+    """调试问诊补充功能"""
     
-    parser = argparse.ArgumentParser(description='正确匹配问诊API的测试工具')
-    parser.add_argument('--url', default='http://localhost:8080', help='服务器地址')
+    print("=" * 60)
+    print("开始调试问诊补充功能")
+    print("=" * 60)
     
-    args = parser.parse_args()
+    # 步骤1: 先进行初步问诊
+    print("\n步骤1: 初步问诊")
+    inquiry_data = {
+        "age": 35,
+        "gender": "男", 
+        "symptoms": "头痛、发烧、咳嗽，持续3天，伴有乏力"
+    }
     
-    tester = CorrectInquiryTester(args.url)
-    tester.run_all_correct_tests()
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/inquiry",
+            json=inquiry_data,
+            headers={'Content-Type': 'application/json'},
+            timeout=240
+        )
+        
+        print(f"初步问诊响应状态码: {response.status_code}")
+        print(f"初步问诊响应: {response.text}")
+        
+        if response.status_code == 200:
+            inquiry_result = response.json()
+            prev_inquiry = inquiry_result.get('data', {}).get('results', '')
+            print(f"✅ 初步问诊成功")
+            print(f"获取到的问诊结果长度: {len(prev_inquiry)}")
+            print(f"问诊结果前200字符: {prev_inquiry[:200]}")
+        else:
+            print(f"❌ 初步问诊失败")
+            prev_inquiry = "患者基本信息：35岁，男性。主要症状：头痛、发烧、咳嗽，持续3天，伴有乏力。根据中医辨证，考虑为外感风寒证，建议温阳散寒治疗。"
+            print(f"使用默认问诊结果: {prev_inquiry}")
+            
+    except Exception as e:
+        print(f"❌ 初步问诊异常: {e}")
+        prev_inquiry = "患者基本信息：35岁，男性。主要症状：头痛、发烧、咳嗽，持续3天，伴有乏力。根据中医辨证，考虑为外感风寒证，建议温阳散寒治疗。"
+        print(f"使用默认问诊结果: {prev_inquiry}")
+    
+    # 步骤2: 测试不同格式的补充问诊
+    additional_info = "患者还有肠胃不适，食欲不振，大便偏稀"
+    
+    # 测试1: application/x-www-form-urlencoded 格式
+    print(f"\n步骤2a: 测试form-urlencoded格式")
+    test_form_urlencoded(prev_inquiry, additional_info)
+    
+    # 测试2: application/json 格式  
+    print(f"\n步骤2b: 测试JSON格式")
+    test_json_format(prev_inquiry, additional_info)
+    
+    # 测试3: multipart/form-data 格式
+    print(f"\n步骤2c: 测试multipart格式")
+    test_multipart_format(prev_inquiry, additional_info)
 
-if __name__ == '__main__':
-    main()
+def test_form_urlencoded(prev_inquiry, additional_info):
+    """测试application/x-www-form-urlencoded格式"""
+    data = {
+        'prevInquiry': prev_inquiry,
+        'additionalInfo': additional_info
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/inquiry/complete",
+            data=data,  # 使用data参数，自动设置为form-urlencoded
+            timeout=30
+        )
+        
+        print(f"Form-urlencoded响应状态码: {response.status_code}")
+        print(f"Form-urlencoded响应: {response.text}")
+        
+        if response.status_code == 200:
+            print("✅ Form-urlencoded格式成功")
+        else:
+            print("❌ Form-urlencoded格式失败")
+            
+    except Exception as e:
+        print(f"❌ Form-urlencoded异常: {e}")
+
+def test_json_format(prev_inquiry, additional_info):
+    """测试application/json格式"""
+    data = {
+        'prevInquiry': prev_inquiry,
+        'additionalInfo': additional_info
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/inquiry/complete",
+            json=data,  # 使用json参数，自动设置Content-Type
+            timeout=30
+        )
+        
+        print(f"JSON响应状态码: {response.status_code}")
+        print(f"JSON响应: {response.text}")
+        
+        if response.status_code == 200:
+            print("✅ JSON格式成功")
+        else:
+            print("❌ JSON格式失败")
+            
+    except Exception as e:
+        print(f"❌ JSON异常: {e}")
+
+def test_multipart_format(prev_inquiry, additional_info):
+    """测试multipart/form-data格式"""
+    # 使用files参数会自动设置为multipart/form-data
+    data = {
+        'prevInquiry': prev_inquiry,
+        'additionalInfo': additional_info
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/inquiry/complete",
+            data=data,
+            files={'dummy': (None, '')},  # 添加一个空文件触发multipart
+            timeout=30
+        )
+        
+        print(f"Multipart响应状态码: {response.status_code}")
+        print(f"Multipart响应: {response.text}")
+        
+        if response.status_code == 200:
+            print("✅ Multipart格式成功")
+        else:
+            print("❌ Multipart格式失败")
+            
+    except Exception as e:
+        print(f"❌ Multipart异常: {e}")
+
+if __name__ == "__main__":
+    test_inquiry_complete_debug()

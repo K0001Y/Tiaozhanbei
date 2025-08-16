@@ -1,12 +1,15 @@
 """
-中医问诊分析API模块
-实现中医问诊分析和补充问诊功能
+中医问诊分析API模块 - Linus修复版
+实现中医问诊分析和补充问诊功能，带智能状态管理
 """
 import logging
 import json
 import os
 import tempfile
 import traceback
+import hashlib
+import pickle
+import time
 from typing import Dict, Any, Optional
 from flask import request, jsonify
 from werkzeug.datastructures import FileStorage
@@ -22,13 +25,100 @@ except ImportError:
         return {
             "response": f"基于问诊分析: {user_input}，建议调理脾胃，注意作息规律。",
             "diagnosis_data": {"证型": "气血两虚", "建议": "益气养血"},
-            "prescription_data": {"方剂": "四君子汤加减"}
+            "prescription_data": {"方剂": "四君子汤加减"},
+            "user_input": user_input,
+            "messages": messages or [],
+            "memory": memory,
+            "config": config or {"retriever_k": 4}
         }
 
 logger = logging.getLogger(__name__)
 
+class SessionManager:
+    """
+    Linus式Session管理器 - 基于内容Hash的智能状态管理
+    用户不知道有session，但我们在后台维护状态
+    """
+    
+    def __init__(self, ttl_seconds=3600):  # 1小时TTL
+        self._sessions = {}  # session_id -> state
+        self._ttl = ttl_seconds
+        self._last_cleanup = time.time()
+    
+    def _cleanup_expired_sessions(self):
+        """清理过期的session"""
+        current_time = time.time()
+        if current_time - self._last_cleanup < 300:  # 5分钟清理一次
+            return
+            
+        expired_sessions = []
+        for session_id, data in self._sessions.items():
+            if current_time - data['created_at'] > self._ttl:
+                expired_sessions.append(session_id)
+        
+        for session_id in expired_sessions:
+            del self._sessions[session_id]
+        
+        self._last_cleanup = current_time
+        logger.info(f"清理了 {len(expired_sessions)} 个过期session")
+    
+    def _generate_session_id(self, base_info: str) -> str:
+        """基于基础信息生成session ID"""
+        # 使用内容hash作为session标识，相同内容=相同session
+        return hashlib.md5(base_info.encode('utf-8')).hexdigest()[:16]
+    
+    def get_or_create_session(self, base_info: str, initial_state: Dict = None) -> str:
+        """获取或创建session"""
+        self._cleanup_expired_sessions()
+        
+        session_id = self._generate_session_id(base_info)
+        
+        if session_id not in self._sessions:
+            self._sessions[session_id] = {
+                'state': initial_state or {},
+                'created_at': time.time(),
+                'updated_at': time.time()
+            }
+            logger.info(f"创建新session: {session_id}")
+        else:
+            logger.info(f"复用已存在session: {session_id}")
+        
+        return session_id
+    
+    def get_session_state(self, session_id: str) -> Optional[Dict]:
+        """获取session状态"""
+        if session_id in self._sessions:
+            return self._sessions[session_id]['state']
+        return None
+    
+    def update_session_state(self, session_id: str, new_state: Dict):
+        """更新session状态"""
+        if session_id in self._sessions:
+            self._sessions[session_id]['state'] = new_state
+            self._sessions[session_id]['updated_at'] = time.time()
+        else:
+            logger.warning(f"尝试更新不存在的session: {session_id}")
+    
+    def extract_session_from_prev_inquiry(self, prev_inquiry: str) -> Optional[str]:
+        """从之前的问诊结果中提取可能的session标识"""
+        # 这是个聪明的hack：从之前的分析结果中反推可能的session
+        # 我们寻找特征性的内容来匹配已有session
+        
+        for session_id, data in self._sessions.items():
+            state = data['state']
+            if 'response' in state:
+                # 如果当前输入包含之前的响应内容，很可能是同一个session
+                if prev_inquiry in state['response'] or state['response'] in prev_inquiry:
+                    logger.info(f"从prev_inquiry中识别出session: {session_id}")
+                    return session_id
+        
+        return None
+
+# 全局session管理器
+session_manager = SessionManager()
+
 class MedicalInquiryAPI:
-    """中医问诊分析API类"""
+    """中医问诊分析API类 - Linus修复版"""
     
     def __init__(self):
         """初始化中医问诊分析API"""
@@ -36,7 +126,7 @@ class MedicalInquiryAPI:
             logger.info("初始化中医问诊分析API模块")
             
             self.api_name = "中医问诊分析API"
-            self.version = "1.0.0"
+            self.version = "2.0.0"  # Linus修复版
             
             # 支持的图像格式（用于补充问诊的检查报告）
             self.allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'pdf'}
@@ -49,12 +139,7 @@ class MedicalInquiryAPI:
     
     def _validate_inquiry_params(self, age: Any, gender: str, symptoms: str) -> tuple[bool, str]:
         """
-        验证问诊参数
-        
-        :param age: 年龄
-        :param gender: 性别
-        :param symptoms: 症状描述
-        :return: (是否有效, 错误信息)
+        验证问诊参数 - 保持原有逻辑
         """
         # 验证年龄
         if age is None:
@@ -89,12 +174,7 @@ class MedicalInquiryAPI:
         return True, ""
     
     def _validate_image_file(self, file: FileStorage) -> tuple[bool, str]:
-        """
-        验证上传的检查报告文件
-        
-        :param file: 上传的文件
-        :return: (是否有效, 错误信息)
-        """
+        """验证上传的检查报告文件 - 保持原有逻辑"""
         if not file:
             return False, "未上传文件"
         
@@ -123,12 +203,7 @@ class MedicalInquiryAPI:
         return True, ""
     
     def _save_temp_file(self, file: FileStorage) -> str:
-        """
-        保存临时文件并返回文件路径
-        
-        :param file: 上传的文件
-        :return: 临时文件路径
-        """
+        """保存临时文件并返回文件路径 - 保持原有逻辑"""
         # 创建临时文件
         suffix = '.' + file.filename.rsplit('.', 1)[1].lower()
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
@@ -146,11 +221,7 @@ class MedicalInquiryAPI:
             raise e
     
     def _cleanup_temp_file(self, file_path: str):
-        """
-        清理临时文件
-        
-        :param file_path: 文件路径
-        """
+        """清理临时文件 - 保持原有逻辑"""
         try:
             if os.path.exists(file_path):
                 os.unlink(file_path)
@@ -158,12 +229,7 @@ class MedicalInquiryAPI:
             logger.warning(f"清理临时文件失败: {file_path} - {str(e)}")
     
     def _normalize_gender(self, gender: str) -> str:
-        """
-        标准化性别表示
-        
-        :param gender: 输入的性别
-        :return: 标准化的性别
-        """
+        """标准化性别表示 - 保持原有逻辑"""
         gender = gender.strip().lower()
         if gender in ['男', '男性', 'male', 'm']:
             return '男'
@@ -173,14 +239,7 @@ class MedicalInquiryAPI:
             return gender  # 保持原样，让验证函数处理
     
     def _build_inquiry_text(self, age: int, gender: str, symptoms: str) -> str:
-        """
-        构建问诊输入文本
-        
-        :param age: 年龄
-        :param gender: 性别
-        :param symptoms: 症状描述
-        :return: 格式化的问诊文本
-        """
+        """构建问诊输入文本 - 保持原有逻辑"""
         # 标准化性别
         normalized_gender = self._normalize_gender(gender)
         
@@ -195,14 +254,38 @@ class MedicalInquiryAPI:
         
         return inquiry_text
     
+    def _extract_result_from_state(self, state: Dict) -> str:
+        """从graph state中提取最终结果"""
+        # 首先尝试获取response
+        final_results = state.get("response", "")
+        
+        # 如果结果为空，尝试从其他字段获取信息
+        if not final_results.strip():
+            diagnosis_data = state.get("diagnosis_data", {})
+            prescription_data = state.get("prescription_data", {})
+            
+            result_parts = []
+            if diagnosis_data:
+                if isinstance(diagnosis_data, dict):
+                    for key, value in diagnosis_data.items():
+                        result_parts.append(f"{key}：{value}")
+                else:
+                    result_parts.append(str(diagnosis_data))
+            
+            if prescription_data:
+                if isinstance(prescription_data, dict):
+                    for key, value in prescription_data.items():
+                        result_parts.append(f"{key}：{value}")
+                else:
+                    result_parts.append(str(prescription_data))
+            
+            final_results = "。".join(result_parts) if result_parts else ""
+        
+        return final_results
+    
     def initial_inquiry(self, age: Any, gender: str, symptoms: str) -> tuple[int, Dict[str, Any]]:
         """
-        初步问诊分析
-        
-        :param age: 年龄
-        :param gender: 性别
-        :param symptoms: 症状描述
-        :return: (HTTP状态码, 响应数据)
+        初步问诊分析 - Linus修复版：引入智能状态管理
         """
         try:
             logger.info("开始初步问诊分析")
@@ -218,8 +301,25 @@ class MedicalInquiryAPI:
             
             # 构建问诊输入文本
             inquiry_text = self._build_inquiry_text(int(age), gender, symptoms)
-            
             logger.info(f"问诊输入文本: {inquiry_text}")
+            
+            # 生成session标识 - 基于基础信息
+            base_info = f"{age}_{gender}_{symptoms[:50]}"  # 使用前50字符避免过长
+            session_id = session_manager.get_or_create_session(base_info)
+            
+            # 检查是否已有计算结果
+            existing_state = session_manager.get_session_state(session_id)
+            if existing_state and existing_state.get("response"):
+                logger.info(f"复用已有计算结果，session: {session_id}")
+                final_results = self._extract_result_from_state(existing_state)
+                
+                return 200, {
+                    "success": True,
+                    "message": "问诊分析成功",
+                    "data": {
+                        "results": final_results
+                    }
+                }
             
             # 调用诊断系统进行分析
             logger.info("调用诊断系统进行问诊分析")
@@ -228,30 +328,14 @@ class MedicalInquiryAPI:
                 config={"retriever_k": 4}
             )
             
-            # 获取分析结果
-            final_results = diagnosis_result.get("response", "")
+            # 保存完整的graph state
+            session_manager.update_session_state(session_id, diagnosis_result)
             
-            # 如果结果为空，尝试从其他字段获取信息
+            # 提取结果
+            final_results = self._extract_result_from_state(diagnosis_result)
+            
             if not final_results.strip():
-                diagnosis_data = diagnosis_result.get("diagnosis_data", {})
-                prescription_data = diagnosis_result.get("prescription_data", {})
-                
-                result_parts = []
-                if diagnosis_data:
-                    if isinstance(diagnosis_data, dict):
-                        for key, value in diagnosis_data.items():
-                            result_parts.append(f"{key}：{value}")
-                    else:
-                        result_parts.append(str(diagnosis_data))
-                
-                if prescription_data:
-                    if isinstance(prescription_data, dict):
-                        for key, value in prescription_data.items():
-                            result_parts.append(f"{key}：{value}")
-                    else:
-                        result_parts.append(str(prescription_data))
-                
-                final_results = "。".join(result_parts) if result_parts else inquiry_text
+                final_results = inquiry_text  # 兜底策略
             
             logger.info("初步问诊分析完成")
             
@@ -277,12 +361,7 @@ class MedicalInquiryAPI:
     def complete_inquiry(self, prev_inquiry: str, additional_info: str, 
                         additional_file: Optional[FileStorage] = None) -> tuple[int, Dict[str, Any]]:
         """
-        补充问诊分析
-        
-        :param prev_inquiry: 之前的问诊分析结果
-        :param additional_info: 补充信息
-        :param additional_file: 可选的检查报告文件
-        :return: (HTTP状态码, 响应数据)
+        补充问诊分析 - Linus修复版：智能状态恢复，避免重复计算
         """
         temp_file_path = None
         
@@ -297,16 +376,21 @@ class MedicalInquiryAPI:
                     "data": {"results": ""}
                 }
             
-            # 构建补充问诊的输入文本
-            inquiry_parts = []
+            # 智能识别已有session
+            session_id = None
+            existing_state = None
             
-            # 添加之前的问诊结果
             if prev_inquiry and prev_inquiry.strip():
-                inquiry_parts.append(f"之前的问诊分析：{prev_inquiry.strip()}")
+                # 尝试从之前的问诊结果中识别session
+                session_id = session_manager.extract_session_from_prev_inquiry(prev_inquiry.strip())
+                if session_id:
+                    existing_state = session_manager.get_session_state(session_id)
+                    logger.info(f"识别到已有session: {session_id}")
             
-            # 添加补充信息
+            # 构建补充信息
+            additional_parts = []
             if additional_info and additional_info.strip():
-                inquiry_parts.append(f"补充信息：{additional_info.strip()}")
+                additional_parts.append(f"补充信息：{additional_info.strip()}")
             
             # 处理检查报告文件（如果有）
             if additional_file:
@@ -325,56 +409,64 @@ class MedicalInquiryAPI:
                 # 根据文件类型添加描述
                 file_ext = additional_file.filename.rsplit('.', 1)[1].lower()
                 if file_ext == 'pdf':
-                    inquiry_parts.append("已上传PDF格式的检查报告，请结合报告内容进行综合分析。")
+                    additional_parts.append("已上传PDF格式的检查报告，请结合报告内容进行综合分析。")
                 else:
-                    inquiry_parts.append("已上传检查报告图片，请结合图像信息进行综合分析。")
+                    additional_parts.append("已上传检查报告图片，请结合图像信息进行综合分析。")
             
-            # 合并所有输入信息
-            combined_inquiry = "。".join(inquiry_parts)
-            
-            if not combined_inquiry.strip():
+            if not additional_parts:
                 return 400, {
                     "success": False,
-                    "message": "补充问诊输入信息为空",
+                    "message": "补充信息为空",
                     "data": {"results": ""}
                 }
             
-            # 添加补充问诊的特殊指令
-            combined_inquiry += "。请在之前分析的基础上，结合新的补充信息，提供更完善的中医辨证分析和诊疗建议。"
+            # 构建增量输入
+            incremental_input = "。".join(additional_parts)
+            incremental_input += "。请在之前分析的基础上，结合新的补充信息，提供更完善的中医辨证分析和诊疗建议。"
             
-            logger.info(f"补充问诊输入文本: {combined_inquiry}")
+            logger.info(f"补充问诊增量输入: {incremental_input}")
             
-            # 调用诊断系统进行综合分析
-            logger.info("调用诊断系统进行补充问诊分析")
-            diagnosis_result = run_tcm_graph(
-                user_input=combined_inquiry,
-                config={"retriever_k": 5}  # 补充分析使用更多检索结果
-            )
+            if existing_state:
+                # 【Linus式核心修复】使用已有state进行增量计算，避免重复劳动
+                logger.info("基于已有state进行增量分析")
+                
+                # 将补充信息添加到messages中
+                updated_messages = existing_state.get("messages", [])
+                updated_messages.append({"role": "user", "content": incremental_input})
+                
+                # 使用已有状态进行增量计算
+                diagnosis_result = run_tcm_graph(
+                    user_input=incremental_input,
+                    messages=updated_messages,
+                    memory=existing_state.get("memory"),
+                    config=existing_state.get("config", {"retriever_k": 5})
+                )
+            else:
+                # 如果没有找到已有状态，只能重新计算（但记录警告）
+                logger.warning("未找到已有session，执行完整计算")
+                
+                combined_inquiry = prev_inquiry + "。" + incremental_input if prev_inquiry else incremental_input
+                
+                diagnosis_result = run_tcm_graph(
+                    user_input=combined_inquiry,
+                    config={"retriever_k": 5}
+                )
+                
+                # 为新的计算创建session
+                session_id = session_manager.get_or_create_session(
+                    f"complete_{hash(combined_inquiry)}", 
+                    diagnosis_result
+                )
             
-            # 获取分析结果
-            final_results = diagnosis_result.get("response", "")
+            # 更新session状态
+            if session_id:
+                session_manager.update_session_state(session_id, diagnosis_result)
             
-            # 如果结果为空，尝试从其他字段获取信息
+            # 提取最终结果
+            final_results = self._extract_result_from_state(diagnosis_result)
+            
             if not final_results.strip():
-                diagnosis_data = diagnosis_result.get("diagnosis_data", {})
-                prescription_data = diagnosis_result.get("prescription_data", {})
-                
-                result_parts = []
-                if diagnosis_data:
-                    if isinstance(diagnosis_data, dict):
-                        for key, value in diagnosis_data.items():
-                            result_parts.append(f"{key}：{value}")
-                    else:
-                        result_parts.append(str(diagnosis_data))
-                
-                if prescription_data:
-                    if isinstance(prescription_data, dict):
-                        for key, value in prescription_data.items():
-                            result_parts.append(f"{key}：{value}")
-                    else:
-                        result_parts.append(str(prescription_data))
-                
-                final_results = "。".join(result_parts) if result_parts else combined_inquiry
+                final_results = prev_inquiry + "。" + incremental_input  # 兜底策略
             
             logger.info("补充问诊分析完成")
             
@@ -404,7 +496,7 @@ class MedicalInquiryAPI:
     
     def handle_inquiry_request(self):
         """
-        处理初步问诊请求 (接口5.1)
+        处理初步问诊请求 (接口5.1) - 保持接口不变
         POST /api/inquiry
         """
         try:
@@ -443,7 +535,7 @@ class MedicalInquiryAPI:
     
     def handle_inquiry_complete_request(self):
         """
-        处理补充问诊请求 (接口5.2)
+        处理补充问诊请求 (接口5.2) - 保持接口不变
         POST /api/inquiry/complete
         """
         try:
@@ -489,14 +581,18 @@ class MedicalInquiryAPI:
     
     def get_api_info(self) -> Dict[str, Any]:
         """
-        获取API信息
-        
-        :return: API信息
+        获取API信息 - 保持原有接口
         """
         return {
             "name": self.api_name,
             "version": self.version,
-            "description": "基于中医理论的问诊分析API，支持初步问诊和补充问诊",
+            "description": "基于中医理论的问诊分析API，支持初步问诊和补充问诊 - Linus修复版",
+            "features": [
+                "智能状态管理，避免重复计算",
+                "基于内容Hash的session识别",
+                "增量计算，复用已有结果", 
+                "自动过期清理，防止内存泄漏"
+            ],
             "endpoints": {
                 "inquiry": {
                     "method": "POST",

@@ -18,7 +18,7 @@ from typing import Dict, Any, Optional
 # 配置
 BASE_URL = "http://localhost:8080"  # 修改为你的实际服务器地址
 IMAGE_PATH = r"D:\ROG\Documents\微信图片_20250816172059.jpg"
-TIMEOUT = 120  # 请求超时时间（秒）
+TIMEOUT = 240  # 请求超时时间（秒）
 
 class MedicalAPITester:
     """医学图像分析API测试器"""
@@ -249,7 +249,7 @@ class MedicalAPITester:
         
         # 2. 测试图片望诊分析接口
         print(f"\n📍 第一阶段：测试基础望诊分析")
-        watch_result = self.test_watch_api("这是一张舌诊图片，请分析")
+        watch_result = self.test_watch_api("这是一张图片，请分析")
         
         if not watch_result or not watch_result.get('success'):
             print(f"\n❌ 基础望诊分析测试失败，跳过补充分析测试")

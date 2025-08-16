@@ -8,14 +8,15 @@ aiohttp
 requests
 
 # 基础科学与图像处理
-numpy
+numpy==1.26.0
 opencv-python
 Pillow
 matplotlib  # 若你需要调试图像可视化等
 
 # 文档与文件处理
 PyMuPDF           # 提供 fitz 接口
-paddleocr         # OCR 识别
+paddleocr==2.10.0        # OCR 识别
+paddlepaddle==3.0.0rc1
 pdf2image         # 如果后续处理 PDF 渲染图片可能需要
 torch             # 用于 AI 模型加载和推理
 tqdm              # 若有进度条显示需求
@@ -30,7 +31,7 @@ langchain
 langchain-openai
 langchain-community
 langgraph         # 从你的第一行 `StateGraph` 可知
-transformers
+transformers==4.42.3
 sentence-transformers  # 若你使用 huggingface 嵌入模型
 faiss-cpu          # 向量库 FAISS，若使用 GPU 可改为 faiss-gpu
 

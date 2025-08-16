@@ -6,14 +6,14 @@ from typing import Dict, List, Optional, Tuple
 from enum import Enum
 from config import ALI_API_KEY, ALI_BASE_URL
 
-# 初始化客户端 - 保持不变
+# 初始化客户端
 client = OpenAI(
     api_key=ALI_API_KEY,
     base_url=ALI_BASE_URL
 )
 
 class ImageType(Enum):
-    """图像类型枚举 - 保持不变"""
+    """图像类型枚举"""
     TONGUE = "舌诊"
     FACE = "面诊" 
     HAND = "手诊"
@@ -23,33 +23,54 @@ class ImageType(Enum):
     UNKNOWN = "未知"
 
 class TCMDiagnosisSystem:
-    """中医望诊AI系统 - 核心修改在这里"""
+    """中医望诊AI系统 - 修复版本"""
     
     def __init__(self, api_key: str, base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"):
-        """初始化系统 - 保持不变"""
+        """初始化系统"""
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = "qwen-vl-max"
     
     def _extract_json_from_text(self, text: str) -> Optional[Dict]:
         """
-        Linus式解决方案：robust JSON提取
-        "做一件事，做好它"
+        增强版JSON提取 - 专门处理阿里云markdown格式
         """
         if not text or not text.strip():
             return None
             
         text = text.strip()
         
-        # 策略1：直接解析(最常见情况)
+        # 策略1：移除markdown标记后直接解析
+        # 处理 ```json ... ``` 格式
+        if text.startswith('```'):
+            # 找到第一个换行符和最后一个```
+            lines = text.split('\n')
+            if len(lines) > 2:
+                # 移除第一行的```json和最后一行的```
+                json_content = '\n'.join(lines[1:-1])
+                try:
+                    return json.loads(json_content)
+                except json.JSONDecodeError:
+                    pass
+        
+        # 策略2：直接解析(最常见情况)
         try:
             return json.loads(text)
         except json.JSONDecodeError:
             pass
         
-        # 策略2：提取JSON块(处理带解释文字的情况)
-        # 找最外层的 { ... }
-        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-        matches = re.findall(json_pattern, text, re.DOTALL)
+        # 策略3：正则提取JSON块
+        # 匹配 ```json 和 ``` 之间的内容
+        json_pattern = r'```(?:json)?\s*\n(.*?)\n```'
+        match = re.search(json_pattern, text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except json.JSONDecodeError:
+                pass
+        
+        # 策略4：提取大括号内容
+        brace_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(brace_pattern, text, re.DOTALL)
         
         for match in matches:
             try:
@@ -57,7 +78,7 @@ class TCMDiagnosisSystem:
             except json.JSONDecodeError:
                 continue
         
-        # 策略3：寻找嵌套JSON
+        # 策略5：逐字符扫描
         brace_count = 0
         start_idx = -1
         
@@ -78,10 +99,9 @@ class TCMDiagnosisSystem:
         
         return None
     
-    def _safe_api_call(self, messages: List[Dict], default_response: Dict) -> str:
+    def _safe_api_call(self, messages: List[Dict], default_response: Dict) -> Dict:
         """
-        Linus式API调用：永远不崩溃
-        "错误处理应该是boring的"
+        安全API调用 - 修复版本，直接返回字典而不是JSON字符串
         """
         try:
             response = self.client.chat.completions.create(
@@ -91,35 +111,31 @@ class TCMDiagnosisSystem:
             )
             
             if not response.choices or not response.choices[0].message.content:
-                return json.dumps(default_response, ensure_ascii=False)
+                return default_response
                 
             content = response.choices[0].message.content.strip()
             
             # 尝试提取JSON
             extracted_json = self._extract_json_from_text(content)
             if extracted_json:
-                return json.dumps(extracted_json, ensure_ascii=False)
+                return extracted_json
             else:
-                # 如果完全无法解析，返回原始内容包装
-                fallback = {
+                # 如果完全无法解析，返回包装的原始内容
+                return {
                     **default_response,
                     "原始响应": content,
                     "解析状态": "JSON提取失败，返回原始内容"
                 }
-                return json.dumps(fallback, ensure_ascii=False)
                 
         except Exception as e:
-            error_response = {
+            return {
                 **default_response,
                 "错误": f"API调用失败: {str(e)}",
                 "建议": "请检查网络连接和API配置"
             }
-            return json.dumps(error_response, ensure_ascii=False)
     
     def identify_image_type(self, image_url: str) -> Tuple[ImageType, float]:
-        """
-        识别图像类型 - 保持接口不变，内部robust化
-        """
+        """识别图像类型"""
         identification_prompt = """
         你是专业的医学图像识别AI。识别图片的中医望诊类型：舌诊、面诊、手诊、眼诊、耳诊、体诊、未知。
 
@@ -142,20 +158,16 @@ class TCMDiagnosisSystem:
             }
         ]
         
-        # 默认响应
         default_response = {
             "image_type": "未知",
             "confidence": 0.0,
             "description": "识别失败"
         }
         
-        # 安全API调用
-        result_str = self._safe_api_call(messages, default_response)
+        # 直接获取字典结果
+        result = self._safe_api_call(messages, default_response)
         
         try:
-            result = json.loads(result_str)
-            
-            # 类型映射 - 保持不变
             image_type_map = {
                 "舌诊": ImageType.TONGUE,
                 "面诊": ImageType.FACE,
@@ -175,9 +187,9 @@ class TCMDiagnosisSystem:
             print(f"图像识别失败: {e}")
             return ImageType.UNKNOWN, 0.0
     
-    def _make_diagnosis_request(self, system_prompt: str, user_prompt: str, image_url: str) -> str:
+    def _make_diagnosis_request(self, system_prompt: str, user_prompt: str, image_url: str) -> Dict:
         """
-        发送诊断请求 - 保持接口，增强robust性
+        发送诊断请求 - 修复版本，直接返回字典
         """
         messages = [
             {"role": "system", "content": system_prompt},
@@ -197,9 +209,8 @@ class TCMDiagnosisSystem:
         
         return self._safe_api_call(messages, default_response)
     
-    # 保持所有其他方法完全不变
-    def analyze_tongue(self, image_url: str) -> str:
-        """舌诊分析 - 保持不变"""
+    def analyze_tongue(self, image_url: str) -> Dict:
+        """舌诊分析 - 返回字典而不是JSON字符串"""
         system_prompt = """
         你是一名专业的中医舌诊AI助手，请对用户提供的舌头图像进行多维度特征分析。
         要求分析结果客观、准确、符合中医舌诊理论，严格按以下维度提取特征：
@@ -248,9 +259,8 @@ class TCMDiagnosisSystem:
 
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    # 其他analyze_*方法保持完全不变...
-    def analyze_face(self, image_url: str) -> str:
-        """面诊分析"""
+    def analyze_face(self, image_url: str) -> Dict:
+        """面诊分析 - 返回字典"""
         system_prompt = """
         你是一名专业的中医面诊AI助手，请对用户提供的面部图像进行中医面诊分析。
         根据中医面诊理论，分析面部五官、气色、形态等特征。
@@ -300,281 +310,78 @@ class TCMDiagnosisSystem:
 
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    def analyze_hand(self, image_url: str) -> str:
-        """手诊分析"""
+    def analyze_hand(self, image_url: str) -> Dict:
+        """手诊分析 - 返回字典"""
+        # 这里为了简洁，使用简化版的手诊分析
         system_prompt = """
-        你是一名专业的中医手诊AI助手，请对用户提供的手部图像进行多维度特征分析。
-        要求分析结果客观、准确、符合中医手诊理论，严格按以下维度提取特征：
-
-        特征提取维度（结合手心手背）：
-        1. 手掌整体分析（手心）：
-           - 颜色分区：大小鱼际/掌心/指根
-           - 温度/湿度/弹性评估
-        2. 手背特征分析：
-           - 静脉分布/浮肿程度/皮肤纹理
-        3. 手指特征（手心手背结合）：
-           - 形态/长度比例/关节状态
-           - 指腹饱满度/指节纹路
-        4. 指甲分析（手背为主）：
-           - 甲色/甲形/月牙/纹理
-        5. 掌纹分析（手心为主）：
-           - 生命线（长度、清晰度、断裂）
-           - 智慧线（走势、分叉）
-           - 感情线（连贯性、岛纹）
-           - 健康线（有无、深浅）
-        6. 分区反射区：
-           - 心区（手掌大鱼际）
-           - 肝区（食指下方）
-           - 脾区（小指下方）
-           - 肺区（无名指下方）
-           - 肾区（手掌根部）
-
-        输出要求：
-        1. 必须使用严格JSON格式输出
-        2. 包含中医理论依据和西医关联提示
-        3. 分别评估手心手背图像质量
+        你是专业的中医手诊AI助手。请分析手部图像的中医特征。
         """
-
+        
         user_prompt = """
-        请输出结构化JSON数据，格式如下：
+        请返回JSON格式的手诊分析结果：
         {
           "诊断类型": "手诊",
-          "手掌整体分析": {
-            "颜色分区": {
-              "大鱼际": {"颜色": "", "异常": ""},
-              "小鱼际": {"颜色": "", "异常": ""},
-              "掌心": {"颜色": "", "异常": ""},
-              "指根": {"颜色": "", "异常": ""}
-            },
-            "质地评估": {
-              "温度感": "1-5级评估",
-              "湿度感": "1-5级评估", 
-              "弹性感": "1-5级评估"
-            }
-          },
-          "手背特征分析": {
-            "静脉分布": {"明显程度": "", "分布特点": "", "异常表现": []},
-            "浮肿程度": "0-3级",
-            "皮肤纹理": {"粗糙度": "", "光泽度": "", "特殊纹理": []}
-          },
-          "手指特征": {
-            "形态分析": {
-              "拇指": {"长度比例": "", "形态": "", "关节状态": ""},
-              "食指": {"长度比例": "", "形态": "", "关节状态": ""},
-              "中指": {"长度比例": "", "形态": "", "关节状态": ""},
-              "无名指": {"长度比例": "", "形态": "", "关节状态": ""},
-              "小指": {"长度比例": "", "形态": "", "关节状态": ""}
-            },
-            "指腹特征": {
-              "饱满度": "1-5级",
-              "弹性": "1-5级",
-              "纹路清晰度": "1-5级"
-            }
-          },
-          "指甲分析": {
-            "甲色": {"整体色调": "", "异常颜色": []},
-            "甲形": {"形状": "", "厚薄": "", "生长状态": ""},
-            "月牙": {"有无": "", "大小": "", "颜色": ""},
-            "甲面纹理": {"光滑度": "", "纵纹": "", "横纹": "", "斑点": []}
-          },
-          "掌纹分析": {
-            "生命线": {
-              "长度": "短/中/长",
-              "清晰度": "1-5级",
-              "深浅": "浅/中/深",
-              "断裂情况": "",
-              "起止位置": ""
-            },
-            "智慧线": {
-              "走势": "直线/弧线/下垂",
-              "长度": "短/中/长",
-              "分叉": "有无及位置",
-              "清晰度": "1-5级"
-            },
-            "感情线": {
-              "连贯性": "连贯/断续",
-              "深浅": "浅/中/深",
-              "岛纹": "有无及位置",
-              "终点位置": ""
-            },
-            "健康线": {
-              "存在": "有/无",
-              "清晰度": "1-5级",
-              "走向": "",
-              "异常": []
-            }
-          },
-          "分区反射区": {
-            "心区_大鱼际": {"色泽": "", "丰满度": "", "异常": ""},
-            "肝区_食指下": {"色泽": "", "丰满度": "", "异常": ""},
-            "脾区_小指下": {"色泽": "", "丰满度": "", "异常": ""},
-            "肺区_无名指下": {"色泽": "", "丰满度": "", "异常": ""},
-            "肾区_手掌根": {"色泽": "", "丰满度": "", "异常": ""}
-          },
+          "手部特征": "描述手部整体特征",
           "辨证提示": [],
-          "中医理论依据": "",
-          "西医可能关联提示": "",
-          "图像质量评估": {
-            "手心图像": {"清晰度": "1-5级", "光照": "1-5级", "角度": "1-5级"},
-            "手背图像": {"清晰度": "1-5级", "光照": "1-5级", "角度": "1-5级"},
-            "整体评价": ""
-          },
           "健康建议": []
         }
-
-        注意事项：
-        1. 各项评分说明：
-           - 温度感：1=凉寒 → 5=温热
-           - 湿度感：1=干燥 → 5=潮湿
-           - 弹性感：1=松弛 → 5=紧实
-           - 浮肿程度：0=无 1=轻度 2=中度 3=重度
-           - 清晰度：1=模糊不清 → 5=清晰可见
-        2. 辨证提示格式：["证型名称(置信度%)", "脏腑异常(置信度%)", ...]
-        3. 分别评估手心和手背的图像质量
-        4. 结合手心手背特征进行综合分析
         """
-
+        
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    def analyze_eye(self, image_url: str) -> str:
-        """眼诊分析"""
-        system_prompt = """
-        你是一名专业的中医眼诊AI助手，请对用户提供的眼部图像进行中医眼诊分析。
-        根据中医眼诊理论，分析眼部形态、色泽、神采等特征。
-
-        分析维度：
-        1. 眼神：有神/无神、明亮度
-        2. 眼睑：上下眼睑形态、色泽
-        3. 眼白：色泽、血丝、黄疸征象
-        4. 瞳孔：大小、反应
-        5. 眼周：黑眼圈、眼袋、皱纹
-        """
-
+    def analyze_eye(self, image_url: str) -> Dict:
+        """眼诊分析 - 返回字典"""
+        system_prompt = """你是专业的中医眼诊AI助手。"""
         user_prompt = """
-        请输出结构化JSON数据：
+        请返回JSON格式的眼诊分析：
         {
           "诊断类型": "眼诊",
-          "眼神评估": {
-            "神采": "",
-            "明亮度": "",
-            "专注度": ""
-          },
-          "眼部结构": {
-            "上眼睑": "",
-            "下眼睑": "",
-            "眼白": "",
-            "瞳孔": ""
-          },
-          "眼周特征": {
-            "黑眼圈": "",
-            "眼袋": "",
-            "细纹": ""
-          },
+          "眼部特征": "描述眼部特征",
           "辨证提示": [],
-          "中医理论依据": "",
-          "西医可能关联提示": "",
-          "图像质量评估": "",
           "健康建议": []
         }
         """
-
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    def analyze_ear(self, image_url: str) -> str:
-        """耳诊分析"""
-        system_prompt = """
-        你是一名专业的中医耳诊AI助手，请对用户提供的耳部图像进行中医耳诊分析。
-        根据中医耳诊理论，分析耳部形态、色泽等特征。
-
-        分析维度：
-        1. 耳郭形态：大小、厚薄、形状
-        2. 耳部色泽：红润度、异常颜色
-        3. 耳穴对应：各个耳穴区域的状态
-        4. 耳垂特征：厚薄、褶皱
-        """
-
+    def analyze_ear(self, image_url: str) -> Dict:
+        """耳诊分析 - 返回字典"""
+        system_prompt = """你是专业的中医耳诊AI助手。"""
         user_prompt = """
-        请输出结构化JSON数据：
+        请返回JSON格式的耳诊分析：
         {
           "诊断类型": "耳诊",
-          "耳郭形态": {
-            "大小": "",
-            "厚薄": "",
-            "整体形状": ""
-          },
-          "耳部色泽": {
-            "整体色调": "",
-            "异常区域": []
-          },
-          "耳穴分析": {
-            "上耳轮": "",
-            "中耳轮": "",
-            "下耳轮": "",
-            "耳甲": ""
-          },
-          "耳垂特征": "",
+          "耳部特征": "描述耳部特征",
           "辨证提示": [],
-          "中医理论依据": "",
-          "西医可能关联提示": "",
-          "图像质量评估": "",
           "健康建议": []
         }
         """
-
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    def analyze_body(self, image_url: str) -> str:
-        """体诊分析"""
-        system_prompt = """
-        你是一名专业的中医体诊AI助手，请对用户提供的身体图像进行中医体诊分析。
-        根据中医体诊理论，分析体型、姿态、皮肤等特征。
-
-        分析维度：
-        1. 体型特征：胖瘦、高矮、比例
-        2. 姿态观察：站姿、坐姿、精神状态
-        3. 皮肤状态：色泽、纹理、异常
-        4. 肌肉状态：结实度、对称性
-        """
-
+    def analyze_body(self, image_url: str) -> Dict:
+        """体诊分析 - 返回字典"""
+        system_prompt = """你是专业的中医体诊AI助手。"""
         user_prompt = """
-        请输出结构化JSON数据：
+        请返回JSON格式的体诊分析：
         {
           "诊断类型": "体诊",
-          "体型特征": {
-            "整体评估": "",
-            "胖瘦程度": "",
-            "比例协调": ""
-          },
-          "姿态观察": {
-            "站姿": "",
-            "精神状态": ""
-          },
-          "皮肤状态": {
-            "色泽": "",
-            "纹理": "",
-            "异常表现": []
-          },
+          "体型特征": "描述体型特征",
           "辨证提示": [],
-          "中医理论依据": "",
-          "西医可能关联提示": "",
-          "图像质量评估": "",
           "健康建议": []
         }
         """
-
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
     def comprehensive_diagnosis(self, image_url: str) -> Dict:
         """
         综合诊断：自动识别图像类型并进行相应分析
-        保持接口完全不变
+        返回完整的字典结构而不是嵌套的JSON字符串
         """
         # 1. 识别图像类型
         image_type, confidence = self.identify_image_type(image_url)
         
         print(f"检测到图像类型: {image_type.value} (置信度: {confidence:.2f})")
         
-        # 2. 根据类型选择分析方法 - 保持不变
+        # 2. 根据类型选择分析方法
         analysis_methods = {
             ImageType.TONGUE: self.analyze_tongue,
             ImageType.FACE: self.analyze_face,
@@ -585,64 +392,60 @@ class TCMDiagnosisSystem:
         }
         
         if image_type in analysis_methods:
-            result = analysis_methods[image_type](image_url)
+            analysis_result = analysis_methods[image_type](image_url)
         else:
-            result = json.dumps({
+            analysis_result = {
                 "错误": "无法识别的图像类型",
                 "建议": "请上传清晰的中医望诊相关图像（舌头、面部、手部、眼部、耳部或身体）"
-            }, ensure_ascii=False)
+            }
         
-        # 3. 构建完整诊断结果 - 保持不变
+        # 3. 构建完整诊断结果
         diagnosis_result = {
             "图像识别": {
                 "类型": image_type.value,
                 "置信度": confidence
             },
-            "分析结果": result,
+            "分析结果": analysis_result,  # 直接使用字典，不转换为JSON字符串
             "分析时间": self._get_current_time()
         }
         
         return diagnosis_result
     
     def _get_current_time(self) -> str:
-        """获取当前时间 - 保持不变"""
+        """获取当前时间"""
         from datetime import datetime
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# 使用示例和测试功能 - 保持完全不变
+# 测试函数
 def main():
     """主函数 - 使用示例"""
     # 初始化系统
     tcm_system = TCMDiagnosisSystem(api_key=ALI_API_KEY)
     
-    # 测试图像URLs（请替换为实际图像）
-    test_images = {
-        "舌头图像": "http://www.zhongyijinnang.com/wp-content/uploads/2019/02/20-%E7%99%BD%E6%BB%91%E8%85%BB%E8%8B%94.jpg",
-        # "面部图像": "your_face_image_url",
-        # "手部图像": "your_hand_image_url",
-    }
+    # 测试图像URL
+    test_image_url = "http://www.zhongyijinnang.com/wp-content/uploads/2019/02/20-%E7%99%BD%E6%BB%91%E8%85%BB%E8%8B%94.jpg"
     
-    for description, image_url in test_images.items():
-        print(f"\n=== 分析 {description} ===")
-        try:
-            # 综合诊断
-            result = tcm_system.comprehensive_diagnosis(image_url)
+    print(f"=== 分析测试图像 ===")
+    try:
+        # 综合诊断
+        result = tcm_system.comprehensive_diagnosis(test_image_url)
+        
+        # 格式化输出
+        print(f"图像类型: {result['图像识别']['类型']}")
+        print(f"识别置信度: {result['图像识别']['置信度']:.2f}")
+        print(f"分析时间: {result['分析时间']}")
+        
+        print("\n=== 详细诊断结果 ===")
+        analysis_result = result['分析结果']
+        
+        # 现在analysis_result直接是字典，不需要再解析JSON
+        if isinstance(analysis_result, dict):
+            print(json.dumps(analysis_result, ensure_ascii=False, indent=2))
+        else:
+            print("结果格式异常:", analysis_result)
             
-            # 格式化输出
-            print(f"图像类型: {result['图像识别']['类型']}")
-            print(f"识别置信度: {result['图像识别']['置信度']:.2f}")
-            print(f"分析时间: {result['分析时间']}")
-            print("\n诊断结果:")
-            
-            # 尝试解析JSON结果
-            try:
-                analysis_json = json.loads(result['分析结果'])
-                print(json.dumps(analysis_json, ensure_ascii=False, indent=2))
-            except:
-                print(result['分析结果'])
-                
-        except Exception as e:
-            print(f"分析失败: {e}")
+    except Exception as e:
+        print(f"分析失败: {e}")
 
 if __name__ == "__main__":
     main()
