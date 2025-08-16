@@ -1,0 +1,43 @@
+# Web 框架与 API 支持
+flask
+flask-cors
+werkzeug
+
+# 异步与网络请求
+aiohttp
+requests
+
+# 基础科学与图像处理
+numpy
+opencv-python
+Pillow
+matplotlib  # 若你需要调试图像可视化等
+
+# 文档与文件处理
+PyMuPDF           # 提供 fitz 接口
+paddleocr         # OCR 识别
+pdf2image         # 如果后续处理 PDF 渲染图片可能需要
+torch             # 用于 AI 模型加载和推理
+tqdm              # 若有进度条显示需求
+
+# 日志处理
+# logging 是 Python 标准库，通常不需安装
+# 若有特殊需求如日志轮转处理可以添加 loguru：
+# loguru
+
+# LangChain 系列组件
+langchain
+langchain-openai
+langchain-community
+langgraph         # 从你的第一行 `StateGraph` 可知
+transformers
+sentence-transformers  # 若你使用 huggingface 嵌入模型
+faiss-cpu          # 向量库 FAISS，若使用 GPU 可改为 faiss-gpu
+
+# Embedding 模型等配置
+huggingface-hub
+# openai SDK（若使用 OpenAI）
+openai
+
+# 其他工具模块
+python-dotenv      # 用于读取 .env 文件中的配置

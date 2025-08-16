@@ -1,17 +1,19 @@
 import os
 import json
+import re
 from openai import OpenAI
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from config import ALI_API_KEY, ALI_BASE_URL
 
-# 初始化客户端
+# 初始化客户端 - 保持不变
 client = OpenAI(
-    api_key="sk-xxx",  # 请替换为您的API密钥
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    api_key=ALI_API_KEY,
+    base_url=ALI_BASE_URL
 )
 
 class ImageType(Enum):
-    """图像类型枚举"""
+    """图像类型枚举 - 保持不变"""
     TONGUE = "舌诊"
     FACE = "面诊" 
     HAND = "手诊"
@@ -21,53 +23,139 @@ class ImageType(Enum):
     UNKNOWN = "未知"
 
 class TCMDiagnosisSystem:
-    """中医望诊AI系统"""
+    """中医望诊AI系统 - 核心修改在这里"""
     
     def __init__(self, api_key: str, base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"):
-        """初始化系统"""
+        """初始化系统 - 保持不变"""
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = "qwen-vl-max"
     
-    def identify_image_type(self, image_url: str) -> Tuple[ImageType, float]:
+    def _extract_json_from_text(self, text: str) -> Optional[Dict]:
         """
-        识别图像类型
-        Returns: (图像类型, 置信度)
+        Linus式解决方案：robust JSON提取
+        "做一件事，做好它"
         """
-        identification_prompt = """
-        你是一个专业的医学图像识别AI。请识别这张图片属于哪种中医望诊类型：
-        1. 舌诊 - 舌头图像
-        2. 面诊 - 面部图像
-        3. 手诊 - 手部图像（手掌、手背、指甲等）
-        4. 眼诊 - 眼部图像
-        5. 耳诊 - 耳部图像
-        6. 体诊 - 身体体态图像
-        7. 未知 - 无法确定或不属于以上类型
+        if not text or not text.strip():
+            return None
+            
+        text = text.strip()
         
-        请返回JSON格式：
-        {
-            "image_type": "类型名称",
-            "confidence": 0.95,
-            "description": "简要描述图像内容"
-        }
-        """
+        # 策略1：直接解析(最常见情况)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
         
+        # 策略2：提取JSON块(处理带解释文字的情况)
+        # 找最外层的 { ... }
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(json_pattern, text, re.DOTALL)
+        
+        for match in matches:
+            try:
+                return json.loads(match)
+            except json.JSONDecodeError:
+                continue
+        
+        # 策略3：寻找嵌套JSON
+        brace_count = 0
+        start_idx = -1
+        
+        for i, char in enumerate(text):
+            if char == '{':
+                if start_idx == -1:
+                    start_idx = i
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0 and start_idx != -1:
+                    try:
+                        json_str = text[start_idx:i+1]
+                        return json.loads(json_str)
+                    except json.JSONDecodeError:
+                        start_idx = -1
+                        continue
+        
+        return None
+    
+    def _safe_api_call(self, messages: List[Dict], default_response: Dict) -> str:
+        """
+        Linus式API调用：永远不崩溃
+        "错误处理应该是boring的"
+        """
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": identification_prompt},
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "image_url", "image_url": {"url": image_url}},
-                            {"type": "text", "text": "请识别这张图片的类型"}
-                        ]
-                    }
-                ],
+                messages=messages,
                 temperature=0.1
             )
             
-            result = json.loads(response.choices[0].message.content)
+            if not response.choices or not response.choices[0].message.content:
+                return json.dumps(default_response, ensure_ascii=False)
+                
+            content = response.choices[0].message.content.strip()
+            
+            # 尝试提取JSON
+            extracted_json = self._extract_json_from_text(content)
+            if extracted_json:
+                return json.dumps(extracted_json, ensure_ascii=False)
+            else:
+                # 如果完全无法解析，返回原始内容包装
+                fallback = {
+                    **default_response,
+                    "原始响应": content,
+                    "解析状态": "JSON提取失败，返回原始内容"
+                }
+                return json.dumps(fallback, ensure_ascii=False)
+                
+        except Exception as e:
+            error_response = {
+                **default_response,
+                "错误": f"API调用失败: {str(e)}",
+                "建议": "请检查网络连接和API配置"
+            }
+            return json.dumps(error_response, ensure_ascii=False)
+    
+    def identify_image_type(self, image_url: str) -> Tuple[ImageType, float]:
+        """
+        识别图像类型 - 保持接口不变，内部robust化
+        """
+        identification_prompt = """
+        你是专业的医学图像识别AI。识别图片的中医望诊类型：舌诊、面诊、手诊、眼诊、耳诊、体诊、未知。
+
+        严格按此JSON格式返回：
+        {
+            "image_type": "类型名称",  
+            "confidence": 0.95,
+            "description": "简要描述"
+        }
+        """
+        
+        messages = [
+            {"role": "system", "content": identification_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                    {"type": "text", "text": "识别图像类型，返回JSON"}
+                ]
+            }
+        ]
+        
+        # 默认响应
+        default_response = {
+            "image_type": "未知",
+            "confidence": 0.0,
+            "description": "识别失败"
+        }
+        
+        # 安全API调用
+        result_str = self._safe_api_call(messages, default_response)
+        
+        try:
+            result = json.loads(result_str)
+            
+            # 类型映射 - 保持不变
             image_type_map = {
                 "舌诊": ImageType.TONGUE,
                 "面诊": ImageType.FACE,
@@ -78,8 +166,8 @@ class TCMDiagnosisSystem:
                 "未知": ImageType.UNKNOWN
             }
             
-            image_type = image_type_map.get(result["image_type"], ImageType.UNKNOWN)
-            confidence = result["confidence"]
+            image_type = image_type_map.get(result.get("image_type", "未知"), ImageType.UNKNOWN)
+            confidence = float(result.get("confidence", 0.0))
             
             return image_type, confidence
             
@@ -87,8 +175,31 @@ class TCMDiagnosisSystem:
             print(f"图像识别失败: {e}")
             return ImageType.UNKNOWN, 0.0
     
+    def _make_diagnosis_request(self, system_prompt: str, user_prompt: str, image_url: str) -> str:
+        """
+        发送诊断请求 - 保持接口，增强robust性
+        """
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                    {"type": "text", "text": user_prompt}
+                ]
+            }
+        ]
+        
+        default_response = {
+            "错误": "分析失败",
+            "建议": "请检查图像质量或重试"
+        }
+        
+        return self._safe_api_call(messages, default_response)
+    
+    # 保持所有其他方法完全不变
     def analyze_tongue(self, image_url: str) -> str:
-        """舌诊分析"""
+        """舌诊分析 - 保持不变"""
         system_prompt = """
         你是一名专业的中医舌诊AI助手，请对用户提供的舌头图像进行多维度特征分析。
         要求分析结果客观、准确、符合中医舌诊理论，严格按以下维度提取特征：
@@ -137,6 +248,7 @@ class TCMDiagnosisSystem:
 
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
+    # 其他analyze_*方法保持完全不变...
     def analyze_face(self, image_url: str) -> str:
         """面诊分析"""
         system_prompt = """
@@ -452,40 +564,17 @@ class TCMDiagnosisSystem:
 
         return self._make_diagnosis_request(system_prompt, user_prompt, image_url)
     
-    def _make_diagnosis_request(self, system_prompt: str, user_prompt: str, image_url: str) -> str:
-        """发送诊断请求到AI模型"""
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "image_url", "image_url": {"url": image_url}},
-                            {"type": "text", "text": user_prompt}
-                        ]
-                    }
-                ],
-                temperature=0.1
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return json.dumps({
-                "错误": f"分析失败: {str(e)}",
-                "建议": "请检查图像质量或重试"
-            }, ensure_ascii=False)
-    
     def comprehensive_diagnosis(self, image_url: str) -> Dict:
         """
         综合诊断：自动识别图像类型并进行相应分析
+        保持接口完全不变
         """
         # 1. 识别图像类型
         image_type, confidence = self.identify_image_type(image_url)
         
         print(f"检测到图像类型: {image_type.value} (置信度: {confidence:.2f})")
         
-        # 2. 根据类型选择分析方法
+        # 2. 根据类型选择分析方法 - 保持不变
         analysis_methods = {
             ImageType.TONGUE: self.analyze_tongue,
             ImageType.FACE: self.analyze_face,
@@ -503,7 +592,7 @@ class TCMDiagnosisSystem:
                 "建议": "请上传清晰的中医望诊相关图像（舌头、面部、手部、眼部、耳部或身体）"
             }, ensure_ascii=False)
         
-        # 3. 构建完整诊断结果
+        # 3. 构建完整诊断结果 - 保持不变
         diagnosis_result = {
             "图像识别": {
                 "类型": image_type.value,
@@ -516,15 +605,15 @@ class TCMDiagnosisSystem:
         return diagnosis_result
     
     def _get_current_time(self) -> str:
-        """获取当前时间"""
+        """获取当前时间 - 保持不变"""
         from datetime import datetime
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# 使用示例和测试功能
+# 使用示例和测试功能 - 保持完全不变
 def main():
     """主函数 - 使用示例"""
     # 初始化系统
-    tcm_system = TCMDiagnosisSystem(api_key="sk-xxx")  # 请替换为您的API密钥
+    tcm_system = TCMDiagnosisSystem(api_key=ALI_API_KEY)
     
     # 测试图像URLs（请替换为实际图像）
     test_images = {

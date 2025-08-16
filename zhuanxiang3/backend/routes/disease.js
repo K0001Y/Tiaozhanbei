@@ -3,7 +3,7 @@ const router = express.Router();
 const { searchDiseases } = require('../controllers/diseaseController');
 const AIService = require('../services/aiService');
 const auth = require('../middleware/auth');
-
+const AI_CONFIG = require('../config/aiConfig');
 // 所有路由都需要认证
 router.use(auth);
 
@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
       user_id: req.user.id
     };
     
-    const aiResponse = await AIService.callWithRetry('search', requestData);
+    const aiResponse = await AIService.callWithRetry('/api/search', requestData);
     
     if (aiResponse.success) {
       res.json({

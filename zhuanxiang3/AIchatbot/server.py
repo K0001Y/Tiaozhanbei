@@ -10,11 +10,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # 导入API模块
-from search_api import RAGSearchAPI
-from watch_api import MedicalImageAPI
-from inquiry_api import MedicalInquiryAPI
-from record_api import RecordAPI  # 病历生成API
-from import_api import ImportAPI  # 文档导入分析API
+from routes.search_api import RAGSearchAPI
+from routes.watch_api import MedicalImageAPI
+from routes.inquiry_api import MedicalInquiryAPI
+from routes.record_api import RecordAPI  # 病历生成API
+from routes.import_api import ImportAPI  # 文档导入分析API
 
 # 配置日志
 logging.basicConfig(

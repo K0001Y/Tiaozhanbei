@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const auth = require('../middleware/auth');
-
+const AI_CONFIG = require('../config/aiConfig');  
 // 配置multer用于文件上传（用于补充问诊的文件）
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('inquiry', AIService.formatInquiryData(inquiryData));
+    const aiResponse = await AIService.callWithRetry(AI_CONFIG.ENDPOINTS.INQUIRY, AIService.formatInquiryData(inquiryData));
     
     if (aiResponse.success) {
       res.json({
@@ -111,7 +111,7 @@ router.post('/complete', upload.single('additionalFile'), async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('inquiry-supplement', AIService.formatInquiryData(supplementData));
+    const aiResponse = await AIService.callWithRetry(AI_CONFIG.ENDPOINTS.INQUIRY_COMPLETE, AIService.formatInquiryData(supplementData));
     
     if (aiResponse.success) {
       res.json({

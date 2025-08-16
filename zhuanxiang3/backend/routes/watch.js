@@ -29,7 +29,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('analyze', AIService.formatWatchData(watchData));
+    const aiResponse = await AIService.callWithRetry('/api/analyze', AIService.formatWatchData(watchData));
     
     if (aiResponse.success) {
       res.json({
@@ -66,7 +66,7 @@ router.post('/complete', upload.single('additionalFile'), async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('analyze-supplement', AIService.formatWatchData(supplementData));
+    const aiResponse = await AIService.callWithRetry('/api/analyze-supplement', AIService.formatWatchData(supplementData));
     
     if (aiResponse.success) {
       res.json({

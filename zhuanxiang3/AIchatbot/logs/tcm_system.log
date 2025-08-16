@@ -1,0 +1,331 @@
+2025-08-15 21:07:07,915 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-15 21:07:52,429 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.42:8080
+2025-08-15 21:07:52,432 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-15 21:20:03,748 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-15 21:20:15,523 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.42:8080
+2025-08-15 21:20:15,523 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 00:23:20,441 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 00:24:02,285 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.42:8080
+2025-08-16 00:24:02,286 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 00:45:21,987 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:21] "GET /health HTTP/1.1" 200 -
+2025-08-16 00:45:24,013 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:24] "GET / HTTP/1.1" 200 -
+2025-08-16 00:45:26,034 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:26] "GET /health HTTP/1.1" 200 -
+2025-08-16 00:45:29,487 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:29] "GET /api/search?search=∏–√∞ HTTP/1.1" 200 -
+2025-08-16 00:45:31,558 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:31] "GET /api/search?search=Õ∑Õ¥ HTTP/1.1" 200 -
+2025-08-16 00:45:33,621 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:33] "GET /api/search?search=∑¢…’ HTTP/1.1" 200 -
+2025-08-16 00:45:35,675 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:45:35] "GET /api/search?search=test HTTP/1.1" 200 -
+2025-08-16 00:45:37,924 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 00:46:39,010 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:39] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 00:46:41,035 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:41] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 00:46:43,059 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:43] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 00:46:45,073 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:45] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 00:46:47,097 - routes.record_api - ERROR - Graph µ¿˝Œ¥…Ë÷√
+2025-08-16 00:46:47,100 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:47] "[35m[1mPOST /api/record HTTP/1.1[0m" 500 -
+2025-08-16 00:46:49,119 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:49] "POST /api/import HTTP/1.1" 200 -
+2025-08-16 00:46:51,137 - routes.import_api - ERROR - Œƒµµµº»Î«Î«Û¥¶¿Ì ß∞‹: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 00:46:51,138 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:51] "[35m[1mPOST /api/import HTTP/1.1[0m" 500 -
+2025-08-16 00:46:53,152 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:53] "[33mGET /api/nonexistent HTTP/1.1[0m" 404 -
+2025-08-16 00:46:55,172 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:55] "[31m[1mPUT /api/search HTTP/1.1[0m" 405 -
+2025-08-16 00:46:57,184 - routes.inquiry_api - ERROR - ≥ı≤ΩŒ ’Ô«Î«Û¥¶¿Ì“Ï≥£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 00:46:57,236 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 598, in get_json
+    rv = self.json_module.loads(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\json\provider.py", line 255, in loads
+    return json.loads(s, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 629, in on_json_loading_failed
+    raise BadRequest(f"Failed to decode JSON object: {e}")
+werkzeug.exceptions.BadRequest: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 414, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 607, in get_json
+    rv = self.on_json_loading_failed(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-16 00:46:57,237 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:46:57] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-16 00:52:51,636 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:52:51] "GET /health HTTP/1.1" 200 -
+2025-08-16 00:52:53,656 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:52:53] "GET / HTTP/1.1" 200 -
+2025-08-16 00:52:55,673 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:52:55] "GET /health HTTP/1.1" 200 -
+2025-08-16 00:52:57,798 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:52:57] "GET /api/search?search=∏–√∞ HTTP/1.1" 200 -
+2025-08-16 00:52:59,864 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:52:59] "GET /api/search?search=Õ∑Õ¥ HTTP/1.1" 200 -
+2025-08-16 00:53:01,922 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:53:01] "GET /api/search?search=∑¢…’ HTTP/1.1" 200 -
+2025-08-16 00:53:03,972 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:53:03] "GET /api/search?search=test HTTP/1.1" 200 -
+2025-08-16 00:53:06,143 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 00:54:01,183 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:01] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 00:54:03,210 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:03] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 00:54:05,259 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:05] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 00:54:07,279 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:07] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 00:54:09,310 - routes.record_api - ERROR - Graph µ¿˝Œ¥…Ë÷√
+2025-08-16 00:54:09,312 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:09] "[35m[1mPOST /api/record HTTP/1.1[0m" 500 -
+2025-08-16 00:54:11,344 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:11] "POST /api/import HTTP/1.1" 200 -
+2025-08-16 00:54:13,360 - routes.import_api - ERROR - Œƒµµµº»Î«Î«Û¥¶¿Ì ß∞‹: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 00:54:13,361 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:13] "[35m[1mPOST /api/import HTTP/1.1[0m" 500 -
+2025-08-16 00:54:15,371 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:15] "[33mGET /api/nonexistent HTTP/1.1[0m" 404 -
+2025-08-16 00:54:17,398 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:17] "[31m[1mPUT /api/search HTTP/1.1[0m" 405 -
+2025-08-16 00:54:19,420 - routes.inquiry_api - ERROR - ≥ı≤ΩŒ ’Ô«Î«Û¥¶¿Ì“Ï≥£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 00:54:19,423 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 598, in get_json
+    rv = self.json_module.loads(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\json\provider.py", line 255, in loads
+    return json.loads(s, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 629, in on_json_loading_failed
+    raise BadRequest(f"Failed to decode JSON object: {e}")
+werkzeug.exceptions.BadRequest: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 414, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 607, in get_json
+    rv = self.on_json_loading_failed(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-16 00:54:19,425 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 00:54:19] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-16 01:01:47,236 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:01:47] "GET /health HTTP/1.1" 200 -
+2025-08-16 01:01:49,262 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 01:04:14,725 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:14] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-16 01:04:16,758 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:16] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:18,778 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:18] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:20,795 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:20] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:22,817 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:22] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:24,832 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:24] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:26,853 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:26] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:28,878 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:28] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:30,903 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:04:30] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 01:04:32,933 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 01:06:17,582 - nodes.j_response_safety_node - WARNING - ºÏ≤‚µΩ1∏ˆ∏ﬂ/÷–∑Áœ’∞≤»´Œ•πÊ£¨ÃÊªªœÏ”¶Œ™æØ∏Ê
+2025-08-16 01:06:17,723 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:06:17] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-16 01:06:19,762 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 01:06:56,761 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:06:56] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-16 01:06:58,775 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:06:58] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 01:07:00,803 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 01:07:28,536 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:07:28] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-16 01:07:30,558 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 01:07:55,055 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:07:55] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-16 01:07:57,067 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 01:07:57] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 09:11:46,992 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 15:27:20,676 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 15:27:25,086 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 15:27:25,086 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 15:43:21,379 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 15:43:21] "[31m[1mGET /api/inquiry HTTP/1.1[0m" 405 -
+2025-08-16 15:43:22,393 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 15:43:22] "[31m[1mGET /api/inquiry HTTP/1.1[0m" 405 -
+2025-08-16 15:43:24,403 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 15:43:24] "[31m[1mGET /api/inquiry HTTP/1.1[0m" 405 -
+2025-08-16 16:47:53,319 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 16:48:04,117 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 16:48:04,118 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 16:48:33,337 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:33] "GET /health HTTP/1.1" 200 -
+2025-08-16 16:48:35,359 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:35] "GET / HTTP/1.1" 200 -
+2025-08-16 16:48:37,374 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:37] "GET /health HTTP/1.1" 200 -
+2025-08-16 16:48:39,385 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:39] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-16 16:48:42,476 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:42] "GET /api/search?search=Õ∑Õ¥ HTTP/1.1" 200 -
+2025-08-16 16:48:44,489 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:44] "[31m[1mGET /api/search?search= HTTP/1.1[0m" 400 -
+2025-08-16 16:48:46,516 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:48:46] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-16 16:48:48,818 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 16:49:37,897 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:49:37] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 16:49:39,909 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:49:39] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 16:49:41,935 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 16:51:54,974 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:51:54] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-16 16:51:56,997 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:51:56] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 16:51:59,010 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:51:59] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 16:52:01,030 - routes.record_api - ERROR - Graph µ¿˝Œ¥…Ë÷√
+2025-08-16 16:52:01,032 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:01] "[35m[1mPOST /api/record HTTP/1.1[0m" 500 -
+2025-08-16 16:52:03,041 - routes.import_api - ERROR - Œƒµµµº»Î«Î«Û¥¶¿Ì ß∞‹: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 16:52:03,042 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:03] "[35m[1mPOST /api/import HTTP/1.1[0m" 500 -
+2025-08-16 16:52:05,058 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:05] "[31m[1mPOST /api/import HTTP/1.1[0m" 400 -
+2025-08-16 16:52:07,073 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:07] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-16 16:52:09,089 - routes.inquiry_api - ERROR - ≥ı≤ΩŒ ’Ô«Î«Û¥¶¿Ì“Ï≥£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 16:52:09,196 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 414, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-16 16:52:09,197 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:09] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-16 16:52:11,212 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 16:52:11] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 17:07:29,395 - __main__ - WARNING - Graph µ¿˝Œ¥Ã·π© - ƒ≥–©π¶ƒ‹ø…ƒ‹ ‹œﬁ
+2025-08-16 17:07:29,399 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:07:33,000 - __main__ - WARNING - ƒ£øÈ rag_search Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,155 - __main__ - WARNING - ƒ£øÈ medical_image Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,156 - __main__ - WARNING - ƒ£øÈ medical_inquiry Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,156 - __main__ - WARNING - ƒ£øÈ record Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,749 - __main__ - WARNING - ƒ£øÈ import Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,749 - __main__ - WARNING - ƒ£øÈ ai_analysis Œ¥ºÃ≥–APIModuleª˘¿‡£¨ π”√ºÊ»›ƒ£ Ω
+2025-08-16 17:07:33,771 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 17:07:33,771 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 17:09:59,157 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:10:03,091 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 17:10:03,091 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 17:10:38,754 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:38] "GET /health HTTP/1.1" 200 -
+2025-08-16 17:10:40,773 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:40] "GET / HTTP/1.1" 200 -
+2025-08-16 17:10:42,779 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:42] "GET /health HTTP/1.1" 200 -
+2025-08-16 17:10:44,796 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:44] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-16 17:10:47,749 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:47] "GET /api/search?search=Õ∑Õ¥ HTTP/1.1" 200 -
+2025-08-16 17:10:49,756 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:49] "[31m[1mGET /api/search?search= HTTP/1.1[0m" 400 -
+2025-08-16 17:10:51,776 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:10:51] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-16 17:10:54,118 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:11:47,479 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:11:47] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:11:49,502 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:11:49] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:11:51,522 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:14:23,924 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:23] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-16 17:14:25,953 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:25] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:14:27,967 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:27] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 17:14:29,993 - routes.record_api - ERROR - Graph µ¿˝Œ¥…Ë÷√
+2025-08-16 17:14:29,996 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:29] "[35m[1mPOST /api/record HTTP/1.1[0m" 500 -
+2025-08-16 17:14:32,017 - routes.import_api - ERROR - Œƒµµµº»Î«Î«Û¥¶¿Ì ß∞‹: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 17:14:32,019 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:32] "[35m[1mPOST /api/import HTTP/1.1[0m" 500 -
+2025-08-16 17:14:34,047 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:34] "[31m[1mPOST /api/import HTTP/1.1[0m" 400 -
+2025-08-16 17:14:36,083 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:36] "[33mPOST /api/ai/analyze HTTP/1.1[0m" 404 -
+2025-08-16 17:14:38,107 - routes.inquiry_api - ERROR - ≥ı≤ΩŒ ’Ô«Î«Û¥¶¿Ì“Ï≥£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-16 17:14:38,116 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 414, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-16 17:14:38,118 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:38] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-16 17:14:40,152 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:14:40] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-16 17:24:32,643 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:24:32] "GET / HTTP/1.1" 200 -
+2025-08-16 17:24:35,085 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:25:06,727 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:25:06] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-16 17:25:08,758 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:25:08] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:25:35,449 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:25:35] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:27:38,115 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:27:42,122 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 17:27:42,122 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 17:27:55,895 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:27:55] "GET / HTTP/1.1" 200 -
+2025-08-16 17:28:01,059 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:28:29,960 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:28:29] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-16 17:28:31,975 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:28:31] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:28:58,469 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:28:58] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:31:14,397 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:31:18,728 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 17:31:18,728 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 17:31:32,270 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:31:32] "GET / HTTP/1.1" 200 -
+2025-08-16 17:31:37,258 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:32:06,399 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:32:06] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-16 17:32:08,432 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:32:08] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:32:10,985 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:32:10] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:40:56,270 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:41:00,397 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-16 17:41:00,397 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-16 17:41:10,404 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:41:10] "GET / HTTP/1.1" 200 -
+2025-08-16 17:41:44,522 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:41:44] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-16 17:41:46,563 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:41:46] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-16 17:41:55,580 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:42:28,122 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:42:28] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:43:20,030 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:43:20] "GET / HTTP/1.1" 200 -
+2025-08-16 17:44:00,612 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:45:02,297 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:45:02] "POST /api/watch HTTP/1.1" 200 -
+2025-08-16 17:45:04,337 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:45:04] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-16 17:45:52,827 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-16 17:46:16,548 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:16] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-16 17:46:18,573 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:18] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-16 17:46:20,617 - werkzeug - INFO - 127.0.0.1 - - [16/Aug/2025 17:46:20] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -

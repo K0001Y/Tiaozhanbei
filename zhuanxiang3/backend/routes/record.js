@@ -69,7 +69,7 @@ router.post('/import', upload.single('recordImage'), async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('extract-record', AIService.formatRecordData(recordData));
+    const aiResponse = await AIService.callWithRetry('/api/extract-record', AIService.formatRecordData(recordData));
     
     if (aiResponse.success) {
       res.json({
@@ -129,7 +129,7 @@ router.post('/generate', async (req, res) => {
     };
 
     // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('generate-record', AIService.formatRecordData(recordData));
+    const aiResponse = await AIService.callWithRetry('/api/generate-record', AIService.formatRecordData(recordData));
     
     if (aiResponse.success) {
       res.json({

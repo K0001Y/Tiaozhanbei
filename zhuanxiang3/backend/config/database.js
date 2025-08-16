@@ -8,7 +8,8 @@ const createPool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  charset: 'utf8mb4'
 });
 
 // 带数据库名的连接池
@@ -19,14 +20,15 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  charset: 'utf8mb4'
 });
 
 // 创建数据库和表
 const createTables = async () => {
   try {
     // 首先创建数据库（如果不存在）
-    await createPool.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`);
+    await createPool.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
     console.log(`数据库 ${process.env.DB_NAME} 创建成功`);
     
     // 然后创建表
@@ -38,7 +40,7 @@ const createTables = async () => {
         password VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
+      ) DEFAULT CHARSET = utf8mb4
     `);
     
     // 添加新字段（如果不存在的话）
