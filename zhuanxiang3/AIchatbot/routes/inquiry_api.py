@@ -541,10 +541,26 @@ class MedicalInquiryAPI:
         try:
             logger.info(f"收到补充问诊请求: {request.remote_addr}")
             
-            # 获取form-data参数
-            prev_inquiry = request.form.get('prevInquiry', '').strip()
-            additional_info = request.form.get('additionalInfo', '').strip()
+            logger.info(f"请求方法: {request.method}")
+            logger.info(f"Content-Type: {request.content_type}")
+            logger.info(f"Form数据: {dict(request.form)}")
+            logger.info(f"文件数据: {list(request.files.keys())}")
+            if request.content_type and 'application/json' in request.content_type:
+                # JSON格式数据
+                json_data = request.get_json() or {}
+                prev_inquiry = json_data.get('prevInquiry', '').strip()
+                additional_info = json_data.get('additionalInfo', '').strip()
+                logger.info("从JSON数据获取参数")
+            else:
+                # form-data格式数据
+                prev_inquiry = request.form.get('prevInquiry', '').strip()
+                additional_info = request.form.get('additionalInfo', '').strip()
+                logger.info("从form数据获取参数")
+                logger.info(f"Form数据: {dict(request.form)}")
+                logger.info(f"文件数据: {list(request.files.keys())}")
             
+            logger.info(f"prev_inquiry: '{prev_inquiry}' (长度: {len(prev_inquiry)})")
+            logger.info(f"additional_info: '{additional_info}' (长度: {len(additional_info)})")
             # 检查必要参数
             if not prev_inquiry and not additional_info:
                 return jsonify({

@@ -1,10 +1,11 @@
 """
-AI智能分析API模块 - Linus彻底重写版（修复版）
+AI智能分析API模块 - Linus彻底重写版
 修复要点:
-1. 修复MedicalRecord.from_session_aggregation调用参数问题
-2. 修复请求参数验证逻辑
-3. 改善错误处理和日志记录
-4. 确保Mock类方法签名一致性
+1. 集成session系统，结合用户历史诊断记录
+2. 使用优化后的graph系统，避免重复编译
+3. 提供多种分析模式：单纯分析 vs 综合分析
+4. 优化OCR处理流程
+5. 保持接口完全向后兼容
 """
 import logging
 import json
@@ -20,13 +21,11 @@ from werkzeug.datastructures import FileStorage
 # 导入优化后的诊断系统和session管理器
 try:
     from graph import run_tcm_graph_with_state, run_tcm_graph, get_compiled_graph
-    from routes.inquiry_api import session_manager as inquiry_session_manager
-    from routes.watch_api import watch_session_manager
-    from routes.record_api import RecordSessionAggregator, MedicalRecord
-    MOCK_MODE = False
+    from inquiry_api import session_manager as inquiry_session_manager
+    from watch_api import watch_session_manager
+    from record_api import RecordSessionAggregator, MedicalRecord
 except ImportError:
     print("警告: 无法导入优化后的系统，使用模拟版本")
-    MOCK_MODE = True
     
     def run_tcm_graph(user_input, messages=None, memory=None, config=None):
         return {
@@ -42,9 +41,6 @@ except ImportError:
         return None
     
     class MockSessionManager:
-        def __init__(self):
-            self._sessions = {}
-            
         def _get_recent_sessions(self, time_window):
             return []
     
@@ -61,24 +57,12 @@ except ImportError:
             return []
     
     class MockMedicalRecord:
-        def __init__(self):
-            self.symptoms = []
-            self.diagnosis_findings = []
-            self.prescriptions = []
-            self.watch_analysis = ""
-            self.inquiry_analysis = ""
-        
         @classmethod
         def from_session_aggregation(cls, watch_sessions, inquiry_sessions, patient_info=""):
-            """修复：确保参数签名正确"""
             record = cls()
-            # 模拟从sessions提取数据
-            if watch_sessions:
-                record.symptoms.extend([f"望诊症状{i+1}" for i in range(len(watch_sessions))])
-                record.watch_analysis = "望诊分析汇总"
-            if inquiry_sessions:
-                record.diagnosis_findings.extend([f"问诊发现{i+1}" for i in range(len(inquiry_sessions))])
-                record.inquiry_analysis = "问诊分析汇总"
+            record.symptoms = []
+            record.diagnosis_findings = []
+            record.prescriptions = []
             return record
         
         def to_diagnosis_text(self):
@@ -116,28 +100,20 @@ class ContextualAnalysis:
             context.analysis_mode = "综合分析"
             context.confidence_level = "高"
             
-            try:
-                # 修复：确保调用参数正确
-                medical_record = MedicalRecord.from_session_aggregation(
-                    watch_sessions, inquiry_sessions, ""
-                )
-                
-                context.historical_symptoms = medical_record.symptoms
-                context.historical_diagnoses = medical_record.diagnosis_findings
-                context.historical_prescriptions = medical_record.prescriptions
-                
-                if hasattr(medical_record, 'watch_analysis') and medical_record.watch_analysis:
-                    context.watch_context = medical_record.watch_analysis
-                
-                if hasattr(medical_record, 'inquiry_analysis') and medical_record.inquiry_analysis:
-                    context.inquiry_context = medical_record.inquiry_analysis
-                    
-            except Exception as e:
-                logger.error(f"从sessions创建医疗记录失败: {e}")
-                # 降级处理
-                context.has_history = False
-                context.analysis_mode = "单纯分析"
-                context.confidence_level = "中"
+            # 聚合历史医疗记录
+            medical_record = MedicalRecord.from_session_aggregation(
+                watch_sessions, inquiry_sessions, ""
+            )
+            
+            context.historical_symptoms = medical_record.symptoms
+            context.historical_diagnoses = medical_record.diagnosis_findings
+            context.historical_prescriptions = medical_record.prescriptions
+            
+            if medical_record.watch_analysis:
+                context.watch_context = medical_record.watch_analysis
+            
+            if medical_record.inquiry_analysis:
+                context.inquiry_context = medical_record.inquiry_analysis
         else:
             context.confidence_level = "中"
         
@@ -169,11 +145,11 @@ class ContextualAnalysis:
                 prompt_parts.append(f"既往建议：{'; '.join(self.historical_prescriptions[:3])}")
         
         # 添加新的查询内容
-        if new_query and new_query.strip():
+        if new_query.strip():
             prompt_parts.append(f"【当前咨询】{new_query.strip()}")
         
         # 添加OCR内容
-        if ocr_text and ocr_text.strip():
+        if ocr_text.strip():
             cleaned_ocr = '\n'.join(line.strip() for line in ocr_text.split('\n') if line.strip())
             prompt_parts.append(f"【文档内容】\n{cleaned_ocr}")
         
@@ -223,11 +199,6 @@ class OCRProcessor:
             # 检查文件是否存在
             if not os.path.exists(file_path):
                 raise Exception(f"文件不存在: {file_path}")
-            
-            # 模拟模式下直接返回
-            if MOCK_MODE:
-                logger.info("Mock模式：模拟OCR处理成功")
-                return f"模拟OCR结果：这是从{os.path.basename(file_path)}中提取的文本内容", True
             
             # 检查transformer.py是否存在
             transformer_path = os.path.join(os.getcwd(), 'transformer.py')
@@ -292,7 +263,7 @@ class OCRProcessor:
             return "", False
 
 class AIAnalysisAPI:
-    """AI智能分析API - Linus彻底重写版（修复版）"""
+    """AI智能分析API - Linus彻底重写版"""
     
     def __init__(self):
         """初始化AI智能分析API"""
@@ -300,12 +271,12 @@ class AIAnalysisAPI:
             logger.info("初始化AI智能分析API模块")
             
             self.api_name = "AI智能分析API"
-            self.version = "2.0.1"  # 修复版
+            self.version = "2.0.0"  # Linus重写版
             
             # 支持的文件格式
             self.allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'pdf'}
             
-            logger.info(f"AI智能分析API模块初始化完成 - 模式: {'Mock' if MOCK_MODE else 'Production'}")
+            logger.info("AI智能分析API模块初始化完成 - 集成Session系统")
             
         except Exception as e:
             logger.error(f"AI智能分析API模块初始化失败: {str(e)}")
@@ -313,26 +284,21 @@ class AIAnalysisAPI:
     
     def _validate_analyze_params(self, query: Optional[str], file: Optional[FileStorage]) -> Tuple[bool, str]:
         """验证AI分析参数"""
-        logger.debug(f"验证参数 - query: {bool(query and query.strip())}, file: {bool(file and file.filename)}")
-        
         # 至少要有一个输入
-        has_query = query and query.strip()
-        has_file = file and file.filename and file.filename.strip()
-        
-        if not has_query and not has_file:
+        if not query and not file:
             return False, "请提供查询文本或上传文件"
         
         # 验证查询文本
-        if has_query:
-            query_clean = query.strip()
-            if len(query_clean) > 2000:
+        if query:
+            query = query.strip()
+            if len(query) > 2000:
                 return False, "查询文本过长，请限制在2000字符以内"
             
-            if len(query_clean) < 2:
+            if len(query) < 2:
                 return False, "查询文本过于简短，请提供更详细的描述"
         
         # 验证文件
-        if has_file:
+        if file:
             file_valid, file_error = self._validate_file(file)
             if not file_valid:
                 return False, file_error
@@ -344,7 +310,7 @@ class AIAnalysisAPI:
         if not file:
             return False, "未上传文件"
         
-        if not file.filename or file.filename.strip() == '':
+        if file.filename == '':
             return False, "文件名为空"
         
         # 检查文件扩展名
@@ -375,7 +341,6 @@ class AIAnalysisAPI:
         
         try:
             file.save(temp_file.name)
-            logger.debug(f"临时文件保存至: {temp_file.name}")
             return temp_file.name
         except Exception as e:
             try:
@@ -389,7 +354,6 @@ class AIAnalysisAPI:
         try:
             if os.path.exists(file_path):
                 os.unlink(file_path)
-                logger.debug(f"临时文件已清理: {file_path}")
         except Exception as e:
             logger.warning(f"清理临时文件失败: {file_path} - {str(e)}")
     
@@ -408,7 +372,6 @@ class AIAnalysisAPI:
                 watch_sessions = RecordSessionAggregator._get_recent_sessions(
                     watch_session_manager, time_window=7200
                 )
-                logger.debug(f"获取到{len(watch_sessions)}个望诊sessions")
         except Exception as e:
             logger.warning(f"获取望诊session失败: {e}")
         
@@ -417,7 +380,6 @@ class AIAnalysisAPI:
                 inquiry_sessions = RecordSessionAggregator._get_recent_sessions(
                     inquiry_session_manager, time_window=7200
                 )
-                logger.debug(f"获取到{len(inquiry_sessions)}个问诊sessions")
         except Exception as e:
             logger.warning(f"获取问诊session失败: {e}")
         
@@ -441,12 +403,11 @@ class AIAnalysisAPI:
         temp_file_path = None
         
         try:
-            logger.info(f"开始AI智能分析 - query: {bool(query)}, file: {bool(file)}, mode: {context_mode}")
+            logger.info("开始AI智能分析")
             
             # 验证输入参数
             is_valid, error_msg = self._validate_analyze_params(query, file)
             if not is_valid:
-                logger.warning(f"参数验证失败: {error_msg}")
                 return 400, {
                     "success": False,
                     "message": error_msg,
@@ -455,24 +416,19 @@ class AIAnalysisAPI:
             
             # 步骤1：处理OCR（如果有文件）
             ocr_text = ""
-            if file and file.filename and file.filename.strip():
+            if file:
                 temp_file_path = self._save_temp_file(file)
                 
                 ocr_result, ocr_success = OCRProcessor.process_file(temp_file_path)
                 if ocr_success:
                     ocr_text = ocr_result
-                    logger.info(f"OCR处理成功，提取文本长度: {len(ocr_text)}")
                 else:
                     logger.warning("OCR处理失败，继续进行纯文本分析")
             
             # 步骤2：收集历史上下文（智能模式）
             contextual_analysis = None
             if context_mode in ["auto", "comprehensive"]:
-                try:
-                    contextual_analysis = self._gather_historical_context()
-                except Exception as e:
-                    logger.warning(f"收集历史上下文失败: {e}")
-                    contextual_analysis = ContextualAnalysis()  # 使用空的上下文
+                contextual_analysis = self._gather_historical_context()
             
             # 步骤3：构建分析输入
             if contextual_analysis and contextual_analysis.has_history:
@@ -494,57 +450,47 @@ class AIAnalysisAPI:
             logger.info(f"AI分析输入文本长度: {len(analysis_input)} 字符")
             
             # 步骤4：执行AI分析（使用优化后的graph）
-            try:
-                if contextual_analysis and contextual_analysis.has_history and not MOCK_MODE:
-                    # 尝试基于已有session进行增量分析
-                    latest_session = None
-                    try:
-                        # 获取最新的session状态
-                        all_sessions = []
-                        if hasattr(watch_session_manager, '_sessions'):
-                            all_sessions.extend(watch_session_manager._sessions.values())
-                        if hasattr(inquiry_session_manager, '_sessions'):
-                            all_sessions.extend(inquiry_session_manager._sessions.values())
-                        
-                        if all_sessions:
-                            # 按更新时间排序，获取最新的
-                            all_sessions.sort(key=lambda x: x.get('updated_at', 0), reverse=True)
-                            latest_session_data = all_sessions[0]
-                            if 'state' in latest_session_data:
-                                latest_session = latest_session_data['state']
-                            elif 'graph_state' in latest_session_data:
-                                latest_session = latest_session_data['graph_state']
-                    except Exception as e:
-                        logger.warning(f"获取最新session状态失败: {e}")
+            if contextual_analysis and contextual_analysis.has_history:
+                # 尝试基于已有session进行增量分析
+                latest_session = None
+                try:
+                    # 获取最新的session状态
+                    all_sessions = []
+                    if hasattr(watch_session_manager, '_sessions'):
+                        all_sessions.extend(watch_session_manager._sessions.values())
+                    if hasattr(inquiry_session_manager, '_sessions'):
+                        all_sessions.extend(inquiry_session_manager._sessions.values())
                     
-                    if latest_session:
-                        logger.info("基于最新session状态进行增量AI分析")
-                        analysis_result = run_tcm_graph_with_state(
-                            user_input=analysis_input,
-                            existing_state=latest_session,
-                            config={"retriever_k": 5}
-                        )
-                    else:
-                        logger.info("使用完整AI分析")
-                        analysis_result = run_tcm_graph(
-                            user_input=analysis_input,
-                            config={"retriever_k": 5}
-                        )
+                    if all_sessions:
+                        # 按更新时间排序，获取最新的
+                        all_sessions.sort(key=lambda x: x.get('updated_at', 0), reverse=True)
+                        latest_session_data = all_sessions[0]
+                        if 'state' in latest_session_data:
+                            latest_session = latest_session_data['state']
+                        elif 'graph_state' in latest_session_data:
+                            latest_session = latest_session_data['graph_state']
+                except Exception as e:
+                    logger.warning(f"获取最新session状态失败: {e}")
+                
+                if latest_session:
+                    logger.info("基于最新session状态进行增量AI分析")
+                    analysis_result = run_tcm_graph_with_state(
+                        user_input=analysis_input,
+                        existing_state=latest_session,
+                        config={"retriever_k": 5}
+                    )
                 else:
-                    logger.info("使用标准AI分析")
+                    logger.info("使用完整AI分析")
                     analysis_result = run_tcm_graph(
                         user_input=analysis_input,
-                        config={"retriever_k": 4}
+                        config={"retriever_k": 5}
                     )
-                    
-            except Exception as graph_error:
-                logger.error(f"Graph执行失败: {graph_error}")
-                # 降级处理：返回简单的分析结果
-                analysis_result = {
-                    "response": f"AI分析完成。基于您提供的信息，建议您注意观察症状变化并适时咨询专业医生。",
-                    "diagnosis_data": {"状态": "分析完成"},
-                    "prescription_data": {"建议": "如有需要请咨询专业医生"}
-                }
+            else:
+                logger.info("使用标准AI分析")
+                analysis_result = run_tcm_graph(
+                    user_input=analysis_input,
+                    config={"retriever_k": 4}
+                )
             
             # 步骤5：提取和格式化结果
             solution = analysis_result.get("response", "")
@@ -586,8 +532,6 @@ class AIAnalysisAPI:
             # 添加分析元数据（调试用，生产环境可移除）
             if contextual_analysis:
                 response_data["_analysis_metadata"] = contextual_analysis.get_analysis_summary()
-                if MOCK_MODE:
-                    response_data["_analysis_metadata"]["mock_mode"] = True
             
             logger.info("AI智能分析完成")
             return 200, response_data
@@ -615,33 +559,60 @@ class AIAnalysisAPI:
         """
         try:
             logger.info(f"收到AI智能分析请求: {request.remote_addr}")
-            logger.debug(f"Form数据: {dict(request.form)}")
-            logger.debug(f"Files数据: {list(request.files.keys())}")
             
             # 获取参数
-            query = request.form.get('query', '').strip()
-            if not query:
-                query = None
-            else:
-                logger.debug(f"查询文本长度: {len(query)}")
+            query = None
+            context_mode = 'auto'
+        
+            # 检查请求的Content-Type
+            content_type = request.content_type or ''
+            logger.info(f"Request Content-Type: {content_type}")
+        
+            if 'multipart/form-data' in content_type:
+                # multipart/form-data格式
+                query = request.form.get('query', '').strip()
+                context_mode = request.form.get('contextMode', 'auto')
+                logger.info("使用multipart/form-data格式")
             
-            # 获取上下文模式（新功能）
-            context_mode = request.form.get('contextMode', 'auto')
-            if context_mode not in ['auto', 'simple', 'comprehensive']:
-                context_mode = 'auto'
+            elif 'application/json' in content_type or request.is_json:
+                # JSON格式
+                json_data = request.get_json() or {}
+                query = json_data.get('query', '').strip()
+                context_mode = json_data.get('contextMode', 'auto')
+                logger.info("使用application/json格式")
+            
+            elif 'application/x-www-form-urlencoded' in content_type:
+                # form-urlencoded格式
+                query = request.form.get('query', '').strip()
+                context_mode = request.form.get('contextMode', 'auto')
+                logger.info("使用application/x-www-form-urlencoded格式")
+            
+            else:
+                # 尝试所有可能的方式
+                query = (request.form.get('query', '') or 
+                        request.args.get('query', '') or
+                        (request.get_json() or {}).get('query', '')).strip()
+                context_mode = (request.form.get('contextMode', 'auto') or 
+                               request.args.get('contextMode', 'auto') or
+                               (request.get_json() or {}).get('contextMode', 'auto'))
+                logger.info("使用兼容模式")
+        
+            # 空字符串转为None
+            if query == '':
+                query = None
+            
+            logger.info(f"最终获取到 - query: '{query}', contextMode: '{context_mode}'")
             
             # 获取上传的文件
             file = None
             if 'file' in request.files:
-                uploaded_file = request.files['file']
-                if uploaded_file.filename and uploaded_file.filename.strip():
-                    file = uploaded_file
-                    logger.debug(f"上传文件: {file.filename}")
+                file = request.files['file']
+                if file.filename == '':
+                    file = None
             
             # 执行AI智能分析
             status_code, result_data = self.ai_intelligent_analyze(query, file, context_mode)
             
-            logger.info(f"AI分析完成，状态码: {status_code}")
             return jsonify(result_data), status_code
             
         except Exception as e:
@@ -660,16 +631,14 @@ class AIAnalysisAPI:
         return {
             "name": self.api_name,
             "version": self.version,
-            "description": "AI智能分析API - Linus重写版（修复版），集成Session系统和上下文分析",
-            "mode": "Mock" if MOCK_MODE else "Production",
+            "description": "AI智能分析API - Linus重写版，集成Session系统和上下文分析",
             "features": [
                 "智能上下文分析，结合用户历史诊断记录",
                 "使用优化后的graph系统，避免重复编译",
                 "多种分析模式：简单分析/综合分析",
                 "优化的OCR处理流程",
                 "增量分析，基于已有session状态",
-                "完全向后兼容原有接口",
-                "修复了参数验证和方法调用问题"
+                "完全向后兼容原有接口"
             ],
             "endpoints": {
                 "ai_analyze": {

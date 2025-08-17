@@ -341,12 +341,14 @@ class OptimizedAPIServer:
         @self.app.route('/api/inquiry', methods=['POST'])
         def inquiry_analysis():
             """初步问诊API - 接口5.1"""
+            print("=== 进入 /api/inquiry 路由 ===") 
             return self._safe_api_call('medical_inquiry', 'handle_inquiry_request',
                                      error_data={"results": ""})
         
         @self.app.route('/api/inquiry/complete', methods=['POST'])
         def inquiry_complete():
             """补充问诊API - 接口5.2"""
+            print("=== 进入 /api/inquiry/complete 路由 ===") 
             return self._safe_api_call('medical_inquiry', 'handle_inquiry_complete_request',
                                      error_data={"results": ""})
         
