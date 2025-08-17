@@ -45,11 +45,13 @@ const RecordModule: React.FC = () => {
       
       console.log('从store获取的医疗数据:', medicalData);
       
-      // 调用后端API生成病历
-      const response = await apiService.generateRecord(
-        medicalData.diagnosis, 
-        medicalData.inquiry
-      );
+      // 按照todolist文档格式调用6.1病历生成接口
+      const requestData = {
+        watchResults: medicalData.diagnosis?.analysisReport || '',
+        inquiryResults: medicalData.inquiry?.analysisReport || ''
+      };
+      
+      const response = await apiService.generateRecord(requestData);
       
       if (response.success && response.data) {
         // 整合生成的数据为医疗记录格式，使用用户store中的真实信息
@@ -60,8 +62,8 @@ const RecordModule: React.FC = () => {
           contactInfo: user?.phone || "未填写",
           visitDate: new Date().toLocaleDateString('zh-CN'),
           diseaseCategory: "AI辅助诊断",
-          symptoms: response.data.patientInfo?.symptoms || '',
-          diagnosis: response.data.diagnosis || '',
+          symptoms: response.data.symptoms || '',
+          diagnosis: response.data.disease || '',
           prescription: response.data.prescription || ''
         };
         
@@ -94,23 +96,21 @@ const RecordModule: React.FC = () => {
       try {
         setIsImporting(true);
         
-        // 调用后端API处理病历图片
+        // 调用后端API处理病历图片，使用正确的参数名recordImage
         const response = await apiService.importRecord(file);
         
         if (response.success && response.data) {
-          const extractedData = response.data.structuredData;
-          
-          // 转换为医疗记录格式
+          // 转换为医疗记录格式，使用API文档的返回格式
           const importedRecord: MedicalRecord = {
-            name: response.data.extractedContent?.patientName || "患者",
-            gender: response.data.extractedContent?.gender || "未知",
-            age: response.data.extractedContent?.age || "未知",
-            contactInfo: "从病历图片导入",
-            visitDate: response.data.extractedContent?.visitDate || new Date().toLocaleDateString('zh-CN'),
+            name: user?.name || user?.username || "患者",
+            gender: user?.gender || "未知",
+            age: user?.age?.toString() || "未知",
+            contactInfo: user?.phone || "从病历图片导入",
+            visitDate: new Date().toLocaleDateString('zh-CN'),
             diseaseCategory: "导入病历",
-            symptoms: extractedData?.symptoms || response.data.extractedContent?.symptoms || '',
-            diagnosis: extractedData?.diagnosis || response.data.extractedContent?.diagnosis || '',
-            prescription: extractedData?.prescription || response.data.extractedContent?.prescription || ''
+            symptoms: response.data.symptoms || '',
+            diagnosis: response.data.disease || '',
+            prescription: response.data.prescription || ''
           };
           
           setMedicalRecord(importedRecord);

@@ -13,9 +13,9 @@ const AI_CONFIG = {
     INQUIRY: '/api/inquiry', 
     INQUIRY_COMPLETE: '/api/inquiry/complete',
     RECORD: '/api/record',
-    IMPORT: '/api/import',
+    IMPORT: '/api/record/import',
     CHAT: '/api/chat',
-    ANALYZE: '/api/analyze',
+    ANALYZE: '/api/ai/analyze',
     GENERATE_RECORD: '/api/generate-record',
     EXTRACT_RECORD: '/api/extract-record'
   },

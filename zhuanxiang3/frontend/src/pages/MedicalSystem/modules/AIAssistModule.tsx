@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { message } from 'antd';
+import { apiService } from '../../../services/apiService';
 
 interface ChatMessage {
   id: number;
@@ -6,12 +8,14 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   file?: File;
+  contextMode?: string;
 }
 
 const AIAssistModule: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [contextMode, setContextMode] = useState<string>('auto');
   const [isLoading, setIsLoading] = useState(false);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +52,8 @@ const AIAssistModule: React.FC = () => {
       type: 'user',
       content: inputMessage || '上传了文件',
       timestamp: new Date(),
-      file: selectedFile || undefined
+      file: selectedFile || undefined,
+      contextMode: contextMode
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -57,7 +62,7 @@ const AIAssistModule: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // 调用7.1 AI智能分析接口
+      // 根据todolist文档调用7.1 AI智能分析接口
       const formData = new FormData();
       
       // 如果有文本输入，添加query参数
@@ -69,23 +74,17 @@ const AIAssistModule: React.FC = () => {
       if (selectedFile) {
         formData.append('file', selectedFile);
       }
+      
+      // 添加contextMode参数（根据todolist文档）
+      formData.append('contextMode', contextMode);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/ai/analyze', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      const result = await response.json();
+      const response = await apiService.aiAnalyze(formData);
       
       let responseContent = '';
-      if (result.success && result.data?.solution) {
-        responseContent = result.data.solution;
+      if (response.success && response.data?.solution) {
+        responseContent = response.data.solution;
       } else {
-        responseContent = result.message || 'AI分析出现错误，请稍后重试。';
+        responseContent = response.message || 'AI分析出现错误，请稍后重试。';
       }
 
       const aiMessage: ChatMessage = {
@@ -96,6 +95,7 @@ const AIAssistModule: React.FC = () => {
       };
       
       setMessages(prev => [...prev, aiMessage]);
+      message.success('AI分析完成');
     } catch (error) {
       console.error('AI分析请求失败:', error);
       
@@ -108,6 +108,7 @@ const AIAssistModule: React.FC = () => {
       };
       
       setMessages(prev => [...prev, errorMessage]);
+      message.error(error instanceof Error ? error.message : 'AI分析失败，请重试');
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +125,7 @@ const AIAssistModule: React.FC = () => {
     setMessages([]);
     setSelectedFile(null);
     setInputMessage('');
+    setContextMode('auto');
     setHasStartedChat(false);
   };
 
@@ -142,6 +144,26 @@ const AIAssistModule: React.FC = () => {
 
           {/* 底部输入框 */}
           <div className="welcome-input-container">
+            {/* 分析模式选择 */}
+            <div className="context-mode-selector" style={{ marginBottom: '10px' }}>
+              <label style={{ fontSize: '14px', color: '#666' }}>分析模式：</label>
+              <select 
+                value={contextMode} 
+                onChange={(e) => setContextMode(e.target.value)}
+                style={{ 
+                  marginLeft: '8px', 
+                  padding: '4px 8px', 
+                  borderRadius: '4px', 
+                  border: '1px solid #d9d9d9',
+                  fontSize: '14px'
+                }}
+              >
+                <option value="auto">智能模式（推荐）</option>
+                <option value="simple">简单模式</option>
+                <option value="comprehensive">综合模式</option>
+              </select>
+            </div>
+            
             {selectedFile && (
               <div className="selected-file">
                 <div className="file-info">
@@ -223,6 +245,19 @@ const AIAssistModule: React.FC = () => {
                         <span>{message.file.name}</span>
                       </div>
                     )}
+                    {message.type === 'user' && message.contextMode && (
+                      <div className="message-context-mode" style={{ 
+                        fontSize: '12px', 
+                        color: '#888', 
+                        marginTop: '4px' 
+                      }}>
+                        <i className="fas fa-cog"></i> 分析模式: {
+                          message.contextMode === 'auto' ? '智能模式' :
+                          message.contextMode === 'simple' ? '简单模式' :
+                          message.contextMode === 'comprehensive' ? '综合模式' : message.contextMode
+                        }
+                      </div>
+                    )}
                     <div className="message-time">
                       {message.timestamp.toLocaleTimeString()}
                     </div>
@@ -247,6 +282,32 @@ const AIAssistModule: React.FC = () => {
             </div>
             
             <div className="chat-input">
+              {/* 分析模式选择 */}
+              <div className="context-mode-selector" style={{ 
+                marginBottom: '8px', 
+                padding: '8px 12px', 
+                backgroundColor: '#f8f9fa',
+                borderRadius: '6px',
+                border: '1px solid #e9ecef'
+              }}>
+                <label style={{ fontSize: '13px', color: '#666', marginRight: '8px' }}>分析模式：</label>
+                <select 
+                  value={contextMode} 
+                  onChange={(e) => setContextMode(e.target.value)}
+                  style={{ 
+                    padding: '3px 6px', 
+                    borderRadius: '3px', 
+                    border: '1px solid #d9d9d9',
+                    fontSize: '13px',
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="auto">智能模式（推荐）</option>
+                  <option value="simple">简单模式</option>
+                  <option value="comprehensive">综合模式</option>
+                </select>
+              </div>
+              
               {selectedFile && (
                 <div className="selected-file">
                   <div className="file-info">

@@ -7,6 +7,11 @@ class AIService {
   static async callAI(endpoint, data = null, options = {}) {
     const url = `${AI_CONFIG.BASE_URL}${endpoint}`;
     
+    console.log('=== AI服务调用调试信息 ===');
+    console.log('请求URL:', url);
+    console.log('请求数据:', JSON.stringify(data, null, 2));
+    console.log('请求选项:', JSON.stringify(options, null, 2));
+    
     try {
       const config = {
         timeout: AI_CONFIG.TIMEOUT,
@@ -17,13 +22,15 @@ class AIService {
       
       if (data instanceof FormData) {
         // 处理文件上传
+        console.log('发送FormData请求');
         response = await fetch(url, {
           method: 'POST',
           body: data,
           ...config
         });
-      } else if (data && options.method === 'POST') {
-        // 处理JSON数据
+      } else if (data) {
+        // 处理JSON数据 - 只要有数据就使用POST方法
+        console.log('发送JSON POST请求');
         response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -35,14 +42,26 @@ class AIService {
         });
       } else {
         // 处理GET请求
-        response = await fetch(url, config);
+        console.log('发送GET请求');
+        response = await fetch(url, {
+          method: options.method || 'GET',
+          ...config
+        });
       }
 
+      console.log('响应状态:', response.status, response.statusText);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log('错误响应内容:', errorText);
         throw new Error(`AI服务响应错误: ${response.status} - ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('响应结果:', JSON.stringify(result, null, 2));
+      console.log('=== AI服务调用结束 ===');
+      
+      return result;
     } catch (error) {
       console.error('AI服务调用失败:', error);
       return {
@@ -81,26 +100,26 @@ class AIService {
 
   // 数据格式转换方法
   static formatInquiryData(frontendData) {
-    const { age, gender, symptoms, duration, severity, medicalHistory } = frontendData;
+    const { symptoms, duration, severity, additional_info, user_profile } = frontendData;
     
+    // 按照todolist文档的要求，使用扁平结构
     return {
-      symptoms: symptoms.trim(),
-      duration: duration || '',
-      severity: severity || 'medium',
-      patientInfo: {
-        age: parseInt(age) || 0,
-        gender: gender || '',
-        medicalHistory: medicalHistory || ''
-      }
+      age: parseInt(user_profile?.age) || 0,
+      gender: user_profile?.gender || '',
+      symptoms: symptoms || ''
     };
   }
 
-  static formatWatchData(description, imageBuffer, filename) {
+  static formatWatchData(frontendData) {
+    const { image, description } = frontendData;
     const formData = new FormData();
-    formData.append('image', imageBuffer, {
-      filename: filename,
-      contentType: 'image/jpeg'
-    });
+    
+    if (image) {
+      formData.append('image', image.buffer, {
+        filename: image.originalname,
+        contentType: image.mimetype
+      });
+    }
     
     if (description && description.trim()) {
       formData.append('description', description.trim());
@@ -139,7 +158,7 @@ class AIService {
   // 7.1 AI智能分析服务
   static async intelligentAnalyze(analysisRequest) {
     try {
-      const { query, file } = analysisRequest;
+      const { query, file, contextMode } = analysisRequest;
       
       // 准备请求数据
       if (file) {
@@ -149,6 +168,11 @@ class AIService {
         
         if (query) {
           formData.append('query', query);
+        }
+        
+        // 添加contextMode参数
+        if (contextMode) {
+          formData.append('contextMode', contextMode);
         }
         
         // 添加文件
@@ -170,7 +194,10 @@ class AIService {
         return aiResponse.data;
       } else if (query) {
         // 纯文本查询
-        const requestData = { query };
+        const requestData = { 
+          query,
+          contextMode: contextMode || 'auto'
+        };
         
         const aiResponse = await this.callAI('/api/ai/analyze', requestData, {
           method: 'POST'

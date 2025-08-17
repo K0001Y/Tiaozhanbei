@@ -28,7 +28,6 @@ const InquiryModule: React.FC = () => {
     additionalNotes: ''
   });
   const [analysisResult, setAnalysisResult] = useState<string>('');
-  const [analysisId, setAnalysisId] = useState<string>('');
   const [showSupplement, setShowSupplement] = useState(false);
   const [supplementMessages, setSupplementMessages] = useState<SupplementMessage[]>([]);
   const [supplementInput, setSupplementInput] = useState('');
@@ -93,14 +92,25 @@ const InquiryModule: React.FC = () => {
       });
 
       if (response.success) {
-        setAnalysisResult(response.data?.results || '');
-        setAnalysisId(response.data?.analysisId || '');
+        console.log('AI问诊响应数据:', response.data);
+        
+        // 直接使用后端返回的 results 字段
+        const analysisContent = response.data?.results || '';
+        
+        // 如果没有内容，显示调试信息
+        if (!analysisContent) {
+          console.error('AI服务返回空结果:', response.data);
+          message.error('AI服务返回结果为空，请重试');
+          return;
+        }
+        
+        setAnalysisResult(analysisContent);
         setShowSupplement(true);
         
         // 保存问诊结果到store
         const inquiryResult = {
           symptoms: symptomsText,
-          analysisReport: response.data?.results || '',
+          analysisReport: analysisContent,
           supplements: [],
           timestamp: new Date().toISOString()
         };
@@ -141,9 +151,9 @@ const InquiryModule: React.FC = () => {
     setIsSupplementing(true);
 
     try {
-      // 准备FormData
+      // 准备FormData，按照todolist文档要求
       const formData = new FormData();
-      formData.append('analysisId', analysisId);
+      formData.append('prevInquiry', analysisResult); // 发送之前的分析结果
       formData.append('additionalInfo', currentInput);
       
       if (currentFile) {
@@ -289,9 +299,18 @@ const InquiryModule: React.FC = () => {
                 <h4><i className="fas fa-chart-line"></i> 问诊分析结果</h4>
               </div>
               <div className="result-content">
-                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '14px', lineHeight: '1.6' }}>
+                <div style={{ 
+                  whiteSpace: 'pre-wrap', 
+                  fontSize: '14px', 
+                  lineHeight: '1.8',
+                  padding: '15px',
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #e9ecef',
+                  borderRadius: '6px',
+                  color: '#333'
+                }}>
                   {analysisResult}
-                </pre>
+                </div>
               </div>
             </div>
           )}

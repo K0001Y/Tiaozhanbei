@@ -20,14 +20,10 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // 调用AI服务进行智能搜索
-    const requestData = {
-      query: search.trim(),
-      mode: 'disease_search',
-      user_id: req.user.id
-    };
+    // 调用AI服务进行智能搜索 - 搜索接口使用GET方法，参数在URL中
+    const searchUrl = `${AI_CONFIG.ENDPOINTS.SEARCH}?search=${encodeURIComponent(search.trim())}`;
     
-    const aiResponse = await AIService.callWithRetry('/api/search', requestData);
+    const aiResponse = await AIService.callWithRetry(searchUrl, null, { method: 'GET' });
     
     if (aiResponse.success) {
       res.json({

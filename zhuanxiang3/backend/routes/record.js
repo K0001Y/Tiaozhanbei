@@ -1,4 +1,5 @@
 const express = require('express');
+const FormData = require('form-data');
 const router = express.Router();
 const { 
   importFromImage,
@@ -9,6 +10,7 @@ const {
   deleteRecord 
 } = require('../controllers/recordController');
 const AIService = require('../services/aiService');
+const AI_CONFIG = require('../config/aiConfig');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
@@ -61,24 +63,40 @@ router.post('/import', upload.single('recordImage'), async (req, res) => {
       });
     }
 
-    // 构建AI请求数据
-    const recordData = {
-      user_id: req.user.id,
-      image: req.file,
-      analysis_type: 'record_ocr_extraction'
-    };
+    console.log('病历导入请求:', {
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      hasFile: !!req.file
+    });
 
-    // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('/api/extract-record', AIService.formatRecordData(recordData));
+    // 构建AI请求数据，按照todolist文档格式
+    const fs = require('fs');
+    const formData = new FormData();
+    
+    // 添加病历图片文件，参数名为recordImage
+    formData.append('recordImage', fs.createReadStream(req.file.path), {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype
+    });
+
+    // 调用AI服务 - 使用正确的端点
+    const aiResponse = await AIService.callWithRetry(
+      AI_CONFIG.ENDPOINTS.IMPORT, 
+      formData,
+      { method: 'POST' }
+    );
     
     if (aiResponse.success) {
+      // 根据API文档返回格式
+      const analysisResult = aiResponse.data || {};
+      
       res.json({
         success: true,
-        message: "病历识别完成",
+        message: "病历导入成功",
         data: {
-          extracted_text: aiResponse.data.extracted_text || '',
-          structured_data: aiResponse.data.structured_data || {},
-          confidence: aiResponse.data.confidence || 0
+          symptoms: analysisResult.symptoms || '',
+          disease: analysisResult.disease || analysisResult.diagnosis || '',
+          prescription: analysisResult.prescription || ''
         }
       });
     } else {
@@ -93,53 +111,48 @@ router.post('/import', upload.single('recordImage'), async (req, res) => {
 });
 
 // 6.1 生成病历（集成AI）
-router.post('/generate', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { 
-      symptoms, 
-      diagnosis_info, 
-      treatment_history, 
-      current_medications,
-      vital_signs 
-    } = req.body;
+    const { watchResults, inquiryResults } = req.body;
     
-    // 参数验证
-    if (!symptoms || symptoms.trim().length === 0) {
+    // 参数验证：至少需要提供一个分析结果
+    if (!watchResults && !inquiryResults) {
       return res.status(400).json({
         success: false,
-        message: '症状信息不能为空'
+        message: 'watchResults 和 inquiryResults 至少需要提供一项'
       });
     }
 
-    // 构建AI请求数据
+    console.log('病历生成请求:', {
+      hasWatchResults: !!watchResults,
+      hasInquiryResults: !!inquiryResults,
+      userId: req.user.id
+    });
+
+    // 构建AI请求数据，按照todolist文档格式
     const recordData = {
-      user_id: req.user.id,
-      patient_info: {
-        name: req.user.name,
-        age: req.user.age,
-        gender: req.user.gender,
-        phone: req.user.phone
-      },
-      symptoms: symptoms.trim(),
-      diagnosis_info: diagnosis_info || '',
-      treatment_history: treatment_history || '',
-      current_medications: current_medications || '',
-      vital_signs: vital_signs || {},
-      generate_type: 'comprehensive_record'
+      watchResults: watchResults || '',
+      inquiryResults: inquiryResults || ''
     };
 
-    // 调用AI服务
-    const aiResponse = await AIService.callWithRetry('/api/generate-record', AIService.formatRecordData(recordData));
+    // 调用AI服务 - 使用正确的端点
+    const aiResponse = await AIService.callWithRetry(
+      AI_CONFIG.ENDPOINTS.RECORD, 
+      recordData,
+      { headers: AI_CONFIG.HEADERS }
+    );
     
     if (aiResponse.success) {
+      // 根据API文档返回格式
+      const analysisResult = aiResponse.data || {};
+      
       res.json({
         success: true,
-        message: "病历生成完成",
+        message: "病历生成成功",
         data: {
-          record: aiResponse.data.record || {},
-          summary: aiResponse.data.summary || '',
-          recommendations: aiResponse.data.recommendations || [],
-          follow_up: aiResponse.data.follow_up || ''
+          symptoms: analysisResult.symptoms || '',
+          disease: analysisResult.disease || analysisResult.diagnosis || '',
+          prescription: analysisResult.prescription || ''
         }
       });
     } else {
@@ -154,7 +167,7 @@ router.post('/generate', async (req, res) => {
 });
 
 // 保存病历
-router.post('/', saveRecord);
+router.post('/save', saveRecord);
 
 // 获取病历历史
 router.get('/', getRecordHistory);

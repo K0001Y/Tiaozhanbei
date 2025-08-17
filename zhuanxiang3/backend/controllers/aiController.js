@@ -5,7 +5,7 @@ const aiController = {
   async intelligentAnalyze(req, res) {
     try {
       // 从请求中提取参数
-      const { query } = req.body;
+      const { query, contextMode } = req.body;
       const file = req.file;
 
       // 验证参数：query 和 file 至少需要一个
@@ -20,13 +20,15 @@ const aiController = {
         hasQuery: !!query,
         hasFile: !!file,
         fileName: file?.originalname,
-        fileSize: file?.size
+        fileSize: file?.size,
+        contextMode: contextMode || 'auto'
       });
 
       // 调用AI服务进行分析
       const analysisRequest = {
         query: query || undefined,
-        file: file || undefined
+        file: file || undefined,
+        contextMode: contextMode || 'auto'  // 默认为auto模式
       };
 
       const result = await aiService.intelligentAnalyze(analysisRequest);

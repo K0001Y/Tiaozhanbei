@@ -242,8 +242,12 @@ class ApiService {
     }
   }
 
-  // 从病历图片导入生成
-  async importRecord(imageFile: File): Promise<ApiResponse<any>> {
+  // 从病历图片导入生成 - 6.2接口
+  async importRecord(imageFile: File): Promise<ApiResponse<{
+    symptoms: string;
+    disease: string;
+    prescription: string;
+  }>> {
     try {
       const formData = new FormData();
       formData.append('recordImage', imageFile);
@@ -259,19 +263,20 @@ class ApiService {
     }
   }
 
-  // 生成病历
-  async generateRecord(diagnosis: any, inquiry: any): Promise<ApiResponse<any>> {
+  // 生成病历 - 6.1接口
+  async generateRecord(requestData: { watchResults?: string; inquiryResults?: string }): Promise<ApiResponse<{
+    symptoms: string;
+    disease: string;
+    prescription: string;
+  }>> {
     try {
-      console.log('生成病历，参数:', { diagnosis, inquiry });
-      return await this.request('/record/generate', {
+      console.log('生成病历，参数:', requestData);
+      return await this.request('/record', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          diagnosis,
-          inquiry
-        }),
+        body: JSON.stringify(requestData),
       });
     } catch (error) {
       console.error('生成病历错误:', error);
@@ -284,10 +289,10 @@ class ApiService {
     symptoms: string;
     diagnosis?: string;
     prescription?: string;
-  }): Promise<ApiResponse<any>> {
+  }): Promise<ApiResponse<{ message: string }>> {
     try {
       console.log('保存病历，参数:', recordData);
-      return await this.request('/record', {
+      return await this.request('/record/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -380,6 +385,20 @@ class ApiService {
       });
     } catch (error) {
       console.error('删除病历错误:', error);
+      throw error;
+    }
+  }
+
+  // 7.1 AI智能分析
+  async aiAnalyze(formData: FormData): Promise<ApiResponse<{ solution: string }>> {
+    try {
+      return await this.request('/ai/analyze', {
+        method: 'POST',
+        body: formData,
+        // 不设置Content-Type，让浏览器自动设置multipart/form-data边界
+      });
+    } catch (error) {
+      console.error('AI智能分析错误:', error);
       throw error;
     }
   }

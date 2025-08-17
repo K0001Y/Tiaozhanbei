@@ -15,9 +15,9 @@ const auth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, jwtConfig.secret);
     
-    // 从数据库验证用户是否存在
+    // 从数据库验证用户是否存在，并获取完整的用户信息
     const [users] = await pool.execute(
-      'SELECT id, username, name FROM users WHERE id = ?',
+      'SELECT id, username, name, age, gender, phone FROM users WHERE id = ?',
       [decoded.userId]
     );
 
