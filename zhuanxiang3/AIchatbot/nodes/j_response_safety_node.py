@@ -388,9 +388,10 @@ class ResponseSafetyNode:
                 
                 if high_med_violations:
                     # 存在高风险或中风险违规，替换响应为警告
-                    logger.warning(f"检测到{len(high_med_violations)}个高/中风险安全违规，替换响应为警告")
+                    logger.warning(f"检测到{len(high_med_violations)}个高/中风险安全违规，在响应前添加警告")
                     safety_warning = self._create_safety_warning(violations)
-                    updated_state["response"] = safety_warning
+                    # 保留原始响应，在前面添加警告
+                    updated_state["response"] = f"⚠️ 安全提醒 ⚠️\n{safety_warning}\n\n📝 响应内容：\n{response}"
                 elif only_low_violations:
                     # 仅存在低风险违规，添加免责声明
                     logger.info("仅检测到低风险违规，添加免责声明")

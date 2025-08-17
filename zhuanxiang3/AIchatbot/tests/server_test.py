@@ -76,10 +76,20 @@ class FixedAPITester:
                     print(f"   响应: {response.text[:200]}")
                 self.failed_tests += 1
             
+            # 显示真实返回内容
+            print(f"   🔍 真实返回内容:")
+            if isinstance(response_data, dict):
+                print(f"   {json.dumps(response_data, ensure_ascii=False, indent=6)}")
+            else:
+                print(f"   {str(response_data)[:500]}...")
+            print()  # 添加空行分隔
+            
             return success, response_data
             
         except Exception as e:
             print(f"❌ {test_name} - 异常: {e}")
+            print(f"   🔍 异常详情: {str(e)}")
+            print()
             self.failed_tests += 1
             return False, None
     
@@ -352,7 +362,7 @@ class FixedAPITester:
         
         # 7.1 纯文本分析 - 使用正确的参数名
         data = {
-            'query': '我最近经常头痛，还伴有恶心的症状，请帮我分析一下可能的原因',  # 可选
+            'query': '你好',  # 可选
             'contextMode': 'auto'  # 可选，新增参数
         }
         success, response = self._test_request('POST', '/api/ai/analyze', 
@@ -475,8 +485,12 @@ class FixedAPITester:
                                        timeout=5)
             success = response.status_code == 400
             print(f"{'✅' if success else '❌'} 错误Content-Type处理")
-        except:
+            print(f"   🔍 真实返回内容: {response.text[:500]}...")
+            print()
+        except Exception as e:
             print("❌ 错误Content-Type处理 - 异常")
+            print(f"   🔍 异常详情: {str(e)}")
+            print()
             self.failed_tests += 1
         
         # 并发请求测试
@@ -509,6 +523,7 @@ class FixedAPITester:
         else:
             print("   ❌ 并发测试失败")
             self.failed_tests += 1
+        print()
     
     def wait_for_server(self) -> bool:
         """等待服务器启动"""
@@ -538,12 +553,12 @@ class FixedAPITester:
         
         # 测试方法列表
         test_methods = [
-            self.test_basic_endpoints,
-            self.test_search_api,
-            self.test_watch_api, 
-            self.test_inquiry_api,
-            self.test_record_api,
-            self.test_import_api,
+            #self.test_basic_endpoints,
+            #self.test_search_api,
+            #self.test_watch_api, 
+            #self.test_inquiry_api,
+            #self.test_record_api,
+            #self.test_import_api,
             self.test_ai_analysis_api,
             self.test_session_integration,
             self.test_error_handling

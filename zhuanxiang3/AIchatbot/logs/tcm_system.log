@@ -1015,3 +1015,531 @@ werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a r
 2025-08-17 11:51:53,946 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 11:51:53] "GET /health HTTP/1.1" 200 -
 2025-08-17 11:51:53,948 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 11:51:53] "GET /health HTTP/1.1" 200 -
 2025-08-17 11:51:53,962 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 11:51:53] "GET /health HTTP/1.1" 200 -
+2025-08-17 15:56:28,798 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 15:56:32,610 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 15:57:04,422 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 15:57:45,276 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 15:57:45,276 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 16:07:43,052 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 16:07:44,372 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:07:47,642 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:07:51,262 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 16:07:51,262 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 16:08:51,072 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:08:51] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:08:53,116 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:08:53] "GET / HTTP/1.1" 200 -
+2025-08-17 16:08:55,163 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:08:55] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:08:57,202 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:08:57] "GET /graph/stats HTTP/1.1" 200 -
+2025-08-17 16:08:59,235 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:08:59] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-17 16:09:02,262 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:09:02] "GET /api/search?search=Í·Í´ HTTP/1.1" 200 -
+2025-08-17 16:09:04,352 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:09:04] "GET /api/search?search=·¢ÈÈ HTTP/1.1" 200 -
+2025-08-17 16:09:06,382 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:09:06] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 16:09:34,973 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:09:34] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:11:00,026 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:11:00] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-17 16:11:02,063 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:11:02] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-17 16:11:04,107 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:11:04] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-17 16:11:06,132 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:11:06] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-17 16:12:43,444 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:12:43] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:14:30,103 - nodes.j_response_safety_node - WARNING - ¼ì²âµ½1¸ö¸ß/ÖÐ·çÏÕ°²È«Î¥¹æ£¬Ìæ»»ÏìÓ¦Îª¾¯¸æ
+2025-08-17 16:14:30,108 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:30] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-17 16:14:32,152 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:32] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:34,185 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:34] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:36,216 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:36] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:38,263 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:38] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:40,303 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:40] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:42,336 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:42] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:44,363 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:44] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:46,395 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:46] "[31m[1mPOST /api/inquiry HTTP/1.1[0m" 400 -
+2025-08-17 16:14:48,452 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:14:48] "[31m[1mPOST /api/inquiry/complete HTTP/1.1[0m" 400 -
+2025-08-17 16:14:50,507 - routes.inquiry_api - WARNING - Î´ÕÒµ½ÒÑÓÐsession£¬Ö´ÐÐÍêÕû¼ÆËã
+2025-08-17 16:15:03,645 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:03] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-17 16:15:05,697 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:05] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:15:07,732 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:07] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:15:09,762 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:09] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:15:11,808 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:11] "[31m[1mPOST /api/record HTTP/1.1[0m" 400 -
+2025-08-17 16:15:13,862 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:13] "[31m[1mPOST /api/record HTTP/1.1[0m" 400 -
+2025-08-17 16:15:16,329 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:16] "POST /api/record/import HTTP/1.1" 200 -
+2025-08-17 16:15:18,364 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:18] "[31m[1mPOST /api/record/import HTTP/1.1[0m" 400 -
+2025-08-17 16:15:20,407 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:20] "[31m[1mPOST /api/record/import HTTP/1.1[0m" 400 -
+2025-08-17 16:15:22,456 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:22] "[31m[1mPOST /api/record/import HTTP/1.1[0m" 400 -
+2025-08-17 16:15:24,486 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:15:24,492 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:15:24,492 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:24] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:15:26,532 - routes.analysis_api - ERROR - OCR´¦ÀíÒì³£: OCR´¦ÀíÄ£¿é(transformer.py)²»´æÔÚ
+2025-08-17 16:15:26,532 - routes.analysis_api - WARNING - OCR´¦ÀíÊ§°Ü£¬¼ÌÐø½øÐÐ´¿ÎÄ±¾·ÖÎö
+2025-08-17 16:15:26,532 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:15:26,532 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:15:26,532 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:26] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:15:28,592 - routes.analysis_api - ERROR - OCR´¦ÀíÒì³£: OCR´¦ÀíÄ£¿é(transformer.py)²»´æÔÚ
+2025-08-17 16:15:28,592 - routes.analysis_api - WARNING - OCR´¦ÀíÊ§°Ü£¬¼ÌÐø½øÐÐ´¿ÎÄ±¾·ÖÎö
+2025-08-17 16:15:28,592 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:15:28,592 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:15:28,592 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:28] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:15:30,623 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:15:30,623 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:15:30,623 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:30] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:15:48,568 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:48] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:15:50,580 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:15:50,582 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:15:50,583 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:50] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:15:52,616 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:52] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:15:54,652 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:15:54] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:17:01,454 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:17:01] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:18:22,393 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:22] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:18:24,430 - routes.analysis_api - ERROR - AIÖÇÄÜ·ÖÎöÊ§°Ü: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+2025-08-17 16:18:24,439 - routes.analysis_api - ERROR - Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 431, in ai_intelligent_analyze
+    contextual_analysis = self._gather_historical_context()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 386, in _gather_historical_context
+    context = ContextualAnalysis.from_sessions(watch_sessions, inquiry_sessions)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\analysis_api.py", line 104, in from_sessions
+    medical_record = MedicalRecord.from_session_aggregation(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MedicalRecord.from_session_aggregation() takes 3 positional arguments but 4 were given
+
+2025-08-17 16:18:24,439 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:24] "[35m[1mPOST /api/ai/analyze HTTP/1.1[0m" 500 -
+2025-08-17 16:18:26,450 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:26] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:18:28,480 - routes.inquiry_api - ERROR - ³õ²½ÎÊÕïÇëÇó´¦ÀíÒì³£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-17 16:18:28,497 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 506, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-17 16:18:28,498 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:28] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-17 16:18:30,542 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:30] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:30,548 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:30] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:30,551 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:30] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:30,555 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:30] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:30,556 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:30] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:32,575 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:32] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:32,578 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:32] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:32,580 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:32] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:32,580 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:32] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:18:32,587 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:18:32] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:21:27,725 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 16:21:29,452 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:21:32,819 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:21:36,572 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 16:21:36,572 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 16:22:20,019 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:22:20] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:22:22,040 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:22:22] "GET / HTTP/1.1" 200 -
+2025-08-17 16:22:24,062 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:22:24] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:22:26,074 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:22:26] "GET /graph/stats HTTP/1.1" 200 -
+2025-08-17 16:22:28,096 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:22:28] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-17 16:24:39,832 - nodes.j_response_safety_node - WARNING - ¼ì²âµ½1¸ö¸ß/ÖÐ·çÏÕ°²È«Î¥¹æ£¬Ìæ»»ÏìÓ¦Îª¾¯¸æ
+2025-08-17 16:24:39,834 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:24:39] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:24:42,318 - routes.analysis_api - ERROR - OCR´¦ÀíÊ§°Ü£¬·µ»ØÂë: 2£¬´íÎóÐÅÏ¢: python: can't open file 'F:\\Files\\bisai\\Tiaozhanbei\\zhuanxiang3\\AIchatbot\\transformer.py': [Errno 2] No such file or directory
+
+2025-08-17 16:24:42,318 - routes.analysis_api - WARNING - OCR´¦ÀíÊ§°Ü£¬¼ÌÐø½øÐÐ´¿ÎÄ±¾·ÖÎö
+2025-08-17 16:25:00,448 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:25:00] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:25:02,931 - routes.analysis_api - ERROR - OCR´¦ÀíÊ§°Ü£¬·µ»ØÂë: 2£¬´íÎóÐÅÏ¢: python: can't open file 'F:\\Files\\bisai\\Tiaozhanbei\\zhuanxiang3\\AIchatbot\\transformer.py': [Errno 2] No such file or directory
+
+2025-08-17 16:25:02,931 - routes.analysis_api - WARNING - OCR´¦ÀíÊ§°Ü£¬¼ÌÐø½øÐÐ´¿ÎÄ±¾·ÖÎö
+2025-08-17 16:25:27,568 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:25:27] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:25:44,434 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:25:44] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:25:56,921 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:25:56] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:26:59,004 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:26:59] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:27:01,028 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:27:01] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:27:03,046 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:27:03] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:27:19,763 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:27:19] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:28:59,339 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:28:59] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:29:01,380 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:29:01,380 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:01] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:29:03,412 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:03] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:29:05,461 - routes.inquiry_api - ERROR - ³õ²½ÎÊÕïÇëÇó´¦ÀíÒì³£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-17 16:29:05,468 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 506, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-17 16:29:05,470 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:05] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-17 16:29:07,518 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:07] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:07,520 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:07] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:07,522 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:07] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:07,525 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:07] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:07,527 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:07] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:09,556 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:09] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:09,560 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:09] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:09,563 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:09] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:09,574 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:09] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:29:09,576 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:29:09] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:31:04,002 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 16:31:05,540 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:31:08,960 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:31:12,533 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 16:31:12,533 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 16:31:29,153 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:31:29] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:31:31,185 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:31:31] "GET / HTTP/1.1" 200 -
+2025-08-17 16:31:33,209 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:31:33] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:31:35,221 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:31:35] "GET /graph/stats HTTP/1.1" 200 -
+2025-08-17 16:31:37,251 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:31:37] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-17 16:32:10,894 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:32:10] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:32:47,750 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:32:47] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:33:05,177 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:33:05] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:33:18,422 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:33:18] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:34:53,448 - nodes.i_conversation_chain_node - ERROR - Éú³É¶Ô»°»Ø¸´¹ý³ÌÖÐ³ö´í: Request timed out.
+Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\httpx\_transports\default.py", line 69, in map_httpcore_exceptions
+    yield
+  File "D:\anaconda\Lib\site-packages\httpx\_transports\default.py", line 233, in handle_request
+    resp = self._pool.handle_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\connection_pool.py", line 216, in handle_request
+    raise exc from None
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\connection_pool.py", line 196, in handle_request
+    response = connection.handle_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\connection.py", line 101, in handle_request
+    return self._connection.handle_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\http11.py", line 143, in handle_request
+    raise exc
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\http11.py", line 113, in handle_request
+    ) = self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\http11.py", line 186, in _receive_response_headers
+    event = self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_sync\http11.py", line 224, in _receive_event
+    data = self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpcore\_backends\sync.py", line 124, in read
+    with map_exceptions(exc_map):
+  File "D:\anaconda\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "D:\anaconda\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ReadTimeout: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\openai\_base_client.py", line 972, in request
+    response = self._client.send(
+               ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpx\_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpx\_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpx\_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpx\_client.py", line 1015, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\httpx\_transports\default.py", line 232, in handle_request
+    with map_httpcore_exceptions():
+  File "D:\anaconda\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "D:\anaconda\Lib\site-packages\httpx\_transports\default.py", line 86, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\nodes\i_conversation_chain_node.py", line 211, in __call__
+    result = self.conversation_chain.invoke(chain_input)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\langchain\chains\base.py", line 167, in invoke
+    raise e
+  File "D:\anaconda\Lib\site-packages\langchain\chains\base.py", line 157, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "D:\anaconda\Lib\site-packages\langchain\chains\llm.py", line 127, in _call
+    response = self.generate([inputs], run_manager=run_manager)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\langchain\chains\llm.py", line 139, in generate
+    return self.llm.generate_prompt(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\langchain_core\language_models\chat_models.py", line 980, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\langchain_core\language_models\chat_models.py", line 799, in generate
+    self._generate_with_cache(
+  File "D:\anaconda\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1045, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\langchain_openai\chat_models\base.py", line 1071, in _generate
+    response = self.client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\openai\_utils\_utils.py", line 287, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\openai\resources\chat\completions\completions.py", line 925, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\openai\_base_client.py", line 1249, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\openai\_base_client.py", line 990, in request
+    raise APITimeoutError(request=request) from err
+openai.APITimeoutError: Request timed out.
+2025-08-17 16:34:53,745 - graph - ERROR - Í¼Ö´ÐÐ¹ý³ÌÖÐ·¢Éú´íÎó: cannot access local variable 'fallback_response' where it is not associated with a value
+2025-08-17 16:34:53,749 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:34:53] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:34:55,784 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:34:55] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:34:57,826 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:34:57] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:35:08,322 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:35:08] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:36:34,876 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:34] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:36:36,915 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:36:36,917 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:36] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:36:38,952 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:38] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:36:41,004 - routes.inquiry_api - ERROR - ³õ²½ÎÊÕïÇëÇó´¦ÀíÒì³£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-17 16:36:41,009 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 506, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-17 16:36:41,010 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:41] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-17 16:36:43,041 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:43] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:43,042 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:43] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:43,054 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:43] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:43,054 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:43] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:43,069 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:43] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:45,071 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:45] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:45,080 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:45] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:45,094 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:45] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:45,095 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:45] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:36:45,110 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:36:45] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:37:14,584 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:14] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:37:16,604 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:16] "GET / HTTP/1.1" 200 -
+2025-08-17 16:37:18,656 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:18] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:37:20,705 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:20] "GET /graph/stats HTTP/1.1" 200 -
+2025-08-17 16:37:22,754 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:22] "[33mGET /nonexistent HTTP/1.1[0m" 404 -
+2025-08-17 16:37:24,854 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:24] "GET /api/search?search=Í·Í´ HTTP/1.1" 200 -
+2025-08-17 16:37:26,924 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:26] "GET /api/search?search=·¢ÈÈ HTTP/1.1" 200 -
+2025-08-17 16:37:28,972 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:28] "[31m[1mGET /api/search HTTP/1.1[0m" 400 -
+2025-08-17 16:37:59,972 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:37:59] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:39:44,962 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:39:44] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-17 16:39:47,015 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:39:47] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-17 16:39:49,072 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:39:49] "[31m[1mPOST /api/watch/complete HTTP/1.1[0m" 400 -
+2025-08-17 16:39:51,098 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:39:51] "[31m[1mPOST /api/watch HTTP/1.1[0m" 400 -
+2025-08-17 16:41:32,914 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:41:32] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:47:17,159 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 16:47:19,055 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:47:52,793 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 16:48:35,070 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 16:48:35,070 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 16:48:46,081 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:48:46] "GET /api/search?search=Í·ÌÛ HTTP/1.1" 200 -
+2025-08-17 16:48:59,165 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:48:59] "GET /api/search?search=¸ÐÃ° HTTP/1.1" 200 -
+2025-08-17 16:51:01,098 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:51:01] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:51:45,389 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:51:45] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:52:54,642 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:52:54,643 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:52:54] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:53:04,832 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:53:04,835 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:53:04] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:53:28,583 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:53:28] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:57:21,694 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:21] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:57:23,722 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:57:23,723 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:23] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:31,930 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:57:31,932 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:31] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:39,165 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:57:39,166 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:39] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:41,197 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:57:41,200 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:41] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:53,090 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:53] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:55,129 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:57:55,131 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:55] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:57:57,153 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:57] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:57:59,170 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:57:59] "[31m[1mPOST /api/ai/analyze HTTP/1.1[0m" 400 -
+2025-08-17 16:58:09,930 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:58:09] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 16:59:39,323 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:39] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 16:59:41,349 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 16:59:41,350 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:41] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 16:59:43,387 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:43] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 16:59:45,428 - routes.inquiry_api - ERROR - ³õ²½ÎÊÕïÇëÇó´¦ÀíÒì³£: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+2025-08-17 16:59:45,432 - routes.inquiry_api - ERROR - Traceback (most recent call last):
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 128, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 631, in on_json_loading_failed
+    raise BadRequest(
+werkzeug.exceptions.BadRequest: 400 Bad Request: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Files\bisai\Tiaozhanbei\zhuanxiang3\AIchatbot\routes\inquiry_api.py", line 506, in handle_inquiry_request
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\werkzeug\wrappers\request.py", line 591, in get_json
+    return self.on_json_loading_failed(None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\anaconda\Lib\site-packages\flask\wrappers.py", line 133, in on_json_loading_failed
+    raise BadRequest() from e
+werkzeug.exceptions.BadRequest: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+
+2025-08-17 16:59:45,432 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:45] "[35m[1mPOST /api/inquiry HTTP/1.1[0m" 500 -
+2025-08-17 16:59:47,478 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:47] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:47,480 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:47] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:47,498 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:47] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:47,498 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:47] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:47,499 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:47] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:49,506 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:49] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:49,519 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:49] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:49,534 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:49] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:49,549 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:49] "GET /health HTTP/1.1" 200 -
+2025-08-17 16:59:49,565 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 16:59:49] "GET /health HTTP/1.1" 200 -
+2025-08-17 17:07:36,102 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 17:07:36,103 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:07:36] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:09:24,297 - nodes.j_response_safety_node - WARNING - ¼ì²âµ½1¸ö¸ß/ÖÐ·çÏÕ°²È«Î¥¹æ£¬Ìæ»»ÏìÓ¦Îª¾¯¸æ
+2025-08-17 17:09:24,299 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:09:24] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:18:51,720 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:18:51] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:23:48,669 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 17:23:48,671 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:23:48] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:24:03,373 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 17:24:03,375 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:24:03] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:24:20,356 - nodes.a_input_node - WARNING - ÊäÈëÎÞÐ§£º¿Õ»ò½ö°üº¬¿Õ°××Ö·û
+2025-08-17 17:24:20,357 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:24:20] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:33:54,897 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 17:33:56,490 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 17:34:04,568 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 17:34:41,728 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 17:34:41,728 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 17:35:09,504 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:35:09] "POST /api/ai/analyze HTTP/1.1" 200 -
+2025-08-17 17:35:56,922 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:35:56] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 17:36:22,352 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:36:22] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-17 17:36:41,120 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:36:41] "POST /api/watch/complete HTTP/1.1" 200 -
+2025-08-17 17:37:29,080 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:37:29] "POST /api/inquiry HTTP/1.1" 200 -
+2025-08-17 17:37:38,729 - routes.inquiry_api - WARNING - Î´ÕÒµ½ÒÑÓÐsession£¬Ö´ÐÐÍêÕû¼ÆËã
+2025-08-17 17:39:20,818 - nodes.j_response_safety_node - WARNING - ¼ì²âµ½1¸ö¸ß/ÖÐ·çÏÕ°²È«Î¥¹æ£¬ÔÚÏìÓ¦Ç°Ìí¼Ó¾¯¸æ
+2025-08-17 17:39:20,820 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:39:20] "POST /api/inquiry/complete HTTP/1.1" 200 -
+2025-08-17 17:43:34,416 - nodes.j_response_safety_node - WARNING - ¼ì²âµ½2¸ö¸ß/ÖÐ·çÏÕ°²È«Î¥¹æ£¬ÔÚÏìÓ¦Ç°Ìí¼Ó¾¯¸æ
+2025-08-17 17:43:34,420 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:43:34] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 17:49:03,946 - routes.record_api - INFO - ²¡ÀúÉú³ÉAPIÄ£¿é³õÊ¼»¯Íê³É - ÐÞ¸´°æ±¾
+2025-08-17 17:49:05,364 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 17:49:08,759 - sentence_transformers.SentenceTransformer - WARNING - No sentence-transformers model found with name RAG_system/model\sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2. Creating a new one with mean pooling.
+2025-08-17 17:49:41,086 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.3.33:8080
+2025-08-17 17:49:41,086 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-17 17:51:19,024 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:51:19] "POST /api/watch HTTP/1.1" 200 -
+2025-08-17 17:52:19,408 - routes.record_api - WARNING - ÌáÈ¡ÍûÕïsessionÊ§°Ü: 'WatchSessionManager' object has no attribute 'get_session_data'
+2025-08-17 17:52:19,410 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:52:19] "POST /api/record HTTP/1.1" 200 -
+2025-08-17 17:52:36,712 - routes.record_api - WARNING - ÌáÈ¡ÍûÕïsessionÊ§°Ü: 'WatchSessionManager' object has no attribute 'get_session_data'
+2025-08-17 17:52:36,713 - werkzeug - INFO - 127.0.0.1 - - [17/Aug/2025 17:52:36] "POST /api/record HTTP/1.1" 200 -

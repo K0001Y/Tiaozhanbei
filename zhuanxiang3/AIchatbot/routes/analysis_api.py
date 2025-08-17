@@ -21,9 +21,9 @@ from werkzeug.datastructures import FileStorage
 # 导入优化后的诊断系统和session管理器
 try:
     from graph import run_tcm_graph_with_state, run_tcm_graph, get_compiled_graph
-    from inquiry_api import session_manager as inquiry_session_manager
-    from watch_api import watch_session_manager
-    from record_api import RecordSessionAggregator, MedicalRecord
+    from routes.inquiry_api import session_manager as inquiry_session_manager
+    from routes.watch_api import watch_session_manager
+    from routes.record_api import RecordSessionAggregator, MedicalRecord
 except ImportError:
     print("警告: 无法导入优化后的系统，使用模拟版本")
     
@@ -102,7 +102,7 @@ class ContextualAnalysis:
             
             # 聚合历史医疗记录
             medical_record = MedicalRecord.from_session_aggregation(
-                watch_sessions, inquiry_sessions, ""
+                watch_sessions, inquiry_sessions
             )
             
             context.historical_symptoms = medical_record.symptoms
@@ -201,13 +201,13 @@ class OCRProcessor:
                 raise Exception(f"文件不存在: {file_path}")
             
             # 检查transformer.py是否存在
-            transformer_path = os.path.join(os.getcwd(), 'transformer.py')
+            transformer_path = os.path.join(os.getcwd(), 'others/transformer.py')
             if not os.path.exists(transformer_path):
                 raise Exception("OCR处理模块(transformer.py)不存在")
             
             # 调用OCR处理
             result = subprocess.run(
-                ['python', 'transformer.py', file_path],
+                ['python', 'others/transformer.py', file_path],
                 capture_output=True,
                 text=True,
                 timeout=180,  # 3分钟超时
@@ -427,7 +427,7 @@ class AIAnalysisAPI:
             
             # 步骤2：收集历史上下文（智能模式）
             contextual_analysis = None
-            if context_mode in ["auto", "comprehensive"]:
+            if context_mode in ["auto", "comprehensive"] and os.getenv("ENABLE_SMART_MODE", "false").lower() == "true":
                 contextual_analysis = self._gather_historical_context()
             
             # 步骤3：构建分析输入

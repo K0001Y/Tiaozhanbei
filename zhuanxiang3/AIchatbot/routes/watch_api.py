@@ -1,6 +1,6 @@
 """
-医学图像分析API模块 - Linus修复版
-使用优化后的graph.py，实现智能状态管理
+医学图像分析API模块 - 简化版望诊补充逻辑
+直接操作state字典，采用问诊补充的合并策略
 """
 import logging
 import json
@@ -17,8 +17,7 @@ from config import ALI_BASE_URL, ALI_API_KEY
 # 导入优化后的图像识别和诊断系统
 try:
     from others.watch import TCMDiagnosisSystem
-    # 使用修复后的graph接口
-    from graph import run_tcm_graph_with_state, run_tcm_graph
+    from graph import run_tcm_graph
 except ImportError:
     print("警告: 无法导入图像识别或诊断系统，使用模拟数据")
     
@@ -45,15 +44,12 @@ except ImportError:
             "memory": memory,
             "config": config or {"retriever_k": 4}
         }
-    
-    def run_tcm_graph_with_state(user_input, existing_state=None, messages=None, memory=None, config=None):
-        return run_tcm_graph(user_input, messages, memory, config)
 
 logger = logging.getLogger(__name__)
 
 class WatchSessionManager:
     """
-    望诊专用Session管理器 - 基于图像内容Hash
+    望诊专用Session管理器 - 简化版，与问诊逻辑一致
     """
     
     def __init__(self, ttl_seconds=3600):
@@ -104,8 +100,7 @@ class WatchSessionManager:
         
         if session_id not in self._sessions:
             self._sessions[session_id] = {
-                'graph_state': None,
-                'diagnosis_data': None,
+                'state': {},  # 改为直接存储state字典
                 'created_at': time.time(),
                 'updated_at': time.time(),
                 'type': 'image'
@@ -117,213 +112,33 @@ class WatchSessionManager:
         return session_id
     
     def extract_session_from_analysis(self, prev_analysis: str) -> Optional[str]:
-        """从分析结果中提取session"""
+        """从分析结果中提取session - 简化版，类似问诊逻辑"""
         for session_id, data in self._sessions.items():
-            if 'diagnosis_data' in data and data['diagnosis_data']:
-                # 检查分析结果是否匹配
-                diagnosis_text = data['diagnosis_data'].to_diagnosis_text()
-                if (prev_analysis in diagnosis_text or 
-                    diagnosis_text in prev_analysis or
-                    self._text_similarity(prev_analysis, diagnosis_text) > 0.7):
+            state = data.get('state', {})
+            if 'response' in state:
+                # 检查分析结果是否匹配（简化的包含关系判断）
+                if prev_analysis in state['response'] or state['response'] in prev_analysis:
                     logger.info(f"从分析结果中识别出session: {session_id}")
                     return session_id
         return None
     
-    def _text_similarity(self, text1: str, text2: str) -> float:
-        """简单的文本相似度计算"""
-        words1 = set(text1.split())
-        words2 = set(text2.split())
-        
-        if not words1 and not words2:
-            return 1.0
-        if not words1 or not words2:
-            return 0.0
-        
-        intersection = words1.intersection(words2)
-        union = words1.union(words2)
-        
-        return len(intersection) / len(union)
-    
-    def get_session_data(self, session_id: str) -> Optional[Dict]:
-        """获取session数据"""
+    def get_session_state(self, session_id: str) -> Optional[Dict]:
+        """获取session状态"""
         if session_id in self._sessions:
-            return self._sessions[session_id]
+            return self._sessions[session_id]['state']
         return None
     
-    def update_session(self, session_id: str, graph_state: Dict = None, diagnosis_data=None):
-        """更新session"""
+    def update_session_state(self, session_id: str, new_state: Dict):
+        """更新session状态"""
         if session_id in self._sessions:
-            if graph_state:
-                self._sessions[session_id]['graph_state'] = graph_state
-            if diagnosis_data:
-                self._sessions[session_id]['diagnosis_data'] = diagnosis_data
+            self._sessions[session_id]['state'] = new_state
             self._sessions[session_id]['updated_at'] = time.time()
 
 # 全局望诊session管理器
 watch_session_manager = WatchSessionManager()
 
-class DiagnosisData:
-    """结构化诊断数据"""
-    
-    def __init__(self):
-        self.image_type = ""
-        self.confidence = 0.0
-        self.syndromes = []  # 辨证提示列表
-        self.health_advice = []  # 健康建议列表
-        self.theory_basis = ""  # 中医理论依据
-        self.raw_analysis = {}  # 原始分析数据
-        self.additional_findings = []  # 补充发现
-    
-    @classmethod
-    def from_analysis_result(cls, analysis_result: Dict[str, Any]) -> 'DiagnosisData':
-        """从图像分析结果创建结构化诊断数据"""
-        data = cls()
-        
-        # 提取基础信息
-        image_info = analysis_result.get("图像识别", {})
-        data.image_type = image_info.get("类型", "未知")
-        data.confidence = image_info.get("置信度", 0.0)
-        
-        # 解析分析结果
-        analysis_content = analysis_result.get("分析结果", "")
-        try:
-            if isinstance(analysis_content, str):
-                parsed_content = json.loads(analysis_content)
-            else:
-                parsed_content = analysis_content
-            
-            data.syndromes = parsed_content.get("辨证提示", [])
-            data.health_advice = parsed_content.get("健康建议", [])
-            data.theory_basis = parsed_content.get("中医理论依据", "")
-            data.raw_analysis = parsed_content
-            
-        except (json.JSONDecodeError, TypeError):
-            data.theory_basis = str(analysis_content)
-            data.raw_analysis = {"原始结果": analysis_content}
-        
-        return data
-    
-    @classmethod 
-    def from_text(cls, text: str) -> 'DiagnosisData':
-        """从文本分析结果创建结构化诊断数据"""
-        data = cls()
-        
-        # 智能解析文本
-        lines = [line.strip() for line in text.split('。') if line.strip()]
-        
-        for line in lines:
-            if "图像类型" in line or "类型：" in line:
-                data._parse_image_type(line)
-            elif "辨证提示" in line or "证型" in line:
-                data._parse_syndromes(line)
-            elif "健康建议" in line or "建议" in line:
-                data._parse_health_advice(line)
-            elif "理论依据" in line:
-                data._parse_theory_basis(line)
-        
-        data.raw_analysis = {"解析文本": text}
-        return data
-    
-    def _parse_image_type(self, line: str):
-        """解析图像类型"""
-        parts = line.split('：')
-        if len(parts) > 1:
-            type_info = parts[1].strip()
-            if '（置信度' in type_info:
-                self.image_type = type_info.split('（')[0]
-                conf_part = type_info.split('置信度：')[1].split('）')[0] if '置信度：' in type_info else ""
-                try:
-                    self.confidence = float(conf_part.replace('%', '')) / 100 if conf_part else 0.0
-                except:
-                    self.confidence = 0.0
-            else:
-                self.image_type = type_info
-    
-    def _parse_syndromes(self, line: str):
-        """解析辨证提示"""
-        content = line.split('：')[1] if '：' in line else line
-        syndromes = [s.strip() for s in content.split(';') if s.strip()]
-        if not syndromes:
-            syndromes = [s.strip() for s in content.split('，') if s.strip()]
-        self.syndromes.extend(syndromes)
-    
-    def _parse_health_advice(self, line: str):
-        """解析健康建议"""
-        content = line.split('：')[1] if '：' in line else line
-        advice_list = [a.strip() for a in content.split(';') if a.strip()]
-        if not advice_list:
-            advice_list = [a.strip() for a in content.split('，') if a.strip()]
-        self.health_advice.extend(advice_list)
-    
-    def _parse_theory_basis(self, line: str):
-        """解析理论依据"""
-        content = line.split('：')[1] if '：' in line else line
-        self.theory_basis = content.strip()
-    
-    def merge_with_additional(self, additional_data: 'DiagnosisData', additional_info: str = "") -> 'DiagnosisData':
-        """智能合并诊断数据"""
-        merged = DiagnosisData()
-        
-        # 合并图像类型（优先选择置信度高的）
-        if additional_data.confidence > self.confidence:
-            merged.image_type = additional_data.image_type
-            merged.confidence = additional_data.confidence
-        else:
-            merged.image_type = self.image_type
-            merged.confidence = self.confidence
-        
-        # 合并辨证提示（去重）
-        all_syndromes = self.syndromes + additional_data.syndromes
-        merged.syndromes = list(dict.fromkeys(all_syndromes))  # 保持顺序的去重
-        
-        # 合并健康建议（去重）
-        all_advice = self.health_advice + additional_data.health_advice
-        merged.health_advice = list(dict.fromkeys(all_advice))
-        
-        # 合并理论依据
-        theory_parts = [t for t in [self.theory_basis, additional_data.theory_basis] if t.strip()]
-        merged.theory_basis = "；".join(theory_parts)
-        
-        # 记录补充信息
-        if additional_info.strip():
-            merged.additional_findings.append(additional_info.strip())
-        
-        # 合并原始分析数据
-        merged.raw_analysis = {
-            "原始分析": self.raw_analysis,
-            "补充分析": additional_data.raw_analysis,
-            "补充信息": additional_info
-        }
-        
-        return merged
-    
-    def to_diagnosis_text(self, include_image_info: bool = True) -> str:
-        """转换为诊断文本"""
-        parts = []
-        
-        if include_image_info and self.image_type:
-            parts.append(f"图像类型：{self.image_type}（置信度：{self.confidence:.1%}）")
-        
-        if self.syndromes:
-            parts.append(f"辨证提示：{'; '.join(self.syndromes)}")
-        
-        if self.health_advice:
-            parts.append(f"健康建议：{'; '.join(self.health_advice)}")
-        
-        if self.theory_basis:
-            parts.append(f"中医理论依据：{self.theory_basis}")
-        
-        if self.additional_findings:
-            parts.append(f"补充发现：{'; '.join(self.additional_findings)}")
-        
-        return "。".join(parts) if parts else "诊断分析完成"
-    
-    def has_meaningful_data(self) -> bool:
-        """检查是否有有意义的诊断数据"""
-        return bool(self.syndromes or self.health_advice or self.theory_basis)
-
 class MedicalImageAPI:
-    """医学图像分析API类 - Linus修复版"""
+    """医学图像分析API类 - 简化版"""
     
     def __init__(self):
         """初始化医学图像分析API"""
@@ -337,7 +152,7 @@ class MedicalImageAPI:
             self.tcm_system = TCMDiagnosisSystem(api_key=api_key, base_url=base_url)
             
             self.api_name = "医学图像分析API"
-            self.version = "2.0.0"  # Linus修复版
+            self.version = "2.1.0"  # 简化版
             
             # 支持的图像格式
             self.allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
@@ -399,8 +214,8 @@ class MedicalImageAPI:
         except Exception as e:
             logger.warning(f"清理临时文件失败: {file_path} - {str(e)}")
     
-    def _analyze_image_to_structured_data(self, image_path: str) -> DiagnosisData:
-        """分析图像并返回结构化诊断数据"""
+    def _analyze_image_and_get_basic_result(self, image_path: str) -> str:
+        """分析图像并返回基础结果文本 - 简化版"""
         logger.info(f"调用图像识别系统分析: {image_path}")
         
         try:
@@ -420,48 +235,62 @@ class MedicalImageAPI:
                 image_analysis_result = self.tcm_system.comprehensive_diagnosis(image_path)
             except Exception as e2:
                 logger.error(f"所有图像传递方式都失败: {e2}")
-                image_analysis_result = {
-                    "图像识别": {"类型": "处理失败", "置信度": 0.0},
-                    "分析结果": json.dumps({
-                        "错误": f"图像识别失败: {str(e2)}",
-                        "建议": "请检查图像文件格式和网络连接"
-                    }, ensure_ascii=False)
-                }
+                return f"图像识别失败: {str(e2)}"
         
-        return DiagnosisData.from_analysis_result(image_analysis_result)
+        # 简单的文本组装，不使用复杂的DiagnosisData类
+        image_info = image_analysis_result.get("图像识别", {})
+        image_type = image_info.get("类型", "未知")
+        confidence = image_info.get("置信度", 0.0)
+        
+        # 解析分析结果
+        analysis_content = image_analysis_result.get("分析结果", "")
+        try:
+            if isinstance(analysis_content, str):
+                parsed_content = json.loads(analysis_content)
+            else:
+                parsed_content = analysis_content
+        except (json.JSONDecodeError, TypeError):
+            parsed_content = {"原始结果": str(analysis_content)}
+        
+        # 简单文本组装
+        result_parts = [f"图像类型：{image_type}（置信度：{confidence:.1%}）"]
+        
+        if "辨证提示" in parsed_content:
+            syndromes = parsed_content["辨证提示"]
+            if syndromes:
+                result_parts.append(f"辨证提示：{'; '.join(syndromes)}")
+        
+        if "健康建议" in parsed_content:
+            advice = parsed_content["健康建议"]
+            if advice:
+                result_parts.append(f"健康建议：{'; '.join(advice)}")
+        
+        return "。".join(result_parts)
     
-    def _enhanced_diagnosis_with_graph(self, diagnosis_data: DiagnosisData, 
-                                     description: str = "", existing_graph_state: Dict = None) -> Tuple[str, Dict]:
-        """
-        使用优化后的graph进行增强诊断
-        """
-        # 构建诊断输入
-        diagnosis_input = diagnosis_data.to_diagnosis_text()
-        if description.strip():
-            diagnosis_input = f"图像描述：{description}。{diagnosis_input}"
+    def _extract_result_from_state(self, state: Dict) -> str:
+        """从graph state中提取最终结果 - 与问诊逻辑一致"""
+        # 首先尝试获取response
+        final_results = state.get("response", "")
         
-        if existing_graph_state:
-            # 【使用修复后的graph接口】基于已有状态进行增量计算
-            logger.info("基于已有graph状态进行增量诊断")
-            result = run_tcm_graph_with_state(
-                user_input=diagnosis_input,
-                existing_state=existing_graph_state,
-                config={"retriever_k": 3}
-            )
-        else:
-            # 新的完整计算
-            logger.info("执行新的完整诊断")
-            result = run_tcm_graph(
-                user_input=diagnosis_input,
-                config={"retriever_k": 3}
-            )
+        # 如果结果为空，尝试从其他字段获取信息
+        if not final_results.strip():
+            diagnosis_data = state.get("diagnosis_data", {})
+            
+            result_parts = []
+            if diagnosis_data:
+                if isinstance(diagnosis_data, dict):
+                    for key, value in diagnosis_data.items():
+                        result_parts.append(f"{key}：{value}")
+                else:
+                    result_parts.append(str(diagnosis_data))
+            
+            final_results = "。".join(result_parts) if result_parts else ""
         
-        final_response = result.get("response", diagnosis_input)
-        return final_response, result
+        return final_results
     
     def analyze_image(self, image_file: FileStorage, description: str = "") -> tuple[int, Dict[str, Any]]:
         """
-        图片望诊分析 - 使用优化后的graph和session管理
+        图片望诊分析 - 简化版
         """
         temp_file_path = None
         
@@ -484,13 +313,10 @@ class MedicalImageAPI:
             session_id = watch_session_manager.get_or_create_image_session(temp_file_path, description)
             
             # 检查是否已有计算结果
-            session_data = watch_session_manager.get_session_data(session_id)
-            if (session_data and 
-                session_data.get('diagnosis_data') and 
-                session_data['diagnosis_data'].has_meaningful_data()):
-                
+            existing_state = watch_session_manager.get_session_state(session_id)
+            if existing_state and existing_state.get('response'):
                 logger.info(f"复用已有望诊分析结果，session: {session_id}")
-                final_results = session_data['diagnosis_data'].to_diagnosis_text()
+                final_results = self._extract_result_from_state(existing_state)
                 
                 return 200, {
                     "success": True,
@@ -498,14 +324,26 @@ class MedicalImageAPI:
                     "data": {"results": final_results}
                 }
             
-            # 分析图像获取结构化数据
-            diagnosis_data = self._analyze_image_to_structured_data(temp_file_path)
+            # 分析图像获取基础结果
+            basic_result = self._analyze_image_and_get_basic_result(temp_file_path)
             
-            # 使用优化后的graph进行增强诊断
-            final_results, graph_result = self._enhanced_diagnosis_with_graph(diagnosis_data, description)
+            # 构建完整输入
+            full_input = basic_result
+            if description.strip():
+                full_input = f"图像描述：{description}。{basic_result}"
+            
+            # 使用graph进行增强诊断
+            logger.info("调用graph进行增强诊断")
+            diagnosis_result = run_tcm_graph(
+                user_input=full_input,
+                config={"retriever_k": 3}
+            )
             
             # 保存session状态
-            watch_session_manager.update_session(session_id, graph_result, diagnosis_data)
+            watch_session_manager.update_session_state(session_id, diagnosis_result)
+            
+            # 提取最终结果
+            final_results = self._extract_result_from_state(diagnosis_result)
             
             logger.info("图片望诊分析完成")
             
@@ -533,7 +371,7 @@ class MedicalImageAPI:
     def analyze_with_supplement(self, prev_analysis: str, additional_info: str, 
                                additional_file: Optional[FileStorage] = None) -> tuple[int, Dict[str, Any]]:
         """
-        望诊补充分析 - 使用优化后的graph进行增量计算
+        望诊补充分析 - 简化版，采用问诊补充的合并策略
         """
         temp_file_path = None
         
@@ -541,14 +379,22 @@ class MedicalImageAPI:
             logger.info("开始望诊补充分析")
             
             # 智能识别已有session
-            session_id = watch_session_manager.extract_session_from_analysis(prev_analysis) if prev_analysis else None
-            existing_session_data = watch_session_manager.get_session_data(session_id) if session_id else None
+            session_id = None
+            existing_state = None
             
-            # 获取已有诊断数据
-            prev_diagnosis_data = DiagnosisData.from_text(prev_analysis) if prev_analysis.strip() else DiagnosisData()
+            if prev_analysis and prev_analysis.strip():
+                # 尝试从之前的分析结果中识别session
+                session_id = watch_session_manager.extract_session_from_analysis(prev_analysis.strip())
+                if session_id:
+                    existing_state = watch_session_manager.get_session_state(session_id)
+                    logger.info(f"识别到已有session: {session_id}")
+            
+            # 构建补充信息
+            additional_parts = []
+            if additional_info and additional_info.strip():
+                additional_parts.append(f"补充信息：{additional_info.strip()}")
             
             # 处理补充图像（如果有）
-            additional_diagnosis_data = DiagnosisData()
             if additional_file:
                 is_valid, error_msg = self._validate_image_file(additional_file)
                 if not is_valid:
@@ -560,53 +406,64 @@ class MedicalImageAPI:
                 
                 temp_file_path = self._save_temp_file(additional_file)
                 
-                # 为补充图像创建session
-                additional_session_id = watch_session_manager.get_or_create_image_session(temp_file_path, additional_info)
-                additional_session_data = watch_session_manager.get_session_data(additional_session_id)
+                # 分析补充图像
+                additional_image_result = self._analyze_image_and_get_basic_result(temp_file_path)
+                additional_parts.append(f"补充图像分析：{additional_image_result}")
+            
+            if not additional_parts:
+                return 400, {
+                    "success": False,
+                    "message": "补充信息为空",
+                    "data": {"results": ""}
+                }
+            
+            # 构建增量输入 - 与问诊逻辑一致
+            incremental_input = "。".join(additional_parts)
+            incremental_input += "。请在之前分析的基础上，结合新的补充信息，提供更完善的中医辨证分析和诊疗建议。"
+            
+            logger.info(f"补充望诊增量输入: {incremental_input}")
+            
+            if existing_state:
+                # 【与问诊逻辑一致】基于已有state进行增量计算
+                logger.info("基于已有state进行增量分析")
                 
-                if additional_session_data and additional_session_data.get('diagnosis_data'):
-                    # 复用已有分析
-                    logger.info("复用补充图像的已有分析结果")
-                    additional_diagnosis_data = additional_session_data['diagnosis_data']
-                else:
-                    # 新分析
-                    logger.info("分析补充图像")
-                    additional_diagnosis_data = self._analyze_image_to_structured_data(temp_file_path)
-            
-            # 智能合并诊断数据
-            merged_diagnosis_data = prev_diagnosis_data.merge_with_additional(
-                additional_diagnosis_data, additional_info
-            )
-            
-            # 判断是否需要重新诊断
-            needs_full_rediagnosis = self._should_perform_full_rediagnosis(
-                prev_diagnosis_data, additional_diagnosis_data, additional_info
-            )
-            
-            if needs_full_rediagnosis and existing_session_data and existing_session_data.get('graph_state'):
-                # 【核心优化】基于已有session的graph state进行增量计算
-                logger.info("基于已有session进行增量重新诊断")
-                final_results, new_graph_result = self._enhanced_diagnosis_with_graph(
-                    merged_diagnosis_data, 
-                    f"补充分析：{additional_info}",
-                    existing_session_data['graph_state']
-                )
+                # 将补充信息添加到messages中
+                updated_messages = existing_state.get("messages", [])
+                updated_messages.append({"role": "user", "content": incremental_input})
                 
-                # 更新session
-                if session_id:
-                    watch_session_manager.update_session(session_id, new_graph_result, merged_diagnosis_data)
-            elif needs_full_rediagnosis:
-                # 没有已有session，需要完整重新诊断
-                logger.info("执行完整重新诊断")
-                final_results, new_graph_result = self._enhanced_diagnosis_with_graph(
-                    merged_diagnosis_data, f"补充分析：{additional_info}"
+                # 使用已有状态进行增量计算
+                diagnosis_result = run_tcm_graph(
+                    user_input=incremental_input,
+                    messages=updated_messages,
+                    memory=existing_state.get("memory"),
+                    config=existing_state.get("config", {"retriever_k": 5})
                 )
             else:
-                # 【性能优化】增量更新，无需重新诊断
-                logger.info("执行轻量级增量更新")
-                final_results = self._incremental_diagnosis_update(
-                    prev_diagnosis_data, merged_diagnosis_data, additional_info
+                # 如果没有找到已有状态，重新计算
+                logger.warning("未找到已有session，执行完整计算")
+                
+                combined_inquiry = prev_analysis + "。" + incremental_input if prev_analysis else incremental_input
+                
+                diagnosis_result = run_tcm_graph(
+                    user_input=combined_inquiry,
+                    config={"retriever_k": 5}
                 )
+                
+                # 为新的计算创建session
+                session_id = watch_session_manager.get_or_create_image_session(
+                    f"supplement_{hash(combined_inquiry)}", 
+                    ""
+                )
+            
+            # 更新session状态
+            if session_id:
+                watch_session_manager.update_session_state(session_id, diagnosis_result)
+            
+            # 提取最终结果
+            final_results = self._extract_result_from_state(diagnosis_result)
+            
+            if not final_results.strip():
+                final_results = prev_analysis + "。" + incremental_input  # 兜底策略
             
             logger.info("望诊补充分析完成")
             
@@ -631,61 +488,8 @@ class MedicalImageAPI:
             if temp_file_path:
                 self._cleanup_temp_file(temp_file_path)
     
-    def _should_perform_full_rediagnosis(self, prev_data: DiagnosisData, 
-                                        additional_data: DiagnosisData, additional_info: str) -> bool:
-        """判断是否需要完整重新诊断"""
-        
-        # 如果有新图像且置信度显著不同，需要重新诊断
-        if additional_data.image_type and abs(additional_data.confidence - prev_data.confidence) > 0.3:
-            return True
-        
-        # 如果补充信息包含关键症状词汇，需要重新诊断
-        critical_keywords = ["疼痛", "发热", "恶心", "头晕", "胸闷", "气短", "失眠", "腹泻", "便秘", 
-                           "出血", "肿胀", "皮疹", "咳嗽", "乏力", "食欲不振"]
-        if any(keyword in additional_info for keyword in critical_keywords):
-            return True
-        
-        # 如果新图像类型与原图像类型不同，需要重新诊断
-        if (additional_data.image_type and prev_data.image_type and 
-            additional_data.image_type != prev_data.image_type):
-            return True
-        
-        # 如果没有原有诊断数据，需要完整诊断
-        if not prev_data.has_meaningful_data():
-            return True
-        
-        # 否则使用增量更新
-        return False
-    
-    def _incremental_diagnosis_update(self, prev_data: DiagnosisData, 
-                                     merged_data: DiagnosisData, additional_info: str) -> str:
-        """增量诊断更新"""
-        
-        base_text = merged_data.to_diagnosis_text()
-        
-        # 构建增量更新说明
-        update_parts = []
-        
-        if additional_info.strip():
-            update_parts.append(f"根据补充信息'{additional_info}'")
-        
-        # 检查新增的辨证提示
-        new_syndromes = [s for s in merged_data.syndromes if s not in prev_data.syndromes]
-        if new_syndromes:
-            update_parts.append(f"新增辨证考虑：{'; '.join(new_syndromes)}")
-        
-        # 检查新增的健康建议
-        new_advice = [a for a in merged_data.health_advice if a not in prev_data.health_advice]
-        if new_advice:
-            update_parts.append(f"补充建议：{'; '.join(new_advice)}")
-        
-        if update_parts:
-            return f"{base_text}。{'; '.join(update_parts)}。"
-        else:
-            return f"{base_text}。综合补充信息，原诊断结论仍然适用。"
-    
     def handle_watch_request(self):
-        """处理图片望诊请求 (接口4.1) - 保持原有接口"""
+        """处理图片望诊请求 (接口4.1)"""
         try:
             logger.info(f"收到图片望诊请求: {request.remote_addr}")
             
@@ -715,7 +519,7 @@ class MedicalImageAPI:
             }), 500
     
     def handle_watch_complete_request(self):
-        """处理望诊补充请求 (接口4.2) - 保持原有接口"""
+        """处理望诊补充请求 (接口4.2)"""
         try:
             logger.info(f"收到望诊补充请求: {request.remote_addr}")
             
@@ -764,13 +568,12 @@ class MedicalImageAPI:
         return {
             "name": self.api_name,
             "version": self.version,
-            "description": "基于中医理论的医学图像分析API - Linus修复版，使用优化后的graph",
+            "description": "基于中医理论的医学图像分析API - 简化版，与问诊逻辑一致",
             "features": [
-                "智能望诊Session管理，避免重复图像分析",
-                "使用优化后的graph，消除重复编译开销",
-                "真正的增量分析，避免不必要的重新计算",
-                "结构化诊断数据处理，消除字符串拼接",
-                "基于图像内容Hash的智能缓存"
+                "简化的Session管理，与问诊逻辑一致",
+                "直接操作state字典，无复杂数据抽象",
+                "统一的增量分析策略",
+                "简化的文本合并逻辑"
             ],
             "endpoints": {
                 "watch": {

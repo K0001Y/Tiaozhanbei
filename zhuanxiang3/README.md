@@ -137,7 +137,7 @@ AI 服务将在 http://localhost:8080 启动
 
 ### AI 模块
 - 基于 Python Flask 框架
-- 集成 PaddleOCR、LangChain 等 AI 库
+- 集成 PaddleOCR、LangChain、LangGrapg、RAG 等 AI 库
 - 支持医疗文档分析和智能问诊
 
 ## 常用命令
@@ -208,11 +208,16 @@ backend/
 └── app.js             # 应用入口
 
 AIchatbot/
-├── routes/            # API 路由
+├── nodes/             # Langgraph节点
+├── tests/             # 测试代码
+├── RAG_system/        # 向量存储与模型
+├── others/            # 第三方服务
 ├── models/            # AI 模型
 ├── utils/             # 工具函数
 ├── requirements.txt   # Python 依赖
+├── graph.py           # Langgraph编译与运行入口
 └── server.py          # 服务入口
+
 ```
 
 ## 贡献指南
