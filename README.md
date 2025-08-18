@@ -1,6 +1,6 @@
 # 中医诊断系统
 
-基于 Node.js + Vue.js + AI 的智能中医诊断系统
+基于 Node.js + React.js + AI 的智能中医诊断系统
 
 ## 项目结构
 
